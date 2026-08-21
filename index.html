@@ -840,11 +840,11 @@
 
         // --- ОБЛАЧНЫЙ ДВИЖОК СИНХРОНИЗАЦИИ ---
         let cloudSyncTimeout = null;
-
+            
         function saveData(key, data) { 
-            // 1. Мгновенное локальное сохранение (Optimistic UI)
+            // 1. Мгновенное локальное сохранение (Optimistic UI) - интерфейс не тормозит
             localStorage.setItem(key, JSON.stringify(data)); 
-
+            
             // 2. Фоновая отправка в облако с защитой от спама запросами (Debounce)
             const username = localStorage.getItem('priority_user');
             if (!username) return;
@@ -859,7 +859,7 @@
                     templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
                     badges: JSON.parse(localStorage.getItem('priority_badges') || '[]')
                 };
-
+                
                 try {
                     await supabaseClient
                         .from('users')
@@ -869,7 +869,42 @@
                 } catch (err) {
                     console.error('Cloud sync failed', err);
                 }
-            }, 1500); // Отправляем в базу через 1.5 секунды после последнего действия
+            }, 1500); // Отправляем в базу через 1.5 секунды после того, как ты перестал кликать
+        }
+        
+        // Фоновая загрузка при F5
+        async function syncFromCloud() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+        
+            try {
+                const { data } = await supabaseClient.from('users').select('app_data, is_pro').eq('username', username).single();
+                if (data && data.app_data && Object.keys(data.app_data).length > 0) {
+                    const cloudData = data.app_data;
+                    
+                    localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes || []));
+                    localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks || []));
+                    localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros || []));
+                    localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates || []));
+                    localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges || []));
+                    
+                    dynamicScopes = cloudData.scopes || [];
+                    tasks = cloudData.tasks || [];
+                    templates = cloudData.templates || [];
+                    macros = cloudData.macros || [];
+                    unlockedBadges = cloudData.badges || [];
+                    
+                    isPro = data.is_pro || false;
+                    localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
+                    
+                    initDynamicScopes();
+                    renderTasks();
+                    renderMacros();
+                    console.log('☁️ Matrix synchronized from cloud');
+                }
+            } catch (e) {
+                console.error('Cloud pull failed:', e);
+            }
         }
 
         // --- AUTH & ROUTING LOGIC ---
@@ -906,11 +941,11 @@
             input.addEventListener('input', (e) => {
                 // Убираем всё, кроме цифр
                 const val = e.target.value.replace(/[^0-9]/g, '');
-                    
+
                 // ЛОГИКА ДЛЯ МОБИЛЬНОГО АВТОЗАПОЛНЕНИЯ
                 if (val.length > 1) {
                     e.target.value = val[0] || ''; // Оставляем в текущей ячейке только первую цифру
-                    
+
                     // Раскидываем остальные цифры по следующим ячейкам
                     codeInputs.forEach((cell, idx) => {
                         if (idx >= index && (idx - index) < val.length) {
@@ -920,7 +955,7 @@
                     // Переносим фокус на последнюю заполненную ячейку
                     const focusIndex = Math.min(index + val.length - 1, 3);
                     codeInputs[focusIndex].focus();
-                    
+
                     // Если все 4 ячейки заполнены — входим
                     if (codeInputs[3].value !== '') confirmLogin();
                     return;
@@ -932,7 +967,7 @@
                     input.classList.remove('code-pop'); 
                     void input.offsetWidth; 
                     input.classList.add('code-pop');
-                    
+
                     if (index < codeInputs.length - 1) {
                         codeInputs[index + 1].focus();
                     } else {
@@ -1015,7 +1050,7 @@
 
         async function confirmLogin() {
             const code = Array.from(codeInputs).map(i => i.value).join('');
-            let loginInput = document.getElementById('tgLogin').value.trim();
+            let loginInput = document.getElementById('tgLogin').value.trim().toLowerCase();
             if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
 
             if (code.length < 4) {
@@ -1041,27 +1076,38 @@
                 }
             
                 // 2. Сжигаем код
-                await supabaseClient
-                    .from('otp_codes')
-                    .update({ used: true })
-                    .eq('id', otpRecord.id);
+                await supabaseClient.from('otp_codes').update({ used: true }).eq('id', otpRecord.id);
             
-                // 3. ПРОВЕРЯЕМ PRO-СТАТУС ПОЛЬЗОВАТЕЛЯ
-                const { data: userData, error: userError } = await supabaseClient
+                // 3. ЗАГРУЖАЕМ БЭКАП И PRO-СТАТУС ИЗ ОБЛАКА ПРЯМО ПРИ ВХОДЕ
+                const { data: userData } = await supabaseClient
                     .from('users')
-                    .select('is_pro')
+                    .select('is_pro, app_data')
                     .eq('username', loginInput)
                     .single();
             
-                // 4. Сохраняем сессию и статус
                 localStorage.setItem('priority_auth', 'true');
                 localStorage.setItem('priority_user', loginInput);
-                localStorage.setItem('priority_is_pro', (userData && userData.is_pro) ? 'true' : 'false');
 
-                isPro = (userData && userData.is_pro) ? true : false; // Обновляем глобальную переменную
+                if (userData) {
+                    isPro = userData.is_pro || false;
+                    localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
+
+                    // ЕСЛИ В БАЗЕ ЕСТЬ ДАННЫЕ - МЫ УБИВАЕМ ОНБОРДИНГ И ВОССТАНАВЛИВАЕМ СТЕЙТ
+                    if (userData.app_data && Object.keys(userData.app_data).length > 0) {
+                        const cloudData = userData.app_data;
+                        localStorage.setItem('priority_onboarded', 'true'); // Спасение от онбординга
+
+                        if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
+                        if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
+                        if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
+                        if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
+                        if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
+                    }
+                }
             
                 showToast('SYSTEM', 'Access Granted', 'success');
             
+                // 4. Логика перенаправления
                 if (localStorage.getItem('priority_onboarded') !== 'true') {
                     window.location.href = 'onboarding.html';
                 } else {
