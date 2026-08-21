@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PRIORITY // SYS.ANALYTICS</title>
+
+    <meta name="description" content="Глубокая телеметрия вашей эффективности. Графики скорости выполнения задач и мониторинг макро-целей.">
+    <meta name="author" content="PRIORITYS">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://prioritys.ru/analytics.html">
+    <meta property="og:title" content="PRIORITY // Системная Аналитика">
+    <meta property="og:description" content="Анализ эффективности, распределение по квадрантам матрицы и трекинг скорости выполнения задач.">
+    <meta property="og:image" content="https://prioritys.ru/og-image.png">
+
     <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121214'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='%2306B6D4' text-anchor='middle'>/&gt;_</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -224,6 +234,10 @@
     </div>
 
     <script>
+        // ЗАЩИТА РОУТИНГА: Переброс неавторизованных на главную
+        if (localStorage.getItem('priority_auth') !== 'true') {
+            window.location.href = 'index.html';
+        }
 
         // --- ИНИЦИАЛИЗАЦИЯ SUPABASE ---
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
