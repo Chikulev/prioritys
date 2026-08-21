@@ -962,58 +962,68 @@
         }
 
         async function confirmLogin() {
-           const code = Array.from(codeInputs).map(i => i.value).join('');
-           let loginInput = document.getElementById('tgLogin').value.trim();
-           if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
+            const code = Array.from(codeInputs).map(i => i.value).join('');
+            let loginInput = document.getElementById('tgLogin').value.trim();
+            if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
+                
+            if (code.length < 4) {
+                showToast('ERROR', 'Enter 4-digit code', 'error');
+                return;
+            }
         
-           if (code.length < 4) {
-               showToast('ERROR', 'Enter 4-digit code', 'error');
-               return;
-           }
-       
-           try {
-               // Проверяем код в таблице otp_codes
-               const { data: otpRecord, error } = await supabaseClient
-                   .from('otp_codes')
-                   .select('*')
-                   .eq('username', loginInput)
-                   .eq('code', code)
-                   .eq('used', false)
-                   .order('created_at', { ascending: false })
-                   .limit(1)
-                   .single();
-
-               if (error || !otpRecord) {
-                   showToast('ACCESS DENIED', 'Invalid or expired code', 'error');
-                   return;
-               }
-           
-               // Помечаем код как использованный
-               await supabaseClient
-                   .from('otp_codes')
-                   .update({ used: true })
-                   .eq('id', otpRecord.id);
-           
-               // Успешный вход! Сохраняем сессию
-               localStorage.setItem('priority_auth', 'true');
-               localStorage.setItem('priority_user', loginInput);
-           
-               showToast('SYSTEM', 'Access Granted', 'success');
-           
-               if (localStorage.getItem('priority_onboarded') !== 'true') {
-                   window.location.href = 'onboarding.html';
-               } else {
-                   document.getElementById('authScreen').classList.add('hidden');
-                   document.getElementById('globalToggles').classList.add('hidden');
-                   document.getElementById('mainApp').classList.remove('hidden');
-                   loadDataFromStorage();
-                   applyAppTheme();
-                   setTimeout(() => document.getElementById('taskInput').focus(), 100);
-               }
-           } catch (err) {
-               console.error(err);
-               showToast('ERROR', 'Verification error', 'error');
-           }
+            try {
+                // 1. Проверяем OTP код
+                const { data: otpRecord, error } = await supabaseClient
+                    .from('otp_codes')
+                    .select('*')
+                    .eq('username', loginInput)
+                    .eq('code', code)
+                    .eq('used', false)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+            
+                if (error || !otpRecord) {
+                    showToast('ACCESS DENIED', 'Invalid or expired code', 'error');
+                    return;
+                }
+            
+                // 2. Сжигаем код
+                await supabaseClient
+                    .from('otp_codes')
+                    .update({ used: true })
+                    .eq('id', otpRecord.id);
+            
+                // 3. ПРОВЕРЯЕМ PRO-СТАТУС ПОЛЬЗОВАТЕЛЯ
+                const { data: userData, error: userError } = await supabaseClient
+                    .from('users')
+                    .select('is_pro')
+                    .eq('username', loginInput)
+                    .single();
+            
+                // 4. Сохраняем сессию и статус
+                localStorage.setItem('priority_auth', 'true');
+                localStorage.setItem('priority_user', loginInput);
+                localStorage.setItem('priority_is_pro', (userData && userData.is_pro) ? 'true' : 'false');
+                
+                isPro = (userData && userData.is_pro) ? true : false; // Обновляем глобальную переменную
+            
+                showToast('SYSTEM', 'Access Granted', 'success');
+            
+                if (localStorage.getItem('priority_onboarded') !== 'true') {
+                    window.location.href = 'onboarding.html';
+                } else {
+                    document.getElementById('authScreen').classList.add('hidden');
+                    document.getElementById('globalToggles').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    loadDataFromStorage();
+                    applyAppTheme();
+                    setTimeout(() => document.getElementById('taskInput').focus(), 100);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('ERROR', 'Verification error', 'error');
+            }
         }
 
         function backToStep1() {
