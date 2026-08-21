@@ -22,6 +22,7 @@
         }
     </script>
     <script src="locales.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
@@ -223,6 +224,34 @@
     </div>
 
     <script>
+
+        // --- ИНИЦИАЛИЗАЦИЯ SUPABASE ---
+        const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ФОНОВАЯ ЗАГРУЗКА ДАННЫХ ПРИ ОТКРЫТИИ
+        async function syncFromCloud() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+        
+            try {
+                const { data } = await supabaseClient.from('users').select('app_data').eq('username', username).single();
+                if (data && data.app_data && Object.keys(data.app_data).length > 0) {
+                    const cloudData = data.app_data;
+
+                    // Забираем только то, что нужно для графиков
+                    if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
+                    if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
+                    if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
+
+                    // Перерисовываем дашборд свежими данными
+                    renderAnalytics();
+                    console.log('☁️ Analytics synchronized from cloud');
+                }
+            } catch (e) { console.error('Cloud pull failed:', e); }
+        }
+
         function applyAppTheme() {
             const theme = localStorage.getItem('priority_theme') || 'cyber';
             document.body.className = `bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative theme-${theme}`;
@@ -374,6 +403,7 @@
         applyAppTheme();
         applyCursor();
         renderAnalytics();
+        syncFromCloud();
     </script>
 </body>
 </html>

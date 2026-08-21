@@ -715,7 +715,7 @@
         let lastDeletedTask = null;
         let undoTimeout = null;
 
-        function showToast(title, desc, type = 'success') {
+        function showToast(title, desc, type = 'success', duration = 5000) {
             const container = document.getElementById('toastContainer');
             if(!container) return;
             const toast = document.createElement('div');
@@ -724,11 +724,18 @@
             if (type === 'error') { colorClass = 'border-red-500 text-red-500'; icon = '⚠️'; }
             else if (type === 'success') { colorClass = 'border-emerald-500 text-emerald-500'; icon = '✓'; }
             else if (type === 'info') { colorClass = 'border-brand-light dark:border-brand-dark'; icon = '💡'; }
-
-            toast.className = `bg-panel-light dark:bg-panel-dark border ${colorClass} p-4 rounded shadow-lg flex items-center gap-4 toast-enter pointer-events-auto font-mono-tech z-[999]`;
-            toast.innerHTML = `<div class="text-2xl">${icon}</div><div><div class="text-[9px] font-bold ${colorClass} uppercase tracking-widest mb-1">${title}</div><div class="font-bold text-sm uppercase text-zinc-900 dark:text-zinc-100">${desc}</div></div>`;
+                
+            // Добавляем крестик для закрытия, если тост "вечный"
+            let closeBtn = duration === 0 ? `<button onclick="this.closest('.toast-enter').remove()" class="absolute top-2 right-2 text-zinc-400 hover:text-red-500 text-lg leading-none btn-press">&times;</button>` : '';
+                
+            toast.className = `bg-panel-light dark:bg-panel-dark border ${colorClass} p-4 rounded shadow-lg flex items-center gap-4 toast-enter pointer-events-auto font-mono-tech z-[999] relative pr-8 max-w-sm`;
+            toast.innerHTML = `${closeBtn}<div class="text-2xl">${icon}</div><div class="w-full"><div class="text-[9px] font-bold ${colorClass} uppercase tracking-widest mb-1">${title}</div><div class="font-bold text-sm uppercase text-zinc-900 dark:text-zinc-100 w-full">${desc}</div></div>`;
             container.appendChild(toast);
-            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }, 5000);
+                
+            // Если duration больше 0, запускаем таймер на удаление
+            if (duration > 0) {
+                setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }, duration);
+            }
         }
 
         function t(key) {
@@ -838,28 +845,34 @@
         function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
         function getDateTimeStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getFullYear()).slice(2)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
 
-        // --- ОБЛАЧНЫЙ ДВИЖОК СИНХРОНИЗАЦИИ ---
+       // --- ОБЛАЧНЫЙ ДВИЖОК СИНХРОНИЗАЦИИ ---
         let cloudSyncTimeout = null;
-            
+
         function saveData(key, data) { 
-            // 1. Мгновенное локальное сохранение (Optimistic UI) - интерфейс не тормозит
             localStorage.setItem(key, JSON.stringify(data)); 
-            
-            // 2. Фоновая отправка в облако с защитой от спама запросами (Debounce)
+
             const username = localStorage.getItem('priority_user');
             if (!username) return;
         
             clearTimeout(cloudSyncTimeout);
             cloudSyncTimeout = setTimeout(async () => {
-                // Собираем весь слепок приложения
                 const appState = {
+                    // Данные ядра
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
                     templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
-                    badges: JSON.parse(localStorage.getItem('priority_badges') || '[]')
+                    badges: JSON.parse(localStorage.getItem('priority_badges') || '[]'),
+
+                    // Настройки и визуал
+                    theme: localStorage.getItem('priority_theme') || 'cyber',
+                    cursor: localStorage.getItem('priority_cursor') || 'default',
+                    lang: localStorage.getItem('priority_lang') || 'en',
+                    shop_module: localStorage.getItem('priority_shop_module') || 'false',
+                    currency: localStorage.getItem('priority_currency') || '₽',
+                    scale: localStorage.getItem('priority_scale') || '1'
                 };
-                
+
                 try {
                     await supabaseClient
                         .from('users')
@@ -869,42 +882,68 @@
                 } catch (err) {
                     console.error('Cloud sync failed', err);
                 }
-            }, 1500); // Отправляем в базу через 1.5 секунды после того, как ты перестал кликать
+            }, 1500);
         }
         
         // Фоновая загрузка при F5
         async function syncFromCloud() {
-            const username = localStorage.getItem('priority_user');
-            if (!username) return;
-        
-            try {
-                const { data } = await supabaseClient.from('users').select('app_data, is_pro').eq('username', username).single();
-                if (data && data.app_data && Object.keys(data.app_data).length > 0) {
-                    const cloudData = data.app_data;
-                    
-                    localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes || []));
-                    localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks || []));
-                    localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros || []));
-                    localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates || []));
-                    localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges || []));
-                    
-                    dynamicScopes = cloudData.scopes || [];
-                    tasks = cloudData.tasks || [];
-                    templates = cloudData.templates || [];
-                    macros = cloudData.macros || [];
-                    unlockedBadges = cloudData.badges || [];
-                    
-                    isPro = data.is_pro || false;
-                    localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
-                    
-                    initDynamicScopes();
-                    renderTasks();
-                    renderMacros();
-                    console.log('☁️ Matrix synchronized from cloud');
-                }
-            } catch (e) {
-                console.error('Cloud pull failed:', e);
-            }
+           const username = localStorage.getItem('priority_user');
+           if (!username) return;
+
+           try {
+               const { data, error } = await supabaseClient
+                   .from('users')
+                   .select('app_data, is_pro')
+                   .eq('username', username)
+                   .single();
+
+               if (data) {
+                   isPro = data.is_pro || false;
+                   localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
+
+                   if (data.app_data && Object.keys(data.app_data).length > 0) {
+                       const cloudData = data.app_data;
+
+                       // Восстанавливаем НАСТРОЙКИ
+                       if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
+                       if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
+                       if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
+                       if (cloudData.shop_module) localStorage.setItem('priority_shop_module', cloudData.shop_module);
+                       if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
+                       if (cloudData.scale) {
+                           localStorage.setItem('priority_scale', cloudData.scale);
+                           document.documentElement.style.setProperty('--system-scale', cloudData.scale);
+                       }
+                   
+                       // Восстанавливаем ЯДРО
+                       localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes || []));
+                       localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks || []));
+                       localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros || []));
+                       localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates || []));
+                       localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges || []));
+
+                       dynamicScopes = cloudData.scopes || [];
+                       tasks = cloudData.tasks || [];
+                       templates = cloudData.templates || [];
+                       macros = cloudData.macros || [];
+                       unlockedBadges = cloudData.badges || [];
+
+                       // Мягко перерисовываем интерфейс
+                       initDynamicScopes();
+                       renderTasks();
+                       renderMacros();
+
+                       // Применяем визуал на лету
+                       applyAppTheme();
+                       applyCursor();
+                       applyI18n();
+
+                       console.log('☁️ Local state updated from cloud');
+                   }
+               }
+           } catch (e) {
+               console.error('Cloud pull failed:', e);
+           }
         }
 
         // --- AUTH & ROUTING LOGIC ---
@@ -1037,10 +1076,18 @@
                     setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
                     setTimeout(() => codeInputs[0].focus(), 300);
                 } else {
-                    // Красивая интерактивная ошибка для незарегистрированных пользователей
+                    // Вечная интерактивная ошибка для новых пользователей с КНОПКОЙ
                     const botUrl = 'https://t.me/PrioritysBot';
-                    const errorMsg = `Вы не зарегистрированы! <br>1. Нажмите: <a href="${botUrl}" target="_blank" class="text-brand-light dark:text-brand-dark underline font-bold">@PrioritysBot</a><br>2. Отправьте /start<br>3. Повторите запрос здесь.`;
-                    showToast('ACCESS DENIED', errorMsg, 'error');
+                    const errorMsg = `
+                        <div class="flex flex-col gap-3 mt-1">
+                            <span class="text-xs normal-case text-zinc-600 dark:text-zinc-300">Вас нет в базе. Чтобы войти, нужно активировать бота:</span>
+                            <a href="${botUrl}" target="_blank" onclick="this.closest('.toast-enter').remove()" class="w-full bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold py-2.5 px-4 rounded text-[11px] uppercase tracking-widest text-center shadow-md transition-all btn-press">
+                                Открыть @PrioritysBot
+                            </a>
+                        </div>
+                    `;
+                    // Передаем 0 как 4-й аргумент, чтобы тост висел вечно!
+                    showToast('ACCESS DENIED', errorMsg, 'error', 0);
                 }
             } catch (err) {
                 console.error(err);
@@ -1095,13 +1142,21 @@
                     // ЕСЛИ В БАЗЕ ЕСТЬ ДАННЫЕ - МЫ УБИВАЕМ ОНБОРДИНГ И ВОССТАНАВЛИВАЕМ СТЕЙТ
                     if (userData.app_data && Object.keys(userData.app_data).length > 0) {
                         const cloudData = userData.app_data;
-                        localStorage.setItem('priority_onboarded', 'true'); // Спасение от онбординга
-
+                        localStorage.setItem('priority_onboarded', 'true'); 
+                    
                         if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
                         if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
                         if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
                         if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
                         if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
+
+                        // --- ДОБАВИТЬ ЭТИ СТРОКИ ---
+                        if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
+                        if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
+                        if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
+                        if (cloudData.shop_module) localStorage.setItem('priority_shop_module', cloudData.shop_module);
+                        if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
+                        if (cloudData.scale) localStorage.setItem('priority_scale', cloudData.scale);
                     }
                 }
             

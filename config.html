@@ -536,6 +536,8 @@
             localStorage.setItem('priority_scale', val);
             document.documentElement.style.setProperty('--system-scale', val);
             showToast(t('toast_sys'), 'Scale updated: ' + (val * 100) + '%', 'info');
+
+            syncStateToCloud();
         }
 
         function toggleLang() {
@@ -549,6 +551,7 @@
             renderShopUI();
             renderScopes();
             showToast(t('toast_sys'), t('toast_lang'), 'info');
+            syncStateToCloud(); // <-- ДОБАВИТЬ СЮДА
         }
 
         function updateThemeIcons() {
@@ -628,6 +631,7 @@
             localStorage.setItem('priority_theme', themeName);
             applyAppTheme();
             showToast(t('toast_theme_mgr'), t('toast_theme_act'), 'success');
+            syncStateToCloud(); // <-- ДОБАВИТЬ СЮДА
         }
 
         // --- CURSORS ---
@@ -700,6 +704,7 @@
             }
             localStorage.setItem('priority_cursor', cursorClass);
             applyCursor();
+            syncStateToCloud();
         }
 
         function setCustomEmojiCursor(val) {
@@ -714,9 +719,11 @@
                 const singleEmoji = Array.from(emoji)[0]; 
                 localStorage.setItem('priority_cursor', 'emoji:' + singleEmoji);
                 applyCursor();
+                syncStateToCloud();
             } else {
                 localStorage.setItem('priority_cursor', 'default');
                 applyCursor();
+                syncStateToCloud();
             }
         }
 
@@ -760,12 +767,16 @@
             renderShopUI();
             // Если есть функция renderScopes, обновляем и её
             if (typeof renderScopes === 'function') renderScopes();
+
+            syncStateToCloud();
         }
 
         function saveCurrency() {
             const val = document.getElementById('currencySelect').value;
             localStorage.setItem('priority_currency', val);
             showToast(t('toast_sys'), 'Currency updated', 'info');
+
+            syncStateToCloud();
         }
 
         // --- SCOPES ---
@@ -890,7 +901,7 @@
         
         // --- ОБЛАЧНЫЙ ДВИЖОК ДЛЯ НАСТРОЕК ---
         let cloudSyncTimeout = null;
-
+            
         function syncStateToCloud() {
             const username = localStorage.getItem('priority_user');
             if (!username) return;
@@ -898,16 +909,25 @@
             clearTimeout(cloudSyncTimeout);
             cloudSyncTimeout = setTimeout(async () => {
                 const appState = {
+                    // 1. Данные ядра
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
                     templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
-                    badges: JSON.parse(localStorage.getItem('priority_badges') || '[]')
+                    badges: JSON.parse(localStorage.getItem('priority_badges') || '[]'),
+                    
+                    // 2. Настройки и визуал (НОВОЕ)
+                    theme: localStorage.getItem('priority_theme') || 'cyber',
+                    cursor: localStorage.getItem('priority_cursor') || 'default',
+                    lang: localStorage.getItem('priority_lang') || 'en',
+                    shop_module: localStorage.getItem('priority_shop_module') || 'false',
+                    currency: localStorage.getItem('priority_currency') || '₽',
+                    scale: localStorage.getItem('priority_scale') || '1'
                 };
-
+                
                 try {
                     await supabaseClient.from('users').update({ app_data: appState }).eq('username', username);
-                    console.log('☁️ Config synced to cloud');
+                    console.log('☁️ Config & Preferences synced to cloud');
                 } catch (err) { console.error('Cloud sync failed', err); }
             }, 1500);
         }
@@ -931,7 +951,6 @@
                         <div class="flex items-center gap-2 text-[10px] font-bold text-brand-light dark:text-brand-dark uppercase tracking-widest mb-2"><span class="w-2 h-2 bg-brand-light dark:bg-brand-dark rounded-full animate-pulse"></span> <span data-i18n="cfg_lic_status">${t('cfg_lic_status')}</span></div>
                         <h2 data-i18n="cfg_tier_pro" class="text-2xl font-bold text-white dark:text-black mb-4">${t('cfg_tier_pro')}</h2>
                         <p data-i18n="cfg_pro_desc_active" class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 leading-relaxed">${t('cfg_pro_desc_active')}</p>
-                        <button onclick="downgradeToFree()" data-i18n="btn_downgrade" class="text-[10px] text-zinc-500 hover:text-zinc-300 underline">${t('btn_downgrade')}</button>
                     </div>
                 `;
                 document.querySelectorAll('.premium-locked').forEach(el => {
@@ -973,12 +992,37 @@
             }
         }
 
-        function upgradeToPro() { 
-            showToast('ACCESS DENIED', 'Для активации PRO статуса обратитесь к администратору системы.', 'error');
-        }
-        function downgradeToFree() { 
-            localStorage.setItem('priority_is_pro', 'false'); localStorage.removeItem('priority_theme'); localStorage.removeItem('priority_cursor');
-            isPro = false; window.location.reload(); 
+        async function upgradeToPro() { 
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+                
+            showToast('SYSTEM', 'Verifying license...', 'info');
+                
+            try {
+                // Запрашиваем статус прямо из Supabase
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('is_pro')
+                    .eq('username', username)
+                    .single();
+            
+                if (data && data.is_pro) {
+                    // Если админ дал PRO - применяем!
+                    isPro = true;
+                    localStorage.setItem('priority_is_pro', 'true');
+                    renderPremiumState(); 
+                    applyCursor(); 
+                    applyAppTheme(); 
+                    showToast('SYSTEM UPGRADE', 'PRO License Activated!', 'success');
+                    syncStateToCloud(); // Синхронизируем свежий стейт
+                } else {
+                    // Если PRO всё еще нет - показываем ошибку
+                    showToast('ACCESS DENIED', 'Для активации PRO статуса обратитесь к администратору системы.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('ERROR', 'Verification failed', 'error');
+            }
         }
 
         function openDonateModal() { document.getElementById('donateModal').classList.remove('hidden'); setTimeout(() => document.getElementById('donateModal').classList.remove('opacity-0'), 10); }
@@ -1002,6 +1046,42 @@
                 scopes = JSON.parse(storedScopes) || [];
             }
             isPro = localStorage.getItem('priority_is_pro') === 'true';
+        }
+
+        async function syncFromCloud() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+
+            try {
+                const { data } = await supabaseClient.from('users').select('app_data, is_pro').eq('username', username).single();
+                if (data && data.app_data && Object.keys(data.app_data).length > 0) {
+                    const cloudData = data.app_data;
+                
+                    // Восстанавливаем НАСТРОЙКИ
+                    if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
+                    if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
+                    if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
+                    if (cloudData.shop_module) localStorage.setItem('priority_shop_module', cloudData.shop_module);
+                    if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
+                    if (cloudData.scale) {
+                        localStorage.setItem('priority_scale', cloudData.scale);
+                        document.documentElement.style.setProperty('--system-scale', cloudData.scale);
+                    }
+                
+                    // PRO статус
+                    isPro = data.is_pro || false;
+                    localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
+                
+                    // Применяем визуал на лету
+                    applyAppTheme();
+                    applyCursor();
+                    applyI18n();
+                    renderShopUI();
+                    renderPremiumState();
+
+                    console.log('☁️ Preferences synchronized from cloud');
+                }
+            } catch (e) { console.error('Cloud pull failed:', e); }
         }
 
         function toggleFilterMode() {
@@ -1032,19 +1112,22 @@
                 version: "9.0",
                 timestamp: new Date().toISOString(),
                 mode: mode,
-                scopes: localStorage.getItem('priority_scopes'),
-                templates: localStorage.getItem('priority_templates'),
+                // Сразу парсим строки в массивы перед экспортом!
+                scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
+                templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
                 theme: localStorage.getItem('priority_theme'),
                 cursor: localStorage.getItem('priority_cursor'),
                 lang: localStorage.getItem('priority_lang'),
                 shop_module: localStorage.getItem('priority_shop_module'),
                 currency: localStorage.getItem('priority_currency')
             };
+
             if (mode === 'full') {
-                data.tasks = localStorage.getItem('priority_tasks');
-                data.macros = localStorage.getItem('priority_macros');
-                data.badges = localStorage.getItem('priority_badges');
+                data.tasks = JSON.parse(localStorage.getItem('priority_tasks') || '[]');
+                data.macros = JSON.parse(localStorage.getItem('priority_macros') || '[]');
+                data.badges = JSON.parse(localStorage.getItem('priority_badges') || '[]');
             }
+
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1144,6 +1227,7 @@
             applyCursor();
             loadLiteConfig();
             renderShopUI();
+            syncFromCloud();
         });
     </script>
 </body>
