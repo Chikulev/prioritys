@@ -867,18 +867,49 @@
             applyAppTheme();
         }
 
-        const codeInputs = document.querySelectorAll('.code-cell');
-        codeInputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                if (e.target.value.length === 1) {
-                    input.classList.remove('code-pop'); void input.offsetWidth; input.classList.add('code-pop');
-                    if (index < codeInputs.length - 1) codeInputs[index + 1].focus();
-                }
+        // --- УМНЫЙ ВВОД OTP-КОДА ---
+const codeInputs = document.querySelectorAll('.code-cell');
+
+codeInputs.forEach((input, index) => {
+    // Автопереход вперед при вводе цифры
+    input.addEventListener('input', (e) => {
+        const val = e.target.value;
+        // Разрешаем только цифры
+        e.target.value = val.replace(/[^0-9]/g, '');
+
+        if (e.target.value.length === 1) {
+            input.classList.remove('code-pop'); 
+            void input.offsetWidth; 
+            input.classList.add('code-pop');
+            
+            if (index < codeInputs.length - 1) {
+                codeInputs[index + 1].focus();
+            }
+        }
+    });
+
+    // Возврат назад при Backspace
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            codeInputs[index - 1].focus();
+        }
+    });
+
+    // Поддержка вставки (Paste) 4 цифр сразу в первую ячейку
+    input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasteData = e.clipboardData.getData('text').trim().replace(/[^0-9]/g, '');
+        
+        if (pasteData.length >= 4) {
+            codeInputs.forEach((cell, idx) => {
+                cell.value = pasteData[idx] || '';
             });
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !e.target.value && index > 0) codeInputs[index - 1].focus();
-            });
-        });
+            // Фокус на последнюю ячейку и авто-сабмит
+            codeInputs[codeInputs.length - 1].focus();
+            confirmLogin();
+        }
+    });
+});
 
         async function requestTelegramCode() {
            let loginInput = document.getElementById('tgLogin').value.trim();
