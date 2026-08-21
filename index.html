@@ -867,84 +867,96 @@
             applyAppTheme();
         }
 
-        // --- УМНЫЙ ВВОД OTP-КОДА ---
-const codeInputs = document.querySelectorAll('.code-cell');
-
-codeInputs.forEach((input, index) => {
-    // Автопереход вперед при вводе цифры
-    input.addEventListener('input', (e) => {
-        const val = e.target.value;
-        // Разрешаем только цифры
-        e.target.value = val.replace(/[^0-9]/g, '');
-
-        if (e.target.value.length === 1) {
-            input.classList.remove('code-pop'); 
-            void input.offsetWidth; 
-            input.classList.add('code-pop');
+        // --- УМНЫЙ ВВОД OTP-КОДА И UX-УЛУЧШЕНИЯ ---
+        const codeInputs = document.querySelectorAll('.code-cell');
             
-            if (index < codeInputs.length - 1) {
-                codeInputs[index + 1].focus();
-            }
-        }
-    });
-
-    // Возврат назад при Backspace
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !e.target.value && index > 0) {
-            codeInputs[index - 1].focus();
-        }
-    });
-
-    // Поддержка вставки (Paste) 4 цифр сразу в первую ячейку
-    input.addEventListener('paste', (e) => {
-        e.preventDefault();
-        const pasteData = e.clipboardData.getData('text').trim().replace(/[^0-9]/g, '');
-        
-        if (pasteData.length >= 4) {
-            codeInputs.forEach((cell, idx) => {
-                cell.value = pasteData[idx] || '';
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const val = e.target.value.replace(/[^0-9]/g, '');
+                e.target.value = val;
+            
+                if (val.length === 1) {
+                    input.classList.remove('code-pop'); 
+                    void input.offsetWidth; 
+                    input.classList.add('code-pop');
+                    
+                    if (index < codeInputs.length - 1) {
+                        codeInputs[index + 1].focus();
+                    } else {
+                        // Когда введена последняя 4-я цифра — автоматически триггерим вход!
+                        confirmLogin();
+                    }
+                }
             });
-            // Фокус на последнюю ячейку и авто-сабмит
-            codeInputs[codeInputs.length - 1].focus();
-            confirmLogin();
-        }
-    });
-});
+        
+            input.addEventListener('keydown', (e) => {
+                // Если поле пустое и жмут Backspace — прыгаем на предыдущий инпут и очищаем его
+                if (e.key === 'Backspace') {
+                    if (!e.target.value && index > 0) {
+                        codeInputs[index - 1].focus();
+                        codeInputs[index - 1].value = '';
+                    } else if (e.target.value) {
+                        e.target.value = '';
+                    }
+                }
+            });
+        
+            // Поддержка вставки (Paste) 4 цифр буфером
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').trim().replace(/[^0-9]/g, '');
+                
+                if (pasteData.length >= 4) {
+                    codeInputs.forEach((cell, idx) => {
+                        cell.value = pasteData[idx] || '';
+                    });
+                    codeInputs[codeInputs.length - 1].focus();
+                    confirmLogin();
+                }
+            });
+        });
+        
+        // Поддержка клавиши Enter для шага 1 (ввод логина)
+        document.getElementById('tgLogin').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                requestTelegramCode();
+            }
+        });
 
         async function requestTelegramCode() {
-           let loginInput = document.getElementById('tgLogin').value.trim();
-           if (!loginInput) {
-               showToast('ERROR', 'Enter your Telegram username', 'error');
-               return;
-           }
-           if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
-       
-           showToast('SYSTEM', 'Requesting OTP from Telegram bot...', 'info');
-       
-           try {
-               // Вызываем нашу Edge Function для генерации и отправки OTP
-               const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ action: 'send_otp', username: loginInput })
-               });
-           
-               const result = await response.json();
-           
-               if (result.success) {
-                   showToast('SECURE PROTOCOL', 'Code sent to your Telegram!', 'success');
-                   document.getElementById('authStep1').classList.add('hidden');
-                   const s2 = document.getElementById('authStep2');
-                   s2.classList.remove('hidden');
-                   setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
-                   setTimeout(() => codeInputs[0].focus(), 300);
-               } else {
-                   showToast('ACCESS DENIED', result.error || 'User not found. Start the bot first.', 'error');
-               }
-           } catch (err) {
-               console.error(err);
-               showToast('ERROR', 'Connection failed', 'error');
-           }
+            let loginInput = document.getElementById('tgLogin').value.trim();
+            if (!loginInput) {
+                showToast('ERROR', 'Enter your Telegram username', 'error');
+                return;
+            }
+            if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
+        
+            showToast('SYSTEM', 'Requesting OTP from Telegram bot...', 'info');
+        
+            try {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'send_otp', username: loginInput })
+                });
+            
+                const result = await response.json();
+            
+                if (result.success) {
+                    showToast('SECURE PROTOCOL', 'Code sent to your Telegram!', 'success');
+                    document.getElementById('authStep1').classList.add('hidden');
+                    const s2 = document.getElementById('authStep2');
+                    s2.classList.remove('hidden');
+                    setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
+                    setTimeout(() => codeInputs[0].focus(), 300);
+                } else {
+                    // Если пользователь не найден — даем подсказку со ссылкой на бота
+                    showToast('ACCESS DENIED', 'Бот не активирован! Перейдите в @PrioritysBot и нажмите /start', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('ERROR', 'Connection failed', 'error');
+            }
         }
 
         async function confirmLogin() {
