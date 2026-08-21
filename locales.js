@@ -166,6 +166,11 @@ const translations = {
         "btn_start": "Launch System",
 
         // Toasts
+        "toast_unreg_title": "SYSTEM: ACCESS DENIED",
+        "toast_unreg_desc": "YOU ARE NOT REGISTERED. TO REGISTER, YOU MUST START THE BOT IN TELEGRAM. AFTER THAT, WE WILL SEND YOU A CODE.",
+        "btn_open_bot": "LAUNCH BOT",
+        "btn_copy_link": "COPY LINK",
+
         "toast_sys": "SYSTEM",
         "toast_err": "ERROR",
         "toast_acc_denied": "ACCESS DENIED",
@@ -565,6 +570,11 @@ const translations = {
         "btn_back": "< Назад",
         "btn_next": "Далее >",
         "btn_start": "Запуск Системы",
+
+        "toast_unreg_title": "СИСТЕМА: ДОСТУП ЗАКРЫТ",
+        "toast_unreg_desc": "ВЫ НЕ ЗАРЕГИСТРИРОВАНЫ. ЧТОБЫ ЗАРЕГИСТРИРОВАТЬСЯ, НУЖНО ЗАПУСТИТЬ БОТА В ТЕЛЕГРАММЕ. ПОСЛЕ ЭТОГО МЫ ОТПРАВИМ ВАМ КОД.",
+        "btn_open_bot": "ЗАПУСТИТЬ БОТА",
+        "btn_copy_link": "СКОПИРОВАТЬ ССЫЛКУ",
 
         "toast_sys": "СИСТЕМА",
         "toast_err": "ОШИБКА",

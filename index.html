@@ -715,26 +715,46 @@
         let lastDeletedTask = null;
         let undoTimeout = null;
 
-        function showToast(title, desc, type = 'success', duration = 5000) {
+        function showToast(title, desc, type = 'success', duration = 5000, withOverlay = false) {
             const container = document.getElementById('toastContainer');
             if(!container) return;
+            
+            // Выводим контейнер поверх оверлея
+            container.style.zIndex = '9999';
+
+            // Генерация затемнения фона
+            if (withOverlay) {
+                const ov = document.createElement('div');
+                ov.className = 'auth-error-overlay fixed inset-0 bg-zinc-900/85 backdrop-blur-sm z-[9998] transition-opacity fade-in pointer-events-auto';
+                document.body.appendChild(ov);
+            }
+
             const toast = document.createElement('div');
             let colorClass = 'border-brand-light dark:border-brand-dark text-brand-light dark:text-brand-dark';
             let icon = 'ℹ️';
             if (type === 'error') { colorClass = 'border-red-500 text-red-500'; icon = '⚠️'; }
             else if (type === 'success') { colorClass = 'border-emerald-500 text-emerald-500'; icon = '✓'; }
             else if (type === 'info') { colorClass = 'border-brand-light dark:border-brand-dark'; icon = '💡'; }
-                
-            // Добавляем крестик для закрытия, если тост "вечный"
-            let closeBtn = duration === 0 ? `<button onclick="this.closest('.toast-enter').remove()" class="absolute top-2 right-2 text-zinc-400 hover:text-red-500 text-lg leading-none btn-press">&times;</button>` : '';
-                
-            toast.className = `bg-panel-light dark:bg-panel-dark border ${colorClass} p-4 rounded shadow-lg flex items-center gap-4 toast-enter pointer-events-auto font-mono-tech z-[999] relative pr-8 max-w-sm`;
-            toast.innerHTML = `${closeBtn}<div class="text-2xl">${icon}</div><div class="w-full"><div class="text-[9px] font-bold ${colorClass} uppercase tracking-widest mb-1">${title}</div><div class="font-bold text-sm uppercase text-zinc-900 dark:text-zinc-100 w-full">${desc}</div></div>`;
+
+            // Универсальный скрипт закрытия (убирает и тост, и оверлей)
+            const closeScript = `this.closest('.toast-enter').remove(); document.querySelectorAll('.auth-error-overlay').forEach(el=>el.remove());`;
+            
+            // Если duration === 0, выводим крестик для закрытия
+            let closeBtn = duration === 0 ? `<button onclick="${closeScript}" class="absolute top-2 right-3 text-zinc-400 hover:text-red-500 text-2xl leading-none btn-press font-black">&times;</button>` : '';
+
+            toast.className = `bg-panel-light dark:bg-panel-dark border ${colorClass} p-5 rounded shadow-2xl flex items-start gap-4 toast-enter pointer-events-auto font-mono-tech relative pr-10 max-w-md w-full mx-auto`;
+            toast.innerHTML = `${closeBtn}<div class="text-3xl mt-1">${icon}</div><div class="w-full flex-1"><div class="text-[10px] font-black ${colorClass} uppercase tracking-[0.2em] mb-2">${title}</div><div class="font-bold text-sm text-zinc-900 dark:text-zinc-100 w-full">${desc}</div></div>`;
             container.appendChild(toast);
-                
-            // Если duration больше 0, запускаем таймер на удаление
+            
+            // Логика авто-удаления
             if (duration > 0) {
-                setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }, duration);
+                setTimeout(() => { 
+                    toast.classList.replace('toast-enter', 'toast-leave'); 
+                    setTimeout(() => {
+                        toast.remove(); 
+                        document.querySelectorAll('.auth-error-overlay').forEach(el=>el.remove());
+                    }, 400); 
+                }, duration);
             }
         }
 
@@ -1076,18 +1096,24 @@
                     setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
                     setTimeout(() => codeInputs[0].focus(), 300);
                 } else {
-                    // Вечная интерактивная ошибка для новых пользователей с КНОПКОЙ
                     const botUrl = 'https://t.me/PrioritysBot';
+                    const closeAction = `this.closest('.toast-enter').remove(); document.querySelectorAll('.auth-error-overlay').forEach(el=>el.remove());`;
+                    
                     const errorMsg = `
-                        <div class="flex flex-col gap-3 mt-1">
-                            <span class="text-xs normal-case text-zinc-600 dark:text-zinc-300">Вас нет в базе. Чтобы войти, нужно активировать бота:</span>
-                            <a href="${botUrl}" target="_blank" onclick="this.closest('.toast-enter').remove()" class="w-full bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold py-2.5 px-4 rounded text-[11px] uppercase tracking-widest text-center shadow-md transition-all btn-press">
-                                Открыть @PrioritysBot
-                            </a>
+                        <div class="flex flex-col gap-4 mt-2">
+                            <span class="text-xs font-black text-zinc-700 dark:text-zinc-300 leading-relaxed tracking-widest">${t('toast_unreg_desc')}</span>
+                            <div class="flex gap-2 mt-1">
+                                <a href="${botUrl}" target="_blank" onclick="${closeAction}" class="flex-1 flex items-center justify-center bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-black py-3 px-2 rounded text-[10px] uppercase tracking-widest shadow-md transition-all btn-press">
+                                    ${t('btn_open_bot')}
+                                </a>
+                                <button onclick="navigator.clipboard.writeText('${botUrl}'); showToast('${t('toast_clip')}', '${t('toast_copied')}', 'success', 3000);" class="shrink-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark hover:border-brand-light dark:hover:border-brand-dark text-zinc-600 dark:text-zinc-400 font-bold py-3 px-4 rounded text-base transition-all btn-press shadow-sm" title="${t('btn_copy_link')}">
+                                    📋
+                                </button>
+                            </div>
                         </div>
                     `;
-                    // Передаем 0 как 4-й аргумент, чтобы тост висел вечно!
-                    showToast('ACCESS DENIED', errorMsg, 'error', 0);
+                    // Передаем duration: 0 (вечный тост) и withOverlay: true (затемняем фон)
+                    showToast(t('toast_unreg_title'), errorMsg, 'error', 0, true);
                 }
             } catch (err) {
                 console.error(err);
