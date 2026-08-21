@@ -838,7 +838,39 @@
         function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
         function getDateTimeStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getFullYear()).slice(2)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
 
-        function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+        // --- ОБЛАЧНЫЙ ДВИЖОК СИНХРОНИЗАЦИИ ---
+        let cloudSyncTimeout = null;
+
+        function saveData(key, data) { 
+            // 1. Мгновенное локальное сохранение (Optimistic UI)
+            localStorage.setItem(key, JSON.stringify(data)); 
+
+            // 2. Фоновая отправка в облако с защитой от спама запросами (Debounce)
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+        
+            clearTimeout(cloudSyncTimeout);
+            cloudSyncTimeout = setTimeout(async () => {
+                // Собираем весь слепок приложения
+                const appState = {
+                    scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
+                    tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
+                    macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
+                    templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
+                    badges: JSON.parse(localStorage.getItem('priority_badges') || '[]')
+                };
+
+                try {
+                    await supabaseClient
+                        .from('users')
+                        .update({ app_data: appState })
+                        .eq('username', username);
+                    console.log('☁️ State seamlessly synced to cloud');
+                } catch (err) {
+                    console.error('Cloud sync failed', err);
+                }
+            }, 1500); // Отправляем в базу через 1.5 секунды после последнего действия
+        }
 
         // --- AUTH & ROUTING LOGIC ---
         function checkAuth() {
@@ -965,7 +997,7 @@
             const code = Array.from(codeInputs).map(i => i.value).join('');
             let loginInput = document.getElementById('tgLogin').value.trim();
             if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
-                
+
             if (code.length < 4) {
                 showToast('ERROR', 'Enter 4-digit code', 'error');
                 return;
@@ -1005,7 +1037,7 @@
                 localStorage.setItem('priority_auth', 'true');
                 localStorage.setItem('priority_user', loginInput);
                 localStorage.setItem('priority_is_pro', (userData && userData.is_pro) ? 'true' : 'false');
-                
+
                 isPro = (userData && userData.is_pro) ? true : false; // Обновляем глобальную переменную
             
                 showToast('SYSTEM', 'Access Granted', 'success');
@@ -1052,18 +1084,67 @@
             macros = JSON.parse(localStorage.getItem('priority_macros')) || [];
             unlockedBadges = JSON.parse(localStorage.getItem('priority_badges')) || [];
             isPro = localStorage.getItem('priority_is_pro') === 'true';
-            
+
             shopModuleActive = localStorage.getItem('priority_shop_module') === 'true';
             shopCurrency = localStorage.getItem('priority_currency') || '₽';
-            
+
             if(localStorage.getItem('priority_guide_passed') === 'true') {
                 document.getElementById('guideBtn').classList.add('opacity-40', 'grayscale');
             }
-
+        
             initDynamicScopes();
             renderTasks();
             renderMacros();
             applyCursor();
+        
+            // Запускаем подтягивание данных из облака
+            syncFromCloud();
+        }
+
+        async function syncFromCloud() {
+           const username = localStorage.getItem('priority_user');
+           if (!username) return;
+                
+           try {
+               const { data, error } = await supabaseClient
+                   .from('users')
+                   .select('app_data, is_pro')
+                   .eq('username', username)
+                   .single();
+            
+               if (data) {
+                   // Обновляем PRO статус
+                   isPro = data.is_pro || false;
+                   localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
+                   
+                   // Если в облаке есть данные, распаковываем их
+                   if (data.app_data && Object.keys(data.app_data).length > 0) {
+                       const cloudData = data.app_data;
+                       
+                       localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes || []));
+                       localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks || []));
+                       localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros || []));
+                       localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates || []));
+                       localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges || []));
+                       
+                       // Обновляем переменные в памяти
+                       dynamicScopes = cloudData.scopes || [];
+                       tasks = cloudData.tasks || [];
+                       templates = cloudData.templates || [];
+                       macros = cloudData.macros || [];
+                       unlockedBadges = cloudData.badges || [];
+                       
+                       // Мягко перерисовываем интерфейс новыми данными
+                       initDynamicScopes();
+                       renderTasks();
+                       renderMacros();
+                       
+                       console.log('☁️ Local state updated from cloud');
+                   }
+               }
+           } catch (e) {
+               console.error('Cloud pull failed:', e);
+           }
         }
 
         function unlockAchievement(id) {
