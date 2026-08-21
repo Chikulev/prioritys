@@ -7,6 +7,8 @@
     <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121214'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='%2306B6D4' text-anchor='middle'>/&gt;_</text></svg>">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -556,6 +558,10 @@
         let activeFilterScopes = []; // Массив для мульти-фильтра
         let activeFilterPurchases = false; // Глобальный триггер для фильтра покупок
 
+        const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // --- ЛОГИКА ФИЛЬТРАЦИИ ---
         function renderFilters() {
             const container = document.getElementById('scopeFilterContainer');
@@ -874,32 +880,95 @@
             });
         });
 
-        function requestTelegramCode() {
-            if(document.getElementById('tgLogin').value.trim() !== '') {
-                document.getElementById('authStep1').classList.add('hidden');
-                const s2 = document.getElementById('authStep2');
-                s2.classList.remove('hidden');
-                setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
-                setTimeout(() => codeInputs[0].focus(), 300);
-            }
+        async function requestTelegramCode() {
+           let loginInput = document.getElementById('tgLogin').value.trim();
+           if (!loginInput) {
+               showToast('ERROR', 'Enter your Telegram username', 'error');
+               return;
+           }
+           if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
+       
+           showToast('SYSTEM', 'Requesting OTP from Telegram bot...', 'info');
+       
+           try {
+               // Вызываем нашу Edge Function для генерации и отправки OTP
+               const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ action: 'send_otp', username: loginInput })
+               });
+           
+               const result = await response.json();
+           
+               if (result.success) {
+                   showToast('SECURE PROTOCOL', 'Code sent to your Telegram!', 'success');
+                   document.getElementById('authStep1').classList.add('hidden');
+                   const s2 = document.getElementById('authStep2');
+                   s2.classList.remove('hidden');
+                   setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
+                   setTimeout(() => codeInputs[0].focus(), 300);
+               } else {
+                   showToast('ACCESS DENIED', result.error || 'User not found. Start the bot first.', 'error');
+               }
+           } catch (err) {
+               console.error(err);
+               showToast('ERROR', 'Connection failed', 'error');
+           }
         }
 
-        function confirmLogin() {
-            const code = Array.from(codeInputs).map(i => i.value).join('');
-            if(code.length === 4) {
-                localStorage.setItem('priority_auth', 'true');
-                
-                if (localStorage.getItem('priority_onboarded') !== 'true') {
-                    window.location.href = 'onboarding.html';
-                } else {
-                    document.getElementById('authScreen').classList.add('hidden');
-                    document.getElementById('globalToggles').classList.add('hidden');
-                    document.getElementById('mainApp').classList.remove('hidden');
-                    loadDataFromStorage();
-                    applyAppTheme();
-                    setTimeout(() => document.getElementById('taskInput').focus(), 100);
-                }
-            }
+        async function confirmLogin() {
+           const code = Array.from(codeInputs).map(i => i.value).join('');
+           let loginInput = document.getElementById('tgLogin').value.trim();
+           if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
+        
+           if (code.length < 4) {
+               showToast('ERROR', 'Enter 4-digit code', 'error');
+               return;
+           }
+       
+           try {
+               // Проверяем код в таблице otp_codes
+               const { data: otpRecord, error } = await supabaseClient
+                   .from('otp_codes')
+                   .select('*')
+                   .eq('username', loginInput)
+                   .eq('code', code)
+                   .eq('used', false)
+                   .order('created_at', { ascending: false })
+                   .limit(1)
+                   .single();
+
+               if (error || !otpRecord) {
+                   showToast('ACCESS DENIED', 'Invalid or expired code', 'error');
+                   return;
+               }
+           
+               // Помечаем код как использованный
+               await supabaseClient
+                   .from('otp_codes')
+                   .update({ used: true })
+                   .eq('id', otpRecord.id);
+           
+               // Успешный вход! Сохраняем сессию
+               localStorage.setItem('priority_auth', 'true');
+               localStorage.setItem('priority_user', loginInput);
+           
+               showToast('SYSTEM', 'Access Granted', 'success');
+           
+               if (localStorage.getItem('priority_onboarded') !== 'true') {
+                   window.location.href = 'onboarding.html';
+               } else {
+                   document.getElementById('authScreen').classList.add('hidden');
+                   document.getElementById('globalToggles').classList.add('hidden');
+                   document.getElementById('mainApp').classList.remove('hidden');
+                   loadDataFromStorage();
+                   applyAppTheme();
+                   setTimeout(() => document.getElementById('taskInput').focus(), 100);
+               }
+           } catch (err) {
+               console.error(err);
+               showToast('ERROR', 'Verification error', 'error');
+           }
         }
 
         function backToStep1() {
