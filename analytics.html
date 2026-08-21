@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRIORITY // SYS.ANALYTICS</title>
+    <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121214'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='%2306B6D4' text-anchor='middle'>/&gt;_</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { light: 'var(--color-brand-light)', dark: 'var(--color-brand-dark)' },
+                        base: { light: 'var(--color-base-light)', dark: 'var(--color-base-dark)' },
+                        panel: { light: 'var(--color-panel-light)', dark: 'var(--color-panel-dark)' },
+                        borderline: { light: 'var(--color-border-light)', dark: 'var(--color-border-dark)' }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="locales.js"></script>
+    <style>
+        :root {
+            --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
+            --color-base-light: #FAFAFA; --color-base-dark: #09090B;
+            --color-panel-light: #ffffff; --color-panel-dark: #121214;
+            --color-border-light: #d4d4d8; --color-border-dark: #27272a;
+            --font-primary: 'JetBrains Mono', monospace;
+        }
+
+        body.theme-royal {
+            --color-brand-light: #8B0000; --color-brand-dark: #D4AF37;
+            --color-base-light: #FDFBF7; --color-base-dark: #1A120B;
+            --color-panel-light: #F5EEDB; --color-panel-dark: #2A1D12;
+            --color-border-light: #D9CBB0; --color-border-dark: #3D2B1F;
+            --font-primary: 'Georgia', serif;
+        }
+
+        /* --- NEO-BRUTALISM CSS --- */
+        body.theme-brutal {
+            --color-brand-light: #FF3366; --color-brand-dark: #00FFCC;
+            --color-base-light: #E0E722; --color-base-dark: #121212;
+            --color-panel-light: #FFFFFF; --color-panel-dark: #000000;
+            --color-border-light: #000000; --color-border-dark: #E0E722;
+            --font-primary: 'Inter', sans-serif;
+        }
+        body.theme-brutal .rounded, body.theme-brutal .rounded-md, body.theme-brutal .rounded-lg, body.theme-brutal .rounded-sm, body.theme-brutal .rounded-full { border-radius: 0px !important; }
+        body.theme-brutal .border, body.theme-brutal .border-2 { border-width: 3px !important; }
+        body.theme-brutal .shadow-sm, body.theme-brutal .shadow-md, body.theme-brutal .shadow-lg, body.theme-brutal .shadow-2xl { box-shadow: 6px 6px 0px var(--color-border-light) !important; }
+        .dark body.theme-brutal .shadow-sm, .dark body.theme-brutal .shadow-md, .dark body.theme-brutal .shadow-lg, .dark body.theme-brutal .shadow-2xl { box-shadow: 6px 6px 0px var(--color-border-dark) !important; }
+        body.theme-brutal .hover-magnet:hover { transform: translate(-4px, -4px) !important; box-shadow: 10px 10px 0px var(--color-border-light) !important; }
+        .dark body.theme-brutal .hover-magnet:hover { box-shadow: 10px 10px 0px var(--color-border-dark) !important; }
+        body.theme-brutal .btn-press:active { transform: translate(4px, 4px) !important; box-shadow: 0px 0px 0px transparent !important; }
+
+        body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; overflow-x: hidden; }
+        .bg-tech-grid { background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px); background-size: 20px 20px; }
+        .dark .bg-tech-grid { background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px); }
+        body.theme-royal .bg-tech-grid { background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>'); }
+        body.theme-brutal .bg-tech-grid { background-image: none; }
+
+        .btn-press { transition: transform 0.1s ease; } .btn-press:active { transform: scale(0.95); }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-thumb { background: #A1A1AA; border-radius: 0px; } .dark ::-webkit-scrollbar-thumb { background: #52525B; }
+        
+        body.cursor-tech, body.cursor-tech * { cursor: crosshair !important; }
+        body.cursor-royal, body.cursor-royal * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🖋️</text></svg>") 0 20, auto !important; }
+        body.cursor-sword, body.cursor-sword * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🗡️</text></svg>") 0 20, auto !important; }
+        body.cursor-wand, body.cursor-wand * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🪄</text></svg>") 0 20, auto !important; }
+
+        .progress-bar-fill { transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        html { 
+        font-size: calc(16px * var(--system-scale, 1)) !important; 
+        }
+
+    </style>
+</head>
+<body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative">
+    <script>
+        (function() {
+            // 1. Темная/Светлая тема
+            const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            // 2. Мгновенная смена фавиконки
+            const link = document.getElementById('dynamic-favicon');
+            if(link) {
+                const bgColor = isDark ? '%23121214' : '%23FAFAFA';
+                const textColor = isDark ? '%2306B6D4' : '%230891B2';
+                link.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='${textColor}' text-anchor='middle'>/&gt;_</text></svg>`;
+            }
+
+            // 3. Применение PRO-стиля (Brutal/Royal)
+            const theme = localStorage.getItem('priority_theme') || 'cyber';
+            if (theme !== 'cyber') document.body.classList.add('theme-' + theme);
+
+            // 4. Применение кастомного курсора
+            const cursor = localStorage.getItem('priority_cursor') || 'default';
+            if (cursor !== 'default') document.body.classList.add(cursor);
+        })();
+    </script>
+
+    <div id="globalToggles" class="fixed top-6 right-6 flex gap-2 z-[200] font-mono-tech">
+        <button type="button" onclick="toggleLang()" class="hover:text-brand-light dark:hover:text-brand-dark transition-colors px-2 py-2 bg-panel-light dark:bg-panel-dark rounded border border-borderline-light dark:border-borderline-dark btn-press text-zinc-500 text-xs font-bold"><span data-i18n="lang_toggle">EN / RU</span></button>
+        <button type="button" onclick="toggleTheme()" class="hover:text-brand-light dark:hover:text-brand-dark transition-colors px-2 py-2 bg-panel-light dark:bg-panel-dark rounded border border-borderline-light dark:border-borderline-dark btn-press text-zinc-500 shadow-sm dark:shadow-none" title="Toggle Theme">
+            <svg id="themeIconAnalytics" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
+        </button>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-4 md:p-6 fade-in">
+        
+        <header class="flex flex-wrap justify-between items-center mb-8 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-4 rounded-md gap-4 shadow-sm transition-colors">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-brand-light/10 dark:bg-brand-dark/10 border border-brand-light/40 dark:border-brand-dark/50 rounded text-brand-light dark:text-brand-dark flex items-center justify-center font-bold text-base font-mono-tech">📊</div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight font-mono-tech"><span data-i18n="stat_title">SYS.ANALYTICS</span><span class="text-brand-light dark:text-brand-dark animate-pulse">_</span></h1>
+                    <div data-i18n="stat_subtitle" class="text-[11px] text-zinc-500 dark:text-zinc-500 uppercase tracking-widest mt-1 font-mono-tech">System Telemetry & Metrics</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 font-mono-tech">
+                <span class="text-zinc-300 dark:text-zinc-700">|</span>
+                <a href="index.html" data-i18n-title="nav_dash" class="p-2 hover:text-brand-light dark:hover:text-brand-dark hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors btn-press">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </a>
+                <span class="text-zinc-300 dark:text-zinc-700">|</span>
+                <button type="button" onclick="logout()" data-i18n-title="nav_logout" class="shrink-0 p-2 text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors btn-press">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 font-mono-tech">
+            <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-6 rounded-md shadow-sm col-span-1 md:col-span-2">
+                <h3 data-i18n="stat_res_rate" class="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-6">Process Resolution Rate</h3>
+                <div class="flex items-end gap-4 mb-4">
+                    <div id="metric-percent" class="text-6xl font-bold leading-none">0%</div>
+                    <div data-i18n="stat_eff" class="text-sm text-zinc-500 mb-1">Total Efficiency</div>
+                </div>
+                <div class="w-full bg-base-light dark:bg-base-dark h-3 rounded-full overflow-hidden border border-borderline-light dark:border-borderline-dark">
+                    <div id="bar-total" class="progress-bar-fill bg-brand-light dark:bg-brand-dark h-full w-0"></div>
+                </div>
+                <div class="flex justify-between mt-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                    <div><span data-i18n="stat_dep">Tasks Deployed:</span> <span id="metric-deployed" class="text-zinc-900 dark:text-zinc-100">0</span></div>
+                    <div><span data-i18n="stat_res">Tasks Resolved:</span> <span id="metric-resolved" class="text-brand-light dark:text-brand-dark">0</span></div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-zinc-100 dark:to-white border border-zinc-700 dark:border-zinc-200 p-6 rounded-md shadow-lg relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute -right-6 -bottom-6 opacity-10">
+                    <svg class="w-32 h-32 text-white dark:text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div>
+                    <h3 data-i18n="stat_macros" class="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2 relative z-10">Macro Objectives</h3>
+                    <div id="metric-macros" class="text-5xl font-bold text-white dark:text-black mb-2 relative z-10">0/0</div>
+                </div>
+                <p data-i18n="stat_mac_desc" class="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed relative z-10">Archived vs Total Macros in the system.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 font-mono-tech">
+            <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-6 rounded-md shadow-sm">
+                <h3 data-i18n="stat_quads" class="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-6">Quadrant Distribution (Active)</h3>
+                <div class="space-y-5">
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-2 uppercase tracking-widest">
+                            <span data-i18n="quad_1" class="text-red-600 dark:text-red-500">Critical [SEV-0]</span><span id="quad-1-val">0</span>
+                        </div>
+                        <div class="w-full bg-base-light dark:bg-base-dark h-2 rounded-full overflow-hidden border border-borderline-light dark:border-borderline-dark"><div id="bar-quad-1" class="progress-bar-fill bg-red-600 dark:bg-red-500 h-full w-0"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-2 uppercase tracking-widest">
+                            <span data-i18n="quad_2" class="text-brand-light dark:text-brand-dark">Core [SEV-1]</span><span id="quad-2-val">0</span>
+                        </div>
+                        <div class="w-full bg-base-light dark:bg-base-dark h-2 rounded-full overflow-hidden border border-borderline-light dark:border-borderline-dark"><div id="bar-quad-2" class="progress-bar-fill bg-brand-light dark:bg-brand-dark h-full w-0"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-2 uppercase tracking-widest">
+                            <span data-i18n="quad_3" class="text-yellow-600 dark:text-yellow-500">Routine [SEV-2]</span><span id="quad-3-val">0</span>
+                        </div>
+                        <div class="w-full bg-base-light dark:bg-base-dark h-2 rounded-full overflow-hidden border border-borderline-light dark:border-borderline-dark"><div id="bar-quad-3" class="progress-bar-fill bg-yellow-600 dark:bg-yellow-500 h-full w-0"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-2 uppercase tracking-widest">
+                            <span data-i18n="quad_4" class="text-zinc-500">Backlog [SEV-3]</span><span id="quad-4-val">0</span>
+                        </div>
+                        <div class="w-full bg-base-light dark:bg-base-dark h-2 rounded-full overflow-hidden border border-borderline-light dark:border-borderline-dark"><div id="bar-quad-4" class="progress-bar-fill bg-zinc-400 dark:bg-zinc-600 h-full w-0"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-6 rounded-md shadow-sm">
+                <h3 data-i18n="stat_scopes" class="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-6">Scope Distribution (Velocity)</h3>
+                <div id="scopesAnalysisContainer" class="space-y-4 overflow-y-auto max-h-[220px] pr-2"></div>
+            </div>
+
+            <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-6 rounded-md shadow-sm relative overflow-hidden group">
+                <div class="absolute inset-0 bg-brand-light/5 flex items-center justify-center backdrop-blur-[2px] z-10">
+                    <div class="bg-panel-light dark:bg-panel-dark border border-brand-light/30 p-4 rounded text-center shadow-xl">
+                        <div data-i18n="stat_exp" class="text-[10px] font-bold text-brand-light uppercase tracking-widest mb-1">Experimental Module</div>
+                        <div data-i18n="stat_arima_wait" class="text-sm font-bold text-zinc-900 dark:text-zinc-100">AWAITING THESIS INTEGRATION</div>
+                    </div>
+                </div>
+                <h3 class="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-6 opacity-30">Time Series Forecast</h3>
+                <div class="space-y-4 opacity-30">
+                    <div class="h-28 w-full border-b border-l border-borderline-light dark:border-borderline-dark flex items-end justify-between px-2 pb-2">
+                        <div class="w-4 h-12 bg-zinc-300 dark:bg-zinc-700"></div>
+                        <div class="w-4 h-16 bg-zinc-300 dark:bg-zinc-700"></div>
+                        <div class="w-4 h-8 bg-zinc-300 dark:bg-zinc-700"></div>
+                        <div class="w-4 h-20 bg-brand-light dark:bg-brand-dark"></div>
+                        <div class="w-4 h-24 border border-dashed border-brand-light dark:border-brand-dark"></div>
+                    </div>
+                    <p data-i18n="stat_arima_desc" class="text-[10px] text-zinc-500 text-center">ARIMA Model prediction for next sprint workload.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function applyAppTheme() {
+            const theme = localStorage.getItem('priority_theme') || 'cyber';
+            document.body.className = `bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative theme-${theme}`;
+            applyI18n();
+        }
+
+        function initThemeToggle() {
+            updateThemeIcons();
+        }
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            updateThemeIcons();
+        }
+        function updateThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const svgPath = isDark 
+                ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />` 
+                : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />`; 
+            const icon = document.getElementById('themeIconAnalytics');
+            if(icon) icon.innerHTML = svgPath;
+            // --- ДИНАМИЧЕСКАЯ ФАВИКОНКА ---
+            let link = document.getElementById('dynamic-favicon');
+            if(link) {
+                const bgColor = isDark ? '%23121214' : '%23FAFAFA';
+                const textColor = isDark ? '%2306B6D4' : '%230891B2';
+                link.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='${textColor}' text-anchor='middle'>/&gt;_</text></svg>`;
+            }
+        }
+
+        function toggleLang() {
+            const currentLang = localStorage.getItem('priority_lang') || 'en';
+            localStorage.setItem('priority_lang', currentLang === 'en' ? 'ru' : 'en');
+            applyI18n();
+            renderAnalytics(); 
+        }
+
+        function applyCursor() {
+            if(!document.body) return; 
+            const cursorVal = localStorage.getItem('priority_cursor') || 'default';
+            
+            // 1. Очистка старых классов и динамического стиля
+            document.body.classList.remove('cursor-tech', 'cursor-royal', 'cursor-sword', 'cursor-wand', 'cursor-custom-emoji');
+            const oldStyle = document.getElementById('dynamic-emoji-style');
+            if (oldStyle) oldStyle.remove();
+
+            if (cursorVal.startsWith('emoji:')) {
+                // 2. ГЕНЕРАЦИЯ ЭМОДЗИ-КУРСОРОВ (Normal & Active)
+                const emoji = cursorVal.replace('emoji:', '');
+                
+                const svgNormal = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='50%' y='50%' font-size='24' dominant-baseline='central' text-anchor='middle'>${emoji}</text></svg>`;
+                const svgActive = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='50%' y='50%' font-size='18' dominant-baseline='central' text-anchor='middle'>${emoji}</text></svg>`;
+
+                const style = document.createElement('style');
+                style.id = 'dynamic-emoji-style';
+                style.innerHTML = `
+                    body.cursor-custom-emoji, body.cursor-custom-emoji * { cursor: url("${svgNormal}") 16 16, auto !important; }
+                    body.cursor-custom-emoji:active, body.cursor-custom-emoji:active * { cursor: url("${svgActive}") 16 16, auto !important; }
+                `;
+                document.head.appendChild(style);
+                document.body.classList.add('cursor-custom-emoji');
+            } else {
+                // 3. ПРИМЕНЕНИЕ СТАНДАРТНЫХ ПРЕСЕТОВ
+                if(cursorVal !== 'default') document.body.classList.add(cursorVal);
+            }
+        }
+
+        function getQuadrant(isImportant, isUrgent) {
+            if(isImportant && isUrgent) return 1;
+            if(isImportant && !isUrgent) return 2;
+            if(!isImportant && isUrgent) return 3;
+            return 4;
+        }
+
+        function renderAnalytics() {
+            const tasksData = localStorage.getItem('priority_tasks');
+            const tasks = tasksData ? JSON.parse(tasksData) : [];
+            const macrosData = localStorage.getItem('priority_macros');
+            const macros = macrosData ? JSON.parse(macrosData) : [];
+            const scopesData = localStorage.getItem('priority_scopes');
+            const scopes = scopesData ? JSON.parse(scopesData) : [];
+
+            const totalTasks = tasks.length;
+            const resolvedTasks = tasks.filter(t => t.completed).length;
+            const completionRate = totalTasks === 0 ? 0 : Math.round((resolvedTasks / totalTasks) * 100);
+
+            document.getElementById('metric-deployed').innerText = totalTasks;
+            document.getElementById('metric-resolved').innerText = resolvedTasks;
+            document.getElementById('metric-percent').innerText = `${completionRate}%`;
+            setTimeout(() => { document.getElementById('bar-total').style.width = `${completionRate}%`; }, 300);
+
+            const totalMacros = macros.length;
+            const archivedMacros = macros.filter(m => m.status === 'archived').length;
+            document.getElementById('metric-macros').innerText = `${archivedMacros}/${totalMacros}`;
+
+            const activeTasks = tasks.filter(t => !t.completed);
+            const totalActive = activeTasks.length || 1; 
+            let q1Count = 0, q2Count = 0, q3Count = 0, q4Count = 0;
+            
+            activeTasks.forEach(t => {
+                const q = getQuadrant(t.isImportant, t.isUrgent);
+                if(q === 1) q1Count++; else if(q === 2) q2Count++; else if(q === 3) q3Count++; else q4Count++;
+            });
+
+            document.getElementById('quad-1-val').innerText = q1Count;
+            document.getElementById('quad-2-val').innerText = q2Count;
+            document.getElementById('quad-3-val').innerText = q3Count;
+            document.getElementById('quad-4-val').innerText = q4Count;
+
+            setTimeout(() => {
+                document.getElementById('bar-quad-1').style.width = `${(q1Count/totalActive)*100}%`;
+                document.getElementById('bar-quad-2').style.width = `${(q2Count/totalActive)*100}%`;
+                document.getElementById('bar-quad-3').style.width = `${(q3Count/totalActive)*100}%`;
+                document.getElementById('bar-quad-4').style.width = `${(q4Count/totalActive)*100}%`;
+            }, 400);
+
+            const scopesContainer = document.getElementById('scopesAnalysisContainer');
+            let scopesHTML = '';
+            
+            scopes.forEach(scope => {
+                const scopeTasks = tasks.filter(t => t.sphere === scope);
+                const scopeTotal = scopeTasks.length;
+                const scopeDone = scopeTasks.filter(t => t.completed).length;
+                const scopeActive = scopeTotal - scopeDone;
+                const fillPercent = scopeTotal === 0 ? 0 : Math.round((scopeDone / scopeTotal) * 100);
+
+                scopesHTML += `
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs font-bold mb-1 uppercase">
+                            <span>${scope}</span>
+                            <span class="text-brand-light dark:text-brand-dark">${fillPercent}%</span>
+                        </div>
+                        <div class="w-full bg-base-light dark:bg-base-dark h-1.5 rounded-full overflow-hidden border border-borderline-light dark:border-borderline-dark mb-1">
+                            <div class="progress-bar-fill bg-brand-light dark:bg-brand-dark h-full w-0" style="width: ${fillPercent}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-zinc-500 font-bold uppercase">
+                            <span>${t('scope_active')}: ${scopeActive}</span>
+                            <span>${t('scope_done')}: ${scopeDone}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if(scopes.length === 0) scopesHTML = `<div class="text-[10px] text-zinc-500 uppercase text-center mt-4">No Scopes Found</div>`;
+            scopesContainer.innerHTML = scopesHTML;
+        }
+
+        initThemeToggle();
+        applyAppTheme();
+        applyCursor();
+        renderAnalytics();
+    </script>
+</body>
+</html>

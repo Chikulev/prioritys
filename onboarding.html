@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRIORITY // INITIALIZATION</title>
+    <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121214'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='%2306B6D4' text-anchor='middle'>/&gt;_</text></svg>">    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brand: { light: 'var(--color-brand-light)', dark: 'var(--color-brand-dark)' }, base: { light: 'var(--color-base-light)', dark: 'var(--color-base-dark)' }, panel: { light: 'var(--color-panel-light)', dark: 'var(--color-panel-dark)' }, borderline: { light: 'var(--color-border-light)', dark: 'var(--color-border-dark)' } } } } }
+    </script>
+    <script src="locales.js"></script>
+    <style>
+        :root {
+            --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
+            --color-base-light: #FAFAFA; --color-base-dark: #09090B;
+            --color-panel-light: #ffffff; --color-panel-dark: #121214;
+            --color-border-light: #d4d4d8; --color-border-dark: #27272a;
+            --font-primary: 'JetBrains Mono', monospace;
+        }
+        body.theme-royal {
+            --color-brand-light: #8B0000; --color-brand-dark: #D4AF37;
+            --color-base-light: #FDFBF7; --color-base-dark: #1A120B;
+            --color-panel-light: #F5EEDB; --color-panel-dark: #2A1D12;
+            --color-border-light: #D9CBB0; --color-border-dark: #3D2B1F;
+            --font-primary: 'Georgia', serif;
+        }
+        body.theme-brutal {
+            --color-brand-light: #FF3366; --color-brand-dark: #00FFCC;
+            --color-base-light: #E0E722; --color-base-dark: #121212;
+            --color-panel-light: #FFFFFF; --color-panel-dark: #000000;
+            --color-border-light: #000000; --color-border-dark: #E0E722;
+            --font-primary: 'Inter', sans-serif;
+        }
+        body.theme-brutal .rounded, body.theme-brutal .rounded-md, body.theme-brutal .rounded-lg { border-radius: 0px !important; }
+        body.theme-brutal .border, body.theme-brutal .border-2 { border-width: 3px !important; }
+        body.theme-brutal .shadow-lg, body.theme-brutal .shadow-md { box-shadow: 6px 6px 0px var(--color-border-light) !important; }
+        .dark body.theme-brutal .shadow-lg, .dark body.theme-brutal .shadow-md { box-shadow: 6px 6px 0px var(--color-border-dark) !important; }
+        body.theme-brutal .btn-press:active { transform: translate(4px, 4px) !important; box-shadow: 0px 0px 0px transparent !important; }
+
+        body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; }
+        .bg-tech-grid { background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px); background-size: 20px 20px; }
+        .dark .bg-tech-grid { background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px); }
+        body.theme-royal .bg-tech-grid { background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>'); }
+        body.theme-brutal .bg-tech-grid { background-image: none; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-press { transition: transform 0.1s ease; } .btn-press:active { transform: scale(0.95); }
+
+        .toast-enter { animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .toast-leave { animation: fadeOutRight 0.3s ease-in forwards; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    </style>
+</head>
+<body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen flex items-center justify-center p-4">
+    <script>
+        (function() {
+            // 1. Темная/Светлая тема
+            const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            // 2. Мгновенная смена фавиконки
+            const link = document.getElementById('dynamic-favicon');
+            if(link) {
+                const bgColor = isDark ? '%23121214' : '%23FAFAFA';
+                const textColor = isDark ? '%2306B6D4' : '%230891B2';
+                link.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='${textColor}' text-anchor='middle'>/&gt;_</text></svg>`;
+            }
+
+            // 3. Применение PRO-стиля (Brutal/Royal)
+            const theme = localStorage.getItem('priority_theme') || 'cyber';
+            if (theme !== 'cyber') document.body.classList.add('theme-' + theme);
+
+            // 4. Применение кастомного курсора
+            const cursor = localStorage.getItem('priority_cursor') || 'default';
+            if (cursor !== 'default') document.body.classList.add(cursor);
+        })();
+    </script>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none font-mono-tech"></div>
+
+    <!-- GLOBAL TOGGLES -->
+    <div class="fixed top-6 right-6 flex gap-2 z-50 font-mono-tech">
+        <button onclick="toggleLang()" class="hover:text-brand-light dark:hover:text-brand-dark transition-colors px-2 py-2 bg-panel-light dark:bg-panel-dark rounded border border-borderline-light dark:border-borderline-dark btn-press text-zinc-500 text-xs font-bold"><span data-i18n="lang_toggle">EN / RU</span></button>
+        <button onclick="toggleTheme()" class="hover:text-brand-light dark:hover:text-brand-dark transition-colors px-2 py-2 bg-panel-light dark:bg-panel-dark rounded border border-borderline-light dark:border-borderline-dark btn-press text-zinc-500 shadow-sm dark:shadow-none">
+            <svg class="theme-icon-svg w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
+        </button>
+    </div>
+
+    <div class="w-full max-w-2xl bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-lg shadow-lg p-8 fade-in relative overflow-hidden transition-colors font-mono-tech min-h-[450px] flex flex-col">
+        <div class="absolute top-0 left-0 w-full h-1.5 bg-brand-light dark:bg-brand-dark transition-colors"></div>
+        
+        <div class="text-center mb-10 mt-2">
+            <div data-i18n="onb_init" class="text-brand-light dark:text-brand-dark text-xs mb-2 tracking-[0.2em] font-bold">SYSTEM_INITIALIZATION</div>
+            <h1 data-i18n="onb_title" class="text-3xl font-bold tracking-tighter text-zinc-900 dark:text-zinc-100" style="font-family: var(--font-primary);">PRIORITY_SETUP</h1>
+        </div>
+
+        <!-- STEP 1: MODE SELECTION -->
+        <div id="step1" class="space-y-4 flex-1">
+            <p data-i18n="onb_welcome" class="text-center text-sm text-zinc-600 dark:text-zinc-400 mb-8">Welcome to the core. How would you like to initialize your workspace?</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="loadDemo()" class="border border-borderline-light dark:border-borderline-dark hover:border-brand-light dark:hover:border-brand-dark bg-base-light dark:bg-base-dark p-6 rounded text-left btn-press group transition-colors">
+                    <div class="text-2xl mb-3 group-hover:scale-110 transition-transform">🚀</div>
+                    <h3 data-i18n="onb_demo_mode" class="font-bold text-lg mb-2">Demo Mode</h3>
+                    <p data-i18n="onb_demo_desc" class="text-[11px] text-zinc-500">Load system with pre-configured tasks, templates, and scopes to explore features.</p>
+                </button>
+
+                <button onclick="goToStep(2)" class="border-2 border-brand-light dark:border-brand-dark bg-brand-light/5 p-6 rounded text-left btn-press group transition-colors shadow-md">
+                    <div class="text-2xl mb-3 group-hover:scale-110 transition-transform">⚙️</div>
+                    <h3 data-i18n="onb_custom_mode" class="font-bold text-lg mb-2">Custom Setup</h3>
+                    <p data-i18n="onb_custom_desc" class="text-[11px] text-zinc-500">Start with a clean slate. Define your own life and work parameters.</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: SCOPES -->
+        <div id="step2" class="hidden space-y-6 fade-in flex-1 flex flex-col">
+            <div class="border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
+                <h3 data-i18n="onb_step_scopes" class="font-bold text-lg mb-1">Define Your Scopes</h3>
+                <p data-i18n="onb_step_scopes_desc" class="text-xs text-zinc-500 mb-2">Add categories you want to track.</p>
+                <p data-i18n="onb_scope_hint" class="text-[10px] text-brand-light dark:text-brand-dark mb-4">Enter one by one via Enter or paste a comma-separated list.</p>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" id="customScopeInput" data-i18n-ph="onb_scope_ph" onkeypress="if(event.key==='Enter') addCustomScope()" class="flex-1 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-4 py-3 text-sm focus:outline-none focus:border-brand-light dark:focus:border-brand-dark transition-colors placeholder-zinc-400 dark:placeholder-zinc-600" placeholder="e.g., STUDIO, AVITO, MEDICINE...">
+                <button onclick="addCustomScope()" data-i18n="btn_add" class="shrink-0 btn-press bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black px-6 rounded font-bold text-sm uppercase transition-colors">ADD</button>
+            </div>
+
+            <div id="customScopesList" class="flex flex-wrap gap-2 min-h-[50px] mt-4 flex-1 items-start content-start"></div>
+
+            <div class="pt-6 mt-auto border-t border-borderline-light dark:border-borderline-dark flex justify-between items-center">
+                <button onclick="goToStep(1)" data-i18n="btn_back" class="text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 uppercase tracking-widest">< Back</button>
+                <button onclick="goToStep(3)" data-i18n="btn_next" class="btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold px-8 py-3 rounded text-xs uppercase tracking-widest transition-all shadow-md">Next ></button>
+            </div>
+        </div>
+
+        <!-- STEP 3: MACROS -->
+        <div id="step3" class="hidden space-y-6 fade-in flex-1 flex flex-col">
+            <div class="border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4">
+                <h3 data-i18n="onb_step_macros" class="font-bold text-lg mb-1">Set Macro Objectives</h3>
+                <p data-i18n="onb_step_macros_desc" class="text-xs text-zinc-500 mb-2">What are your ultimate goals?</p>
+                <p data-i18n="onb_scope_hint" class="text-[10px] text-brand-light dark:text-brand-dark mb-4">Enter one by one via Enter or paste a comma-separated list.</p>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" id="customMacroInput" data-i18n-ph="onb_macro_ph" onkeypress="if(event.key==='Enter') addCustomMacro()" class="flex-1 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-4 py-3 text-sm focus:outline-none focus:border-brand-light dark:focus:border-brand-dark transition-colors placeholder-zinc-400 dark:placeholder-zinc-600" placeholder="e.g., Write Thesis, Setup Workshop...">
+                <button onclick="addCustomMacro()" data-i18n="btn_add" class="shrink-0 btn-press bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black px-6 rounded font-bold text-sm uppercase transition-colors">ADD</button>
+            </div>
+
+            <div id="customMacrosList" class="flex flex-col gap-2 min-h-[50px] mt-4 flex-1"></div>
+
+            <div class="pt-6 mt-auto border-t border-borderline-light dark:border-borderline-dark flex justify-between items-center">
+                <button onclick="goToStep(2)" data-i18n="btn_back" class="text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 uppercase tracking-widest">< Back</button>
+                <button onclick="goToStep(4)" data-i18n="btn_next" class="btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold px-8 py-3 rounded text-xs uppercase tracking-widest transition-all shadow-md">Next ></button>
+            </div>
+        </div>
+
+        <!-- STEP 4: TEASER THEMES -->
+        <div id="step4" class="hidden space-y-6 fade-in flex-1 flex flex-col">
+            <div class="border-b border-borderline-light dark:border-borderline-dark pb-4 mb-4 text-center">
+                <h3 data-i18n="onb_step_theme" class="font-bold text-lg mb-1">Interface Preview</h3>
+                <p data-i18n="onb_step_theme_desc" class="text-xs text-zinc-500">Click to preview Premium Themes. To enter the system, you must start with the Basic Cyber theme.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <button onclick="selectThemeOnb('cyber')" id="ob-theme-cyber" class="border-2 border-brand-light dark:border-brand-dark bg-base-light dark:bg-base-dark p-4 rounded text-center btn-press">
+                    <div class="text-2xl mb-1">💻</div>
+                    <h3 class="font-bold text-sm" style="font-family: 'JetBrains Mono', monospace;">Cyber</h3>
+                </button>
+                <button onclick="selectThemeOnb('royal')" id="ob-theme-royal" class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-4 rounded text-center btn-press relative">
+                    <div class="absolute top-2 right-2 text-[8px] bg-zinc-800 text-white px-1.5 py-0.5 rounded">PRO</div>
+                    <div class="text-2xl mb-1">👑</div>
+                    <h3 class="font-bold text-sm text-[#800000]" style="font-family: 'Georgia', serif;">Royal</h3>
+                </button>
+                <button onclick="selectThemeOnb('brutal')" id="ob-theme-brutal" class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-4 rounded text-center btn-press relative">
+                    <div class="absolute top-2 right-2 text-[8px] bg-zinc-800 text-white px-1.5 py-0.5 rounded">PRO</div>
+                    <div class="text-2xl mb-1">💥</div>
+                    <h3 class="font-bold text-sm text-[#FF3366] dark:text-[#00FFCC]" style="font-family: 'Inter', sans-serif;">Brutal</h3>
+                </button>
+            </div>
+
+            <div class="pt-6 mt-auto border-t border-borderline-light dark:border-borderline-dark flex justify-between items-center">
+                <button onclick="goToStep(3)" data-i18n="btn_back" class="text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 uppercase tracking-widest">< Back</button>
+                <button onclick="finishCustomSetup()" data-i18n="btn_start" class="btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold px-8 py-3 rounded text-xs uppercase tracking-widest transition-all shadow-md">Launch System</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function showToast(title, desc, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if(!container) return;
+            const toast = document.createElement('div');
+            let colorClass = 'border-brand-light dark:border-brand-dark text-brand-light dark:text-brand-dark';
+            let icon = 'ℹ️';
+            if (type === 'error') { colorClass = 'border-red-500 text-red-500'; icon = '⚠️'; }
+            else if (type === 'info') { colorClass = 'border-brand-light dark:border-brand-dark'; icon = '💡'; }
+            
+            toast.className = `bg-panel-light dark:bg-panel-dark border ${colorClass} p-4 rounded shadow-lg flex items-center gap-4 toast-enter pointer-events-auto font-mono-tech z-[999]`;
+            toast.innerHTML = `<div class="text-2xl">${icon}</div><div><div class="text-[9px] font-bold ${colorClass} uppercase tracking-widest mb-1">${title}</div><div class="font-bold text-sm uppercase text-zinc-900 dark:text-zinc-100">${desc}</div></div>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }, 5000);
+        }
+
+        function t(key) {
+            const lang = localStorage.getItem('priority_lang') || 'en';
+            return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
+        }
+
+        function applyI18n() {
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+        }
+
+        let customScopes = [];
+        let customMacros = [];
+        let selectedTheme = 'cyber';
+
+        function applyAppTheme() {
+            document.body.className = `bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen flex items-center justify-center p-4 theme-${selectedTheme}`;
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            updateThemeIcons();
+        }
+        function updateThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const svgPath = isDark ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />` : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />`; 
+            document.querySelectorAll('.theme-icon-svg').forEach(el => el.innerHTML = svgPath);
+            // --- ДИНАМИЧЕСКАЯ ФАВИКОНКА ---
+            let link = document.getElementById('dynamic-favicon');
+            if(link) {
+                const bgColor = isDark ? '%23121214' : '%23FAFAFA';
+                const textColor = isDark ? '%2306B6D4' : '%230891B2';
+                link.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='${textColor}' text-anchor='middle'>/&gt;_</text></svg>`;
+            }
+        }
+        function toggleLang() {
+            const currentLang = localStorage.getItem('priority_lang') || 'en';
+            localStorage.setItem('priority_lang', currentLang === 'en' ? 'ru' : 'en');
+            applyI18n();
+        }
+
+        function goToStep(stepNum) {
+            [1, 2, 3, 4].forEach(n => document.getElementById(`step${n}`).classList.add('hidden'));
+            document.getElementById(`step${stepNum}`).classList.remove('hidden');
+            if(stepNum === 2) document.getElementById('customScopeInput').focus();
+            if(stepNum === 3) document.getElementById('customMacroInput').focus();
+        }
+
+        function loadDemo() {
+            localStorage.setItem('priority_scopes', JSON.stringify(['DEV', 'HARDWARE', 'LIFE']));
+            localStorage.setItem('priority_tasks', JSON.stringify([
+                { id: 1, title: 'Откалибровать стол A1 Mini перед печатью корпуса 18650', sphere: 'HARDWARE', isImportant: true, isUrgent: true, completed: false, createdAt: getDateStr(), completedAt: null, comments: [] },
+                { id: 2, title: 'Дописать главу про анализ временных рядов (Диплом)', sphere: 'DEV', isImportant: true, isUrgent: false, completed: false, createdAt: getDateStr(), completedAt: null, comments: [] }
+            ]));
+            localStorage.setItem('priority_macros', JSON.stringify([{ id: 1, title: 'Decision Support System Thesis', status: 'active', likes: '&#$*!' }]));
+            
+            // Запрет на запуск демо с премиум-темой без PRO
+            if (selectedTheme !== 'cyber') {
+                showToast(t('toast_sys'), t('toast_onb_pro'), 'info');
+                return;
+            }
+            
+            finishOnboarding();
+        }
+
+        function addCustomScope() {
+            const input = document.getElementById('customScopeInput');
+            const rawVal = input.value;
+            if(rawVal.trim() !== '') {
+                // Разбиваем по запятым, чистим пробелы, переводим в верхний регистр и убираем пустые
+                const newScopes = rawVal.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== '');
+                newScopes.forEach(val => { 
+                    if(!customScopes.includes(val)) customScopes.push(val); 
+                });
+                input.value = '';
+                renderCustomScopes();
+            }
+        }
+        function removeCustomScope(index) { customScopes.splice(index, 1); renderCustomScopes(); }
+        function renderCustomScopes() {
+            document.getElementById('customScopesList').innerHTML = customScopes.map((s, i) => `
+                <div class="flex items-center gap-2 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-3 py-1.5 rounded border border-brand-light/30 dark:border-brand-dark/30 text-xs font-bold">
+                    ${s} <button onclick="removeCustomScope(${i})" class="hover:text-red-500 ml-1">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function addCustomMacro() {
+            const input = document.getElementById('customMacroInput');
+            const rawVal = input.value;
+            if(rawVal.trim() !== '') {
+                // Переводим в верхний регистр для соответствия общему стилю системы
+                const newMacros = rawVal.split(',').map(m => m.trim().toUpperCase()).filter(m => m !== '');
+                newMacros.forEach(val => { 
+                    if(!customMacros.includes(val)) customMacros.push(val); 
+                });
+                input.value = '';
+                renderCustomMacros();
+            }
+        }
+        function removeCustomMacro(index) { customMacros.splice(index, 1); renderCustomMacros(); }
+        function renderCustomMacros() {
+            document.getElementById('customMacrosList').innerHTML = customMacros.map((m, i) => `
+                <div class="flex items-center justify-between bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark px-4 py-3 rounded text-sm font-bold">
+                    ${m} <button onclick="removeCustomMacro(${i})" class="text-zinc-400 hover:text-red-500">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function selectThemeOnb(themeName) {
+            selectedTheme = themeName;
+            applyAppTheme();
+            ['cyber', 'royal', 'brutal'].forEach(t => {
+                const btn = document.getElementById(`ob-theme-${t}`);
+                if(t === themeName) {
+                    btn.classList.remove('border-borderline-light', 'dark:border-borderline-dark');
+                    btn.classList.add('border-brand-light', 'dark:border-brand-dark');
+                    if(t==='brutal') btn.classList.add('border-2');
+                } else {
+                    btn.classList.add('border-borderline-light', 'dark:border-borderline-dark');
+                    btn.classList.remove('border-brand-light', 'dark:border-brand-dark', 'border-2');
+                }
+            });
+        }
+
+        function finishCustomSetup() {
+            // БЛОКИРОВЩИК ПРЕМИУМ ТЕМ В ОНБОРДИНГЕ
+            if (selectedTheme !== 'cyber') {
+                showToast('PREMIUM CONTENT', t('toast_onb_pro'), 'info');
+                return; // Не пускаем дальше
+            }
+
+            if(customScopes.length === 0) customScopes = ['СТУДИЯ', 'АВИТО', '3Д_ПЕЧАТЬ', 'ВУЗ', 'МАСТЕРСКАЯ', 'ADAMA-ART', 'МЕДИЦИНА'];
+            
+            const formattedMacros = customMacros.map((title, i) => {
+                const glitches = ['&#$*!', '0x&?', 'ERR_404', '[NULL]'];
+                return { id: Date.now() + i, title: title, status: 'active', likes: glitches[i % glitches.length] };
+            });
+
+            localStorage.setItem('priority_scopes', JSON.stringify(customScopes));
+            localStorage.setItem('priority_tasks', JSON.stringify([]));
+            localStorage.setItem('priority_macros', JSON.stringify(formattedMacros));
+            localStorage.setItem('priority_templates', JSON.stringify([]));
+            
+            localStorage.setItem('priority_theme', 'cyber'); // Жестко ставим Cyber
+            
+            finishOnboarding();
+        }
+
+        function finishOnboarding() {
+            localStorage.setItem('priority_onboarded', 'true');
+            window.location.href = 'index.html'; 
+        }
+
+        function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
+
+        // BOOT
+        updateThemeIcons();
+        applyI18n();
+    </script>
+</body>
+</html>

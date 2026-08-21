@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRIORITY // SYS.CONFIG</title>
+    <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121214'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='%2306B6D4' text-anchor='middle'>/&gt;_</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { light: 'var(--color-brand-light)', dark: 'var(--color-brand-dark)' },
+                        base: { light: 'var(--color-base-light)', dark: 'var(--color-base-dark)' },
+                        panel: { light: 'var(--color-panel-light)', dark: 'var(--color-panel-dark)' },
+                        borderline: { light: 'var(--color-border-light)', dark: 'var(--color-border-dark)' }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="locales.js"></script>
+    <style>
+        :root {
+            --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
+            --color-base-light: #FAFAFA; --color-base-dark: #09090B;
+            --color-panel-light: #ffffff; --color-panel-dark: #121214;
+            --color-border-light: #d4d4d8; --color-border-dark: #27272a;
+            --font-primary: 'JetBrains Mono', monospace;
+        }
+
+        body.theme-royal {
+            --color-brand-light: #8B0000; --color-brand-dark: #D4AF37;
+            --color-base-light: #FDFBF7; --color-base-dark: #1A120B;
+            --color-panel-light: #F5EEDB; --color-panel-dark: #2A1D12;
+            --color-border-light: #D9CBB0; --color-border-dark: #3D2B1F;
+            --font-primary: 'Georgia', serif;
+        }
+
+        body.theme-brutal {
+            --color-brand-light: #FF3366; --color-brand-dark: #00FFCC;
+            --color-base-light: #E0E722; --color-base-dark: #121212;
+            --color-panel-light: #FFFFFF; --color-panel-dark: #000000;
+            --color-border-light: #000000; --color-border-dark: #E0E722;
+            --font-primary: 'Inter', sans-serif;
+        }
+        body.theme-brutal .rounded, body.theme-brutal .rounded-md, body.theme-brutal .rounded-lg, body.theme-brutal .rounded-sm, body.theme-brutal .rounded-full { border-radius: 0px !important; }
+        body.theme-brutal .border, body.theme-brutal .border-2, body.theme-brutal .border-b, body.theme-brutal .border-t { border-width: 3px !important; }
+        body.theme-brutal .shadow-sm, body.theme-brutal .shadow-md, body.theme-brutal .shadow-lg, body.theme-brutal .shadow-2xl { box-shadow: 6px 6px 0px var(--color-border-light) !important; }
+        .dark body.theme-brutal .shadow-sm, .dark body.theme-brutal .shadow-md, .dark body.theme-brutal .shadow-lg, .dark body.theme-brutal .shadow-2xl { box-shadow: 6px 6px 0px var(--color-border-dark) !important; }
+        body.theme-brutal .hover-magnet:hover { transform: translate(-4px, -4px) !important; box-shadow: 10px 10px 0px var(--color-border-light) !important; }
+        .dark body.theme-brutal .hover-magnet:hover { box-shadow: 10px 10px 0px var(--color-border-dark) !important; }
+        body.theme-brutal .btn-press:active { transform: translate(4px, 4px) !important; box-shadow: 0px 0px 0px transparent !important; }
+
+        body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; overflow-x: hidden; }
+        .bg-tech-grid { background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px); background-size: 20px 20px; }
+        .dark .bg-tech-grid { background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px); }
+        body.theme-royal .bg-tech-grid { background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>'); }
+        body.theme-brutal .bg-tech-grid { background-image: none; }
+
+        .btn-press { transition: transform 0.1s ease; } .btn-press:active { transform: scale(0.95); }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .premium-locked { position: relative; overflow: hidden; }
+        .premium-locked::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px); pointer-events: none; z-index: 10; }
+        .dark .premium-locked::after { background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px); }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-thumb { background: #A1A1AA; border-radius: 0px; } .dark ::-webkit-scrollbar-thumb { background: #52525B; }
+        
+        body.cursor-tech, body.cursor-tech * { cursor: crosshair !important; }
+        body.cursor-royal, body.cursor-royal * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🖋️</text></svg>") 0 20, auto !important; }
+        body.cursor-sword, body.cursor-sword * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🗡️</text></svg>") 0 20, auto !important; }
+        body.cursor-wand, body.cursor-wand * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🪄</text></svg>") 0 20, auto !important; }
+        
+        .cursor-box.active { border-color: var(--color-brand-light); background-color: rgba(8, 145, 178, 0.1); }
+        .dark .cursor-box.active { border-color: var(--color-brand-dark); background-color: rgba(6, 182, 212, 0.1); }
+
+        .toast-enter { animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .toast-leave { animation: fadeOutRight 0.3s ease-in forwards; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
+        /* Custom Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-border-light); transition: .4s; border-radius: 24px; }
+        .dark .slider { background-color: var(--color-border-dark); }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--color-brand-light); }
+        .dark input:checked + .slider { background-color: var(--color-brand-dark); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        body.theme-brutal .slider, body.theme-brutal .slider:before { border-radius: 0; }
+
+        html { 
+        font-size: calc(16px * var(--system-scale, 1)) !important; 
+        }
+
+    </style>
+</head>
+<body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative transition-colors">
+    <script>
+        (function() {
+            // 1. Темная/Светлая тема
+            const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            // 2. Мгновенная смена фавиконки
+            const link = document.getElementById('dynamic-favicon');
+            if(link) {
+                const bgColor = isDark ? '%23121214' : '%23FAFAFA';
+                const textColor = isDark ? '%2306B6D4' : '%230891B2';
+                link.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='${textColor}' text-anchor='middle'>/&gt;_</text></svg>`;
+            }
+
+            // 3. Применение PRO-стиля (Brutal/Royal)
+            const theme = localStorage.getItem('priority_theme') || 'cyber';
+            if (theme !== 'cyber') document.body.classList.add('theme-' + theme);
+
+            // 4. Применение кастомного курсора
+            const cursor = localStorage.getItem('priority_cursor') || 'default';
+            if (cursor !== 'default') document.body.classList.add(cursor);
+        })();
+    </script>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none font-mono-tech"></div>
+
+    <div id="globalToggles" class="fixed top-6 right-6 flex gap-2 z-[200] font-mono-tech">
+        <button type="button" onclick="toggleLang()" class="hover:text-brand-light dark:hover:text-brand-dark transition-colors px-2 py-2 bg-panel-light dark:bg-panel-dark rounded border border-borderline-light dark:border-borderline-dark btn-press text-zinc-500 text-xs font-bold"><span data-i18n="lang_toggle">EN / RU</span></button>
+        <button type="button" onclick="toggleTheme()" class="hover:text-brand-light dark:hover:text-brand-dark transition-colors px-2 py-2 bg-panel-light dark:bg-panel-dark rounded border border-borderline-light dark:border-borderline-dark btn-press text-zinc-500 shadow-sm dark:shadow-none" title="Toggle Theme">
+            <svg class="theme-icon-svg w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
+        </button>
+    </div>
+
+    <div id="systemModal" class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-zinc-900/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 font-mono-tech">
+        <div class="w-full max-w-md bg-panel-light dark:bg-panel-dark border border-red-500/50 p-8 rounded-md shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+            <h3 id="modalTitle" class="text-red-600 dark:text-red-500 font-bold text-lg tracking-widest uppercase mb-4">SYS.WARNING</h3>
+            <p id="modalText" class="text-sm text-zinc-600 dark:text-zinc-300 mb-8 leading-relaxed"></p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeModal()" data-i18n="btn_cancel" class="px-6 py-2.5 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs font-bold uppercase tracking-widest rounded btn-press">Cancel</button>
+                <button id="modalConfirmBtn" data-i18n="btn_confirm" class="px-6 py-2.5 bg-red-600 text-white text-xs font-bold uppercase tracking-widest hover:bg-red-700 transition-colors rounded btn-press">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-4 md:p-6 fade-in">
+        
+        <header class="flex flex-wrap justify-between items-center mb-8 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-4 rounded-md gap-4 shadow-sm transition-colors">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 shrink-0 bg-zinc-200 dark:bg-zinc-800 border border-zinc-400 dark:border-zinc-600 rounded text-zinc-600 dark:text-zinc-400 flex items-center justify-center font-bold text-base font-mono-tech">⚙️</div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight font-mono-tech"><span data-i18n="cfg_title">SYS.CONFIG</span><span class="text-zinc-400 dark:text-zinc-600 animate-pulse">_</span></h1>
+                    <div data-i18n="cfg_subtitle" class="text-[11px] text-zinc-500 uppercase tracking-widest mt-1 font-mono-tech">Preferences & Marketplace</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400">                
+                <span class="text-zinc-300 dark:text-zinc-700">|</span>
+                <a href="index.html" data-i18n-title="nav_dash" class="shrink-0 p-2 hover:text-brand-light dark:hover:text-brand-dark hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors btn-press">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </a>
+                <span class="text-zinc-300 dark:text-zinc-700">|</span>
+                <button type="button" onclick="logout()" data-i18n-title="nav_logout" class="shrink-0 p-2 text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors btn-press">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="space-y-6 lg:col-span-1">
+                <div id="proBanner" class="bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-zinc-100 dark:to-white p-6 rounded-md shadow-sm border border-zinc-700 dark:border-zinc-200 relative overflow-hidden font-mono-tech hover-magnet transition-all">
+                </div>
+
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech">
+                    <div class="flex items-center gap-2 mb-4 border-b border-borderline-light dark:border-borderline-dark pb-4">
+                        <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">💾</div>
+                        <h2 data-i18n="cfg_portability" class="text-lg font-bold uppercase tracking-widest">SYS.PORTABILITY</h2>
+                    </div>
+                    <p data-i18n="port_desc" class="text-[11px] text-zinc-500 mb-6 leading-relaxed"></p>
+                    
+                    <div class="space-y-3">
+                        <button onclick="exportData('full')" data-i18n="port_export_full" class="btn-press w-full bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark hover:border-brand-light dark:hover:border-brand-dark text-zinc-900 dark:text-zinc-100 font-bold py-3 rounded text-[10px] uppercase tracking-widest transition-colors shadow-sm">Export Full Backup</button>
+                        
+                        <button onclick="exportData('workspace')" data-i18n="port_export_work" class="btn-press w-full bg-brand-light/10 dark:bg-brand-dark/10 border border-brand-light/30 dark:border-brand-dark/30 text-brand-light dark:text-brand-dark hover:bg-brand-light hover:text-white dark:hover:bg-brand-dark dark:hover:text-black font-bold py-3 rounded text-[10px] uppercase tracking-widest transition-colors shadow-sm">Export Workspace</button>
+                        
+                        <div class="relative w-full mt-4 border-t border-borderline-light dark:border-borderline-dark pt-4">
+                            <input type="file" id="importFile" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="importData(event)">
+                            <button data-i18n="port_import" class="btn-press w-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Import (.json)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm">
+                    <div class="flex items-center gap-2 mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
+                        <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs font-mono-tech">#</div>
+                        <h2 data-i18n="cfg_scopes" class="text-lg font-bold uppercase tracking-widest font-mono-tech">Scopes</h2>
+                    </div>
+                    
+                    <div class="flex gap-2 mb-6">
+                        <input type="text" id="newScopeInput" data-i18n-ph="scope_ph" onkeypress="if(event.key==='Enter') addScope()" class="flex-1 min-w-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-light dark:focus:border-brand-dark transition-colors placeholder-zinc-400 dark:placeholder-zinc-600 font-mono-tech" placeholder="New Scope Name...">
+                        <button onclick="addScope()" data-i18n="btn_add" class="shrink-0 btn-press bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black px-4 rounded font-bold text-xs uppercase transition-colors font-mono-tech">ADD</button>
+                    </div>
+                    <div id="scopesList" class="space-y-2 max-h-[300px] overflow-y-auto pr-2 font-mono-tech"></div>
+                </div>
+
+                <div class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md p-6 shadow-sm font-mono-tech">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 shrink-0 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-500 flex items-center justify-center rounded font-bold text-xs">!</div>
+                        <h2 data-i18n="cfg_reset" class="text-lg font-bold text-red-600 dark:text-red-500 uppercase tracking-widest">Factory Reset</h2>
+                    </div>
+                    <p data-i18n="reset_desc" class="text-xs text-red-800 dark:text-red-400 mb-6 leading-relaxed">Внимание: Это удалит все задачи...</p>
+                    <button onclick="askFactoryReset()" data-i18n="btn_reset" class="btn-press w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Начать новую жизнь</button>
+                </div>
+            </div>
+
+            <div class="space-y-6 lg:col-span-2">
+                
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden transition-colors">
+    
+    <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 bg-brand-light dark:bg-brand-dark rounded-sm animate-pulse shadow-[0_0_10px_var(--color-brand-dark)]"></div>
+            <h2 data-i18n="cfg_core_params" class="text-sm font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">System Parameters</h2>
+        </div>
+        <div class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest border border-zinc-300 dark:border-zinc-700 px-2 py-1 rounded">RACK_VIEW // ACTIVE</div>
+    </div>
+
+    <div class="divide-y divide-borderline-light dark:divide-borderline-dark">
+        
+        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
+                    <h3 data-i18n="cfg_shop_module" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Shopping</h3>
+                </div>
+                <p data-i18n="cfg_shop_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Enable price fields and spending analytics.</p>
+            </div>
+            <div class="w-full md:w-64 shrink-0 flex items-center justify-between md:justify-end gap-4 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
+                <div id="currencySelectorBlock" class="relative group/sel transition-all duration-300 origin-right">
+                    <select id="currencySelect" onchange="saveCurrency()" class="bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-1.5 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 outline-none appearance-none cursor-pointer hover:border-brand-light dark:hover:border-brand-dark transition-colors pr-8">
+                        <option value="$">USD ($)</option>
+                        <option value="€">EUR (€)</option>
+                        <option value="₽">RUB (₽)</option>
+                        <option value="¥">CNY (¥)</option>
+                        <option value="₸">KZT (₸)</option>
+                    </select>
+                    <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[8px]">▼</div>
+                </div>
+                <label class="switch scale-90 shrink-0 m-0">
+                    <input type="checkbox" id="moduleShopToggle" onchange="toggleShopModule()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
+                    <h3 data-i18n="cfg_filter_mode" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Environment</h3>
+                </div>
+                <p data-i18n="cfg_filter_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Toggle single or multi-selection filters.</p>
+            </div>
+            <div class="w-full md:w-64 shrink-0 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
+                <button onclick="toggleFilterMode()" id="filterModeBtn" class="w-full py-2.5 font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press">
+                    LOADING...
+                </button>
+            </div>
+        </div>
+
+        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
+                    <h3 data-i18n="cfg_access" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Scaling</h3>
+                </div>
+                <p data-i18n="cfg_scale_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Adjust overall UI magnification.</p>
+            </div>
+            <div class="w-full md:w-64 shrink-0 flex items-center gap-4 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
+                <span id="scaleValueDisplay" class="text-[10px] font-bold text-brand-light dark:text-brand-dark w-10 shrink-0 text-right">100%</span>
+                <input type="range" id="scaleSlider" min="0.8" max="1.2" step="0.1" value="1" 
+                       oninput="document.getElementById('scaleValueDisplay').innerText = Math.round(this.value * 100) + '%'"
+                       onchange="updateScale(this.value)" 
+                       class="flex-1 accent-brand-light dark:accent-brand-dark cursor-pointer transition-all">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
+                        <div class="flex items-center gap-2 font-mono-tech">
+                            <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">🎨</div>
+                            <h2 data-i18n="cfg_themes" class="text-lg font-bold uppercase tracking-widest">Theme Marketplace</h2>
+                        </div>
+                        <span data-i18n="ui_config" class="text-[10px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-1 rounded font-mono-tech">UI CONFIG</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="themesGrid">
+                        <div id="theme-card-cyber" class="theme-card border border-borderline-light dark:border-borderline-dark rounded-md p-5 relative overflow-hidden bg-base-light dark:bg-base-dark hover-magnet transition-all" data-theme="cyber">
+                            <div id="badge-theme-cyber" class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold px-2 py-1 rounded hidden font-mono-tech"></div>
+                            <h3 class="font-bold text-lg mb-1 pr-16" style="font-family: 'JetBrains Mono', monospace;">Cyber-Industrial</h3>
+                            <p class="text-[11px] text-zinc-500 mb-4" style="font-family: 'JetBrains Mono', monospace;">Default developer pro aesthetics.</p>
+                            <button id="btn-theme-cyber" onclick="activateTheme('cyber')" class="theme-btn w-full py-2 bg-brand-light dark:bg-brand-dark text-white dark:text-black text-xs font-bold rounded btn-press font-mono-tech transition-colors">ACTIVATE</button>
+                        </div>
+
+                        <div id="theme-card-royal" class="theme-card premium-locked border border-borderline-light dark:border-borderline-dark rounded-md p-5 relative bg-panel-light dark:bg-panel-dark group hover-magnet transition-all" data-theme="royal">
+                            <div id="badge-theme-royal" class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold px-2 py-1 rounded hidden z-20 font-mono-tech"></div>
+                            <h3 class="font-bold text-lg mb-1 text-[#800000]" style="font-family: 'Georgia', serif;">Royal Fantasy</h3>
+                            <p class="text-[11px] text-zinc-500 mb-4" style="font-family: 'Georgia', serif;">Medieval parchment, wax seals, and epic quests.</p>
+                            <button id="btn-theme-royal" onclick="activateTheme('royal')" class="theme-btn pro-btn relative z-20 w-full py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black text-xs font-bold rounded transition-colors btn-press font-mono-tech">UNLOCK</button>
+                        </div>
+
+                        <div id="theme-card-brutal" class="theme-card premium-locked border border-borderline-light dark:border-borderline-dark rounded-md p-5 relative bg-panel-light dark:bg-panel-dark group hover-magnet transition-all" data-theme="brutal">
+                            <div id="badge-theme-brutal" class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold px-2 py-1 rounded hidden z-20 font-mono-tech"></div>
+                            <h3 class="font-bold text-lg mb-1 pr-16 text-[#FF3366] dark:text-[#00FFCC]" style="font-family: 'Inter', sans-serif; text-transform: uppercase; font-weight: 900;">Neo-Brutalism</h3>
+                            <p class="text-[11px] text-zinc-500 mb-4" style="font-family: 'JetBrains Mono', monospace;">High contrast, sharp edges, pure aggressive action.</p>
+                            <button id="btn-theme-brutal" onclick="activateTheme('brutal')" class="theme-btn pro-btn relative z-20 w-full py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black text-xs font-bold rounded transition-colors btn-press font-mono-tech">UNLOCK</button>
+                        </div>
+
+                        <div class="border border-dashed border-brand-light/50 dark:border-brand-dark/50 rounded-md p-5 relative bg-brand-light/5 dark:bg-brand-dark/5 flex flex-col items-center justify-center text-center font-mono-tech">
+                            <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✨</div>
+                            <h3 data-i18n="ai_theme" class="font-bold text-sm mb-1 text-brand-light dark:text-brand-dark">AI Theme Generator</h3>
+                            <p data-i18n="ai_desc" class="text-[10px] text-zinc-500 mb-4 px-4">Generate custom UI schemes using LLM Prompts.</p>
+                            <button data-i18n="btn_soon" class="w-full py-2 bg-zinc-200 dark:bg-zinc-800 text-zinc-500 text-xs font-bold rounded cursor-not-allowed transition-colors">COMING SOON</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden transition-colors">
+    
+                    <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-6 bg-brand-light dark:bg-brand-dark rounded-full shadow-[0_0_10px_var(--color-brand-dark)]"></div>
+                            <h2 data-i18n="cfg_cursors" class="text-sm font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">Interface Cursors</h2>
+                        </div>
+                        <div class="text-[8px] font-bold text-zinc-500 uppercase tracking-widest px-2 py-1 bg-white dark:bg-black rounded border border-zinc-200 dark:border-zinc-800">HAPTIC_ENGINE_v3</div>
+                    </div>
+                
+                    <div class="p-6 border-b border-borderline-light dark:border-borderline-dark">
+                        <div data-i18n="cfg_cursor_scroll" class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Presets (scroll to explore)</div>
+
+                        <div id="cursorScrollContainer" class="flex gap-4 overflow-x-auto py-4 px-2 scrollbar-hide snap-x cursor-grab active:cursor-grabbing select-none" style="scroll-behavior: smooth;">
+
+                            <div onclick="setCursor('default', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet active" id="cursor-default">
+                                <div class="text-3xl mb-2">👆</div>
+                                <div data-i18n="cursor_def" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">System</div>
+                            </div>
+                        
+                            <div onclick="setCursor('cursor-tech', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-tech">
+                                <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✛</div>
+                                <div data-i18n="cursor_tech" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Tech</div>
+                            </div>
+                        
+                            <div onclick="setCursor('cursor-royal', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-royal">
+                                <div class="text-3xl mb-2">🖋</div>
+                                <div data-i18n="cursor_roy" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Royal</div>
+                            </div>
+                        
+                            <div onclick="setCursor('cursor-sword', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-sword">
+                                <div class="text-3xl mb-2">🗡️</div>
+                                <div class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Warrior</div>
+                            </div>
+                        
+                            <div onclick="setCursor('cursor-wand', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-wand">
+                                <div class="text-3xl mb-2">🪄</div>
+                                <div class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Wizard</div>
+                            </div>
+
+                        </div>
+                    </div>
+                
+                    <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
+                        <div class="flex-1">
+                            <h3 data-i18n="cursor_custom" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest mb-1">Personal Identifier</h3>
+                            <p class="text-[10px] text-zinc-500 uppercase">Input any emoji to generate a haptic cursor.</p>
+                        </div>
+                        <div class="w-full md:w-36 shrink-0 flex justify-end">
+                            <div class="cursor-box border-2 border-dashed border-brand-light/30 dark:border-brand-dark/30 bg-brand-light/5 dark:bg-brand-dark/5 p-2 rounded-lg transition-all" id="cursor-custom">
+                                <input type="text" id="customEmojiInput" maxlength="2" 
+                                    oninput="setCustomEmojiCursor(this.value)" 
+                                    class="w-14 h-14 bg-panel-light dark:bg-panel-dark border-2 border-brand-light dark:border-brand-dark rounded-lg text-center text-2xl focus:outline-none focus:ring-4 focus:ring-brand-light/20 transition-all shadow-lg placeholder-zinc-400 dark:placeholder-zinc-600" 
+                                    placeholder="?">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Оперативные задачи - лайт lite режим -->
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden mb-6">
+                    <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-6 bg-yellow-400 dark:bg-yellow-500 rounded-full shadow-[0_0_10px_var(--color-yellow-500)]"></div>
+                            <h2 data-i18n="cfg_lite_title" class="text-sm font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">CRON: LITE Auto-Clear</h2>
+                        </div>
+                    </div>
+                    <div class="p-6 flex flex-col md:flex-row gap-6">
+                        <div class="flex-1">
+                            <label data-i18n="cfg_lite_time" class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Trigger Time</label>
+                            <input type="time" id="liteCronTime" onchange="saveLiteConfig()" class="w-full bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded-lg p-3 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all">
+                        </div>
+                        <div class="flex-1">
+                            <label data-i18n="cfg_lite_action" class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Uncompleted Action</label>
+                            <select id="liteCronAction" onchange="saveLiteConfig()" class="w-full bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded-lg p-3 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all">
+                                <option value="delete" data-i18n="cfg_lite_act_del">Delete Permanently</option>
+                                <option value="fail" data-i18n="cfg_lite_act_fail">To Archive (Failed)</option>
+                                <option value="overdue" data-i18n="cfg_lite_act_overdue">To Overdue</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech">
+                    <div class="flex items-center justify-between mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">☕</div>
+                            <h2 data-i18n="cfg_fund" class="text-lg font-bold uppercase tracking-widest">SYS.FUNDING // Support</h2>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-5 rounded-md flex flex-col justify-between hover-magnet transition-all">
+                            <div>
+                                <h3 data-i18n="fund_direct" class="font-bold text-sm mb-2">Direct Funding</h3>
+                                <p data-i18n="fund_desc" class="text-[11px] text-zinc-500 mb-4 leading-relaxed">Support the continuous development...</p>
+                            </div>
+                            <button onclick="openDonateModal()" data-i18n="btn_crypto" class="w-full mt-auto btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all">Crypto / Card</button>
+                        </div>
+                        
+                        <div class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-5 rounded-md flex flex-col justify-between hover-magnet transition-all" id="referralContainer">
+                            </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="donateModal" class="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity font-mono-tech">
+        <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-8 rounded-lg w-full max-w-md shadow-2xl relative">
+            <button onclick="closeDonateModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-red-500 font-bold text-xl btn-press">✕</button>
+            <h3 data-i18n="donate_title" class="font-bold text-xl mb-6 uppercase tracking-widest text-center">FUNDING_PORTAL</h3>
+            <div class="space-y-4">
+                <div class="border border-borderline-light dark:border-borderline-dark p-4 rounded bg-base-light dark:bg-base-dark">
+                    <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">USDT (TRC20)</div>
+                    <div class="flex items-center gap-2">
+                        <input type="text" readonly value="TNoG3y...CryptoAddress" class="flex-1 bg-transparent border-none text-sm text-zinc-900 dark:text-zinc-100 outline-none font-bold">
+                        <button onclick="copyToClipboard('TNoG3y...CryptoAddress')" class="text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded hover:bg-brand-light hover:text-white dark:hover:bg-brand-dark dark:hover:text-black transition-colors btn-press">COPY</button>
+                    </div>
+                </div>
+                
+                <div class="border border-borderline-light dark:border-borderline-dark p-4 rounded bg-base-light dark:bg-base-dark">
+                    <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">BANK CARD (RU/WORLD)</div>
+                    <div class="flex items-center gap-2">
+                        <input type="text" readonly value="4276 1234 5678 9012" class="flex-1 bg-transparent border-none text-sm text-zinc-900 dark:text-zinc-100 outline-none font-bold font-mono">
+                        <button onclick="copyToClipboard('4276123456789012')" class="text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded hover:bg-brand-light hover:text-white dark:hover:bg-brand-dark dark:hover:text-black transition-colors btn-press">COPY</button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 text-center border-t border-borderline-light dark:border-borderline-dark pt-4">
+                <p data-i18n="donate_thx" class="text-[10px] font-bold text-brand-light dark:text-brand-dark uppercase tracking-widest">Your support keeps the servers alive. Thank you.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GLOBALS
+        let scopes = [];
+        let isPro = false;
+
+        // CORE ENGINE
+        function showToast(title, desc, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if(!container) return;
+            const toast = document.createElement('div');
+            let colorClass = 'border-brand-light dark:border-brand-dark text-brand-light dark:text-brand-dark';
+            let icon = 'ℹ️';
+            if (type === 'error') { colorClass = 'border-red-500 text-red-500'; icon = '⚠️'; }
+            else if (type === 'success') { colorClass = 'border-emerald-500 text-emerald-500'; icon = '✓'; }
+
+            toast.className = `bg-panel-light dark:bg-panel-dark border ${colorClass} p-4 rounded shadow-lg flex items-center gap-4 toast-enter pointer-events-auto font-mono-tech z-[999]`;
+            toast.innerHTML = `<div class="text-2xl">${icon}</div><div><div class="text-[9px] font-bold ${colorClass} uppercase tracking-widest mb-1">${title}</div><div class="font-bold text-sm uppercase text-zinc-900 dark:text-zinc-100">${desc}</div></div>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }, 4000);
+        }
+
+        // КИБЕР-МОДАЛКА ДЛЯ ПОДТВЕРЖДЕНИЙ
+        function askFactoryReset() {
+            openModal(t('sys_warning') || 'SYS.WARNING', t('reset_desc'), () => {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            });
+        }
+
+        function openModal(title, text, onConfirm) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = text;
+            const modal = document.getElementById('systemModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10);
+            document.getElementById('modalConfirmBtn').onclick = () => {
+                onConfirm();
+                closeModal();
+            };
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('systemModal');
+            modal.classList.remove('opacity-100');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function t(key) {
+            const lang = localStorage.getItem('priority_lang') || 'en';
+            return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
+        }
+
+        function applyI18n() {
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
+        }
+
+        function updateScale(val) {
+            localStorage.setItem('priority_scale', val);
+            document.documentElement.style.setProperty('--system-scale', val);
+            showToast(t('toast_sys'), 'Scale updated: ' + (val * 100) + '%', 'info');
+        }
+
+        function toggleLang() {
+            const currentLang = localStorage.getItem('priority_lang') || 'en';
+            const newLang = currentLang === 'en' ? 'ru' : 'en';
+            localStorage.setItem('priority_lang', newLang);
+
+            applyI18n();
+            applyAppTheme();
+            renderPremiumState(); 
+            renderShopUI();
+            renderScopes();
+            showToast(t('toast_sys'), t('toast_lang'), 'info');
+        }
+
+        function updateThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const svgPath = isDark ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />` : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />`; 
+            document.querySelectorAll('.theme-icon-svg').forEach(el => el.innerHTML = svgPath);
+            updateFavicon(isDark);
+        }
+
+        function updateFavicon(isDark) {
+            let link = document.getElementById('dynamic-favicon');
+            if(link) {
+                const bgColor = isDark ? '%23121214' : '%23FAFAFA';
+                const textColor = isDark ? '%2306B6D4' : '%230891B2';
+                link.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='${textColor}' text-anchor='middle'>/&gt;_</text></svg>`;
+            }
+        }
+
+        function initThemeToggle() {
+            updateThemeIcons();
+        }
+        
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateThemeIcons();
+        }
+
+        function applyAppTheme() {
+    const theme = localStorage.getItem('priority_theme') || 'cyber';
+    document.body.classList.remove('theme-cyber', 'theme-royal', 'theme-brutal');
+    if(theme !== 'cyber') document.body.classList.add(`theme-${theme}`);
+    applyI18n(); 
+    
+    const themesArr = ['cyber', 'royal', 'brutal'];
+    themesArr.forEach(tName => {
+        const card = document.getElementById('theme-card-' + tName);
+        const btn = document.getElementById('btn-theme-' + tName);
+        const badge = document.getElementById('badge-theme-' + tName);
+        if(!card || !btn) return;
+        
+        // СБРОС: Делаем кнопку "неактивной" (твои цвета)
+        btn.classList.remove('bg-brand-light', 'dark:bg-brand-dark');
+        btn.classList.add('bg-zinc-900', 'dark:bg-zinc-100');
+        
+        // Сбрасываем рамку карточки
+        card.classList.remove('border-brand-light', 'dark:border-brand-dark');
+        card.classList.add('border-borderline-light', 'dark:border-borderline-dark');
+        
+        if(theme === tName) {
+            // АКТИВНАЯ ТЕМА: Красим кнопку в бирюзовый (твой цвет)
+            btn.classList.remove('bg-zinc-900', 'dark:bg-zinc-100');
+            btn.classList.add('bg-brand-light', 'dark:bg-brand-dark');
+            
+            card.classList.remove('border-borderline-light', 'dark:border-borderline-dark');
+            card.classList.add('border-brand-light', 'dark:border-brand-dark');
+            
+            btn.innerText = t('btn_in_use');
+            badge.innerHTML = t('theme_active');
+            badge.className = "theme-status-badge absolute top-3 right-3 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black px-2 py-1 rounded font-mono-tech z-20";
+        } else {
+            // НЕАКТИВНАЯ ТЕМА: Логика текста
+            if (tName === 'cyber' || isPro) {
+                btn.innerText = t('btn_activate');
+                badge.className = "hidden";
+            } else {
+                btn.innerText = t('btn_unlock');
+                badge.innerHTML = "🔒 PRO";
+                badge.className = "theme-status-badge absolute top-3 right-3 text-[9px] font-bold text-zinc-500 bg-zinc-200 dark:bg-zinc-800 px-2 py-1 rounded group-hover:bg-brand-light dark:group-hover:bg-brand-dark group-hover:text-white dark:group-hover:text-black transition-colors z-20 pro-badge font-mono-tech";
+            }
+        }
+    });
+}
+
+        function activateTheme(themeName) {
+            if(!isPro && themeName !== 'cyber') { showToast(t('toast_acc_denied'), t('toast_upgrade_pro'), 'error'); return; }
+            localStorage.setItem('priority_theme', themeName);
+            applyAppTheme();
+            showToast(t('toast_theme_mgr'), t('toast_theme_act'), 'success');
+        }
+
+        // --- CURSORS ---
+        // --- CURSORS ENGINE v3 ---
+        function initCursorScroll() {
+            const scrollContainer = document.getElementById('cursorScrollContainer');
+            if (scrollContainer) {
+                scrollContainer.addEventListener('wheel', (evt) => {
+                    evt.preventDefault();
+                    // Конвертируем скролл колесиком вверх/вниз в движение ленты вправо/влево
+                    scrollContainer.scrollLeft += evt.deltaY;
+                });
+            }
+        }
+
+        function applyCursor() {
+            if(!document.body) return; 
+            const cursorVal = localStorage.getItem('priority_cursor') || 'default';
+            
+            // 1. Очистка старых системных курсоров
+            document.body.classList.remove('cursor-tech', 'cursor-royal', 'cursor-sword', 'cursor-wand', 'cursor-custom-emoji');
+            const oldStyle = document.getElementById('dynamic-emoji-style');
+            if (oldStyle) oldStyle.remove();
+            
+            // 2. Снимаем выделение со всех карточек
+            document.querySelectorAll('.cursor-box').forEach(el => {
+                el.classList.remove('active', 'ring-4', 'ring-brand-light/30', 'border-brand-light');
+            });
+
+            if (cursorVal.startsWith('emoji:')) {
+                // Если это ЭМОДЗИ
+                const emoji = cursorVal.replace('emoji:', '');
+                
+                // SVG для генерации курсора "на лету" (нормальный и нажатый)
+                const svgNormal = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='50%' y='50%' font-size='24' dominant-baseline='central' text-anchor='middle'>${emoji}</text></svg>`;
+                const svgActive = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='50%' y='50%' font-size='18' dominant-baseline='central' text-anchor='middle'>${emoji}</text></svg>`;
+
+                const style = document.createElement('style');
+                style.id = 'dynamic-emoji-style';
+                style.innerHTML = `
+                    body.cursor-custom-emoji, body.cursor-custom-emoji * { cursor: url("${svgNormal}") 16 16, auto !important; }
+                    body.cursor-custom-emoji:active, body.cursor-custom-emoji:active * { cursor: url("${svgActive}") 16 16, auto !important; }
+                `;
+                document.head.appendChild(style);
+                document.body.classList.add('cursor-custom-emoji');
+
+                // Подсвечиваем UI
+                const customBox = document.getElementById('cursor-custom');
+                if(customBox) {
+                    customBox.classList.add('ring-4', 'ring-brand-light/30', 'border-brand-light');
+                    const input = document.getElementById('customEmojiInput');
+                    if (input) input.value = emoji;
+                }
+            } else {
+                // Если это СТАНДАРТНЫЙ ПРЕСЕТ
+                if(cursorVal !== 'default') document.body.classList.add(cursorVal);
+                const activeBox = document.getElementById(cursorVal === 'default' ? 'cursor-default' : cursorVal);
+                if(activeBox) activeBox.classList.add('active', 'ring-4', 'ring-brand-light/30', 'border-brand-light');
+                
+                // Очищаем инпут
+                const input = document.getElementById('customEmojiInput');
+                if (input) input.value = '';
+            }
+        }
+
+        function setCursor(cursorClass, btnEl) {
+            if(!isPro && cursorClass !== 'default') { 
+                showToast(t('toast_acc_denied'), t('toast_upgrade_pro'), 'error'); 
+                return; 
+            }
+            localStorage.setItem('priority_cursor', cursorClass);
+            applyCursor();
+        }
+
+        function setCustomEmojiCursor(val) {
+            if(!isPro) {
+                document.getElementById('customEmojiInput').value = '';
+                showToast(t('toast_acc_denied'), t('toast_upgrade_pro'), 'error');
+                return;
+            }
+            const emoji = val.trim();
+            if (emoji) {
+                // Гарантируем, что берем только первый символ-эмодзи, отсекая текст
+                const singleEmoji = Array.from(emoji)[0]; 
+                localStorage.setItem('priority_cursor', 'emoji:' + singleEmoji);
+                applyCursor();
+            } else {
+                localStorage.setItem('priority_cursor', 'default');
+                applyCursor();
+            }
+        }
+
+        // --- MODULES (SHOPPING) ---
+        function renderShopUI() {
+            const isActive = localStorage.getItem('priority_shop_module') === 'true';
+            const toggle = document.getElementById('moduleShopToggle');
+            const currencyBlock = document.getElementById('currencySelectorBlock');
+
+            if (toggle) toggle.checked = isActive;
+            
+            if (isActive) {
+                currencyBlock.style.opacity = '1';
+                currencyBlock.style.pointerEvents = 'auto';
+                currencyBlock.style.transform = 'scale(1)';
+                currencyBlock.style.filter = 'grayscale(0)';
+            } else {
+                currencyBlock.style.opacity = '0.3';
+                currencyBlock.style.pointerEvents = 'none';
+                currencyBlock.style.transform = 'scale(0.95)';
+                currencyBlock.style.filter = 'grayscale(1)';
+            }
+
+            const savedCurrency = localStorage.getItem('priority_currency') || '$';
+            const select = document.getElementById('currencySelect');
+            if (select) select.value = savedCurrency;
+        }
+
+        function toggleShopModule() {
+            const current = localStorage.getItem('priority_shop_module') === 'true';
+            const newState = !current;
+            localStorage.setItem('priority_shop_module', newState);
+            
+            // Уведомление
+            if (newState) {
+                showToast(t('toast_sys'), t('toast_shop_on'), 'success');
+            } else {
+                showToast(t('toast_sys'), t('toast_shop_off'), 'info');
+            }
+
+            renderShopUI();
+            // Если есть функция renderScopes, обновляем и её
+            if (typeof renderScopes === 'function') renderScopes();
+        }
+
+        function saveCurrency() {
+            const val = document.getElementById('currencySelect').value;
+            localStorage.setItem('priority_currency', val);
+            showToast(t('toast_sys'), 'Currency updated', 'info');
+        }
+
+        // --- SCOPES ---
+        function renderScopes() {
+            const list = document.getElementById('scopesList');
+            if(!list) return;
+                
+            const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
+                
+            list.innerHTML = scopes.map((s, index) => {
+                const count = allTasks.filter(t => t.sphere === s && !t.completed).length;
+            
+                return `
+                    <div class="flex justify-between items-center bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark p-3 rounded transition-colors group gap-2">
+                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                            <span class="text-brand-light dark:text-brand-dark font-bold shrink-0">></span>
+                            <input type="text" id="scope-edit-${index}" value="${s}" readonly 
+                                class="w-full bg-transparent border-none outline-none text-sm uppercase overflow-hidden text-ellipsis whitespace-nowrap" 
+                                ondblclick="enableScopeEdit(${index})" onblur="saveScopeEdit(${index})">
+                            <span class="px-1.5 py-0.5 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 rounded text-[9px] font-bold shrink-0">
+                                ${count}
+                            </span>
+                        </div>
+                        
+                        <div class="flex gap-1 opacity-50 group-hover:opacity-100 transition-opacity shrink-0 items-center">
+                            
+                            <div class="flex items-center gap-1 mr-2 pr-2 border-r border-borderline-light dark:border-borderline-dark">
+                                <button onclick="moveScopeUp(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === 0 ? 'disabled' : ''} title="Move Up">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                </button>
+                                <button onclick="moveScopeDown(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === scopes.length - 1 ? 'disabled' : ''} title="Move Down">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                            </div>
+                            
+                            <button onclick="enableScopeEdit(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark p-1.5 rounded transition-colors btn-press" title="${t('btn_edit')}">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button onclick="deleteScope(${index})" class="text-zinc-400 hover:text-red-500 p-1.5 rounded transition-colors btn-press" title="${t('btn_del')}">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (typeof applyI18n === 'function') applyI18n(); 
+        }
+
+        function addScope() {
+            const input = document.getElementById('newScopeInput');
+            const rawVal = input.value;
+            if(rawVal.trim() !== '') {
+                const newScopes = rawVal.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== '');
+                newScopes.forEach(val => { if(!scopes.includes(val)) scopes.push(val); });
+                saveScopesData(); 
+                input.value = ''; 
+                showToast(t('toast_sys'), t('toast_scope_add'), 'info');
+            }
+        }
+
+        function moveScopeUp(index) {
+            if (index > 0) {
+                // Меняем местами текущий и предыдущий элементы
+                const temp = scopes[index];
+                scopes[index] = scopes[index - 1];
+                scopes[index - 1] = temp;
+                saveScopesData();
+            }
+        }
+
+        function moveScopeDown(index) {
+            if (index < scopes.length - 1) {
+                // Меняем местами текущий и следующий элементы
+                const temp = scopes[index];
+                scopes[index] = scopes[index + 1];
+                scopes[index + 1] = temp;
+                saveScopesData();
+            }
+        }
+
+        function deleteScope(index) {
+            const scopeToDelete = scopes[index];
+            
+            openModal('DELETE SCOPE?', `Are you sure you want to remove "${scopeToDelete}"?`, () => {
+                const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
+                let tasksChanged = false;
+                
+                // Перебрасываем задачи в системную корзину
+                allTasks.forEach(task => {
+                    if (task.sphere === scopeToDelete) {
+                        task.sphere = 'SYS_OTHER'; // Мертвая хватка, системный ID
+                        tasksChanged = true;
+                    }
+                });
+                
+                if (tasksChanged) localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
+                
+                scopes.splice(index, 1); 
+                localStorage.setItem('priority_scopes', JSON.stringify(scopes)); 
+                
+                renderScopes();
+                showToast(t('toast_sys'), t('toast_scope_del'), 'info');
+            });
+        }
+        function enableScopeEdit(index) {
+            const input = document.getElementById(`scope-edit-${index}`);
+            input.readOnly = false;
+            input.classList.remove('overflow-hidden', 'text-ellipsis');
+            input.classList.add('bg-panel-light', 'dark:bg-panel-dark', 'border-b', 'border-brand-light', 'dark:border-brand-dark');
+            input.focus();
+        }
+        function saveScopeEdit(index) {
+            const input = document.getElementById(`scope-edit-${index}`);
+            const val = input.value.trim().toUpperCase();
+            input.readOnly = true;
+            input.classList.add('overflow-hidden', 'text-ellipsis');
+            input.classList.remove('bg-panel-light', 'dark:bg-panel-dark', 'border-b', 'border-brand-light', 'dark:border-brand-dark');
+            if(val && val !== scopes[index] && !scopes.includes(val)) { scopes[index] = val; saveScopesData(); showToast(t('toast_sys'), t('toast_scope_upd'), 'info'); } 
+            else { renderScopes(); }
+        }
+        function saveScopesData() { localStorage.setItem('priority_scopes', JSON.stringify(scopes)); renderScopes(); }
+
+        // --- PREMIUM & FUNDING ---
+        function renderPremiumState() {
+            const banner = document.getElementById('proBanner');
+            const refContainer = document.getElementById('referralContainer');
+            if(!banner || !refContainer) return;
+            
+            if(isPro) {
+                banner.innerHTML = `
+                    <div class="absolute -right-10 -top-10 opacity-10"><svg class="w-32 h-32 text-white dark:text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 text-[10px] font-bold text-brand-light dark:text-brand-dark uppercase tracking-widest mb-2"><span class="w-2 h-2 bg-brand-light dark:bg-brand-dark rounded-full animate-pulse"></span> <span data-i18n="cfg_lic_status">${t('cfg_lic_status')}</span></div>
+                        <h2 data-i18n="cfg_tier_pro" class="text-2xl font-bold text-white dark:text-black mb-4">${t('cfg_tier_pro')}</h2>
+                        <p data-i18n="cfg_pro_desc_active" class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 leading-relaxed">${t('cfg_pro_desc_active')}</p>
+                        <button onclick="downgradeToFree()" data-i18n="btn_downgrade" class="text-[10px] text-zinc-500 hover:text-zinc-300 underline">${t('btn_downgrade')}</button>
+                    </div>
+                `;
+                document.querySelectorAll('.premium-locked').forEach(el => {
+                    el.classList.remove('premium-locked');
+                });
+                
+                refContainer.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-sm">${t('ref_title_pro')}</h3>
+                            <span class="text-[9px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-0.5 rounded uppercase">${t('ref_badge_pro')}</span>
+                        </div>
+                        <p class="text-[11px] text-zinc-500 mb-4 leading-relaxed">${t('ref_desc_pro')}</p>
+                    </div>
+                    <button onclick="generateReferralLink()" class="w-full mt-auto btn-press bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all shadow-sm">${t('btn_ref')}</button>
+                `;
+
+            } else {
+                banner.innerHTML = `
+                    <div class="absolute -right-10 -top-10 opacity-10"><svg class="w-32 h-32 text-white dark:text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+                    <div class="relative z-10">
+                        <div data-i18n="cfg_lic_status" class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">${t('cfg_lic_status')}</div>
+                        <h2 data-i18n="cfg_tier_basic" class="text-2xl font-bold text-white dark:text-black mb-4">${t('cfg_tier_basic')}</h2>
+                        <p data-i18n="cfg_pro_desc" class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 leading-relaxed">${t('cfg_pro_desc')}</p>
+                        <button onclick="upgradeToPro()" data-i18n="btn_upgrade" class="btn-press w-full bg-brand-light dark:bg-brand-dark text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(6,182,212,0.3)]">${t('btn_upgrade')}</button>
+                    </div>
+                `;
+
+                refContainer.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-sm">${t('fund_ref')}</h3>
+                            <span class="text-[9px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-0.5 rounded uppercase">${t('ref_reward')}</span>
+                        </div>
+                        <p class="text-[11px] text-zinc-500 mb-4 leading-relaxed">${t('ref_desc_basic')}</p>
+                    </div>
+                    <button onclick="generateReferralLink()" class="w-full mt-auto btn-press bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all shadow-sm">${t('btn_ref')}</button>
+                `;
+            }
+        }
+
+        function upgradeToPro() { 
+            localStorage.setItem('priority_is_pro', 'true'); isPro = true; 
+            renderPremiumState(); applyCursor(); applyAppTheme(); showToast(t('toast_upg'), t('toast_pro_act'), 'success');
+        }
+        function downgradeToFree() { 
+            localStorage.setItem('priority_is_pro', 'false'); localStorage.removeItem('priority_theme'); localStorage.removeItem('priority_cursor');
+            isPro = false; window.location.reload(); 
+        }
+
+        function openDonateModal() { document.getElementById('donateModal').classList.remove('hidden'); setTimeout(() => document.getElementById('donateModal').classList.remove('opacity-0'), 10); }
+        function closeDonateModal() { document.getElementById('donateModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('donateModal').classList.add('hidden'), 300); }
+        function copyToClipboard(text) { navigator.clipboard.writeText(text); showToast(t('toast_clip'), t('toast_copied'), 'success'); }
+        function generateReferralLink() {
+            const code = 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            const link = `https://prioritys.ru/invite?code=${code}`;
+            const promo = t('ref_promo_text') + "\n" + link;
+            navigator.clipboard.writeText(promo);
+            showToast(t('toast_ref_link'), t('toast_ref_copied'), 'success');
+        }
+
+        // --- SAFE INITIALIZATION ---
+        function loadDataFromStorage() {
+            let storedScopes = localStorage.getItem('priority_scopes');
+            if (!storedScopes) {
+                scopes = ['СТУДИЯ', 'АВИТО', '3Д_ПЕЧАТЬ', 'ВУЗ', 'МАСТЕРСКАЯ', 'ADAMA-ART', 'МЕДИЦИНА'];
+                localStorage.setItem('priority_scopes', JSON.stringify(scopes));
+            } else {
+                scopes = JSON.parse(storedScopes) || [];
+            }
+            isPro = localStorage.getItem('priority_is_pro') === 'true';
+        }
+
+        function toggleFilterMode() {
+            const current = localStorage.getItem('priority_filter_multi') === 'true';
+            const next = !current;
+            localStorage.setItem('priority_filter_multi', next);
+            renderFilterModeUI();
+            showToast(t('toast_sys'), 'Logic Updated', 'info');
+        }
+
+        function renderFilterModeUI() {
+            const isMulti = localStorage.getItem('priority_filter_multi') === 'true';
+            const btn = document.getElementById('filterModeBtn');
+            if (btn) {
+                btn.innerText = isMulti ? t('cfg_filter_multi') : t('cfg_filter_single');
+                
+                if (isMulti) {
+                    btn.className = "w-full py-2.5 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark border-brand-light/50 dark:border-brand-dark/50 font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press shadow-[0_0_15px_rgba(6,182,212,0.1)]";
+                } else {
+                    btn.className = "w-full py-2.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border-borderline-light dark:border-borderline-dark font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press hover:bg-zinc-200 dark:hover:bg-zinc-800";
+                }
+            }
+        }
+
+        // EXPORT / IMPORT LOGIC
+        function exportData(mode) {
+            const data = {
+                version: "9.0",
+                timestamp: new Date().toISOString(),
+                mode: mode,
+                scopes: localStorage.getItem('priority_scopes'),
+                templates: localStorage.getItem('priority_templates'),
+                theme: localStorage.getItem('priority_theme'),
+                cursor: localStorage.getItem('priority_cursor'),
+                lang: localStorage.getItem('priority_lang'),
+                shop_module: localStorage.getItem('priority_shop_module'),
+                currency: localStorage.getItem('priority_currency')
+            };
+            if (mode === 'full') {
+                data.tasks = localStorage.getItem('priority_tasks');
+                data.macros = localStorage.getItem('priority_macros');
+                data.badges = localStorage.getItem('priority_badges');
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `priority_${mode}_${getDateStr()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(t('toast_sys'), t('toast_port_exp'), 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.scopes) localStorage.setItem('priority_scopes', data.scopes);
+                    if (data.templates) localStorage.setItem('priority_templates', data.templates);
+                    if (data.theme) localStorage.setItem('priority_theme', data.theme);
+                    if (data.cursor) localStorage.setItem('priority_cursor', data.cursor);
+                    if (data.lang) localStorage.setItem('priority_lang', data.lang);
+                    if (data.shop_module) localStorage.setItem('priority_shop_module', data.shop_module);
+                    if (data.currency) localStorage.setItem('priority_currency', data.currency);
+                    
+                    if (data.mode === 'full') {
+                        if (data.tasks) localStorage.setItem('priority_tasks', data.tasks);
+                        if (data.macros) localStorage.setItem('priority_macros', data.macros);
+                        if (data.badges) localStorage.setItem('priority_badges', data.badges);
+                    }
+                    showToast(t('toast_sys'), t('toast_port_imp'), 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } catch (err) {
+                    showToast(t('toast_err'), t('toast_port_err'), 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
+
+        function loadLiteConfig() {
+            document.getElementById('liteCronTime').value = localStorage.getItem('lite_cron_time') || '00:00';
+            document.getElementById('liteCronAction').value = localStorage.getItem('lite_cron_action') || 'fail';
+        }
+        function saveLiteConfig() {
+            localStorage.setItem('lite_cron_time', document.getElementById('liteCronTime').value);
+            localStorage.setItem('lite_cron_action', document.getElementById('liteCronAction').value);
+        }
+
+        // BOOT SEQUENCE
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedScale = localStorage.getItem('priority_scale') || 1;
+            document.documentElement.style.setProperty('--system-scale', savedScale);
+            const scaleSlider = document.getElementById('scaleSlider');
+            if (scaleSlider) {
+                const currentScale = localStorage.getItem('priority_scale') || 1;
+                scaleSlider.value = currentScale;
+                document.getElementById('scaleValueDisplay').innerText = Math.round(currentScale * 100) + '%';
+            }
+            loadDataFromStorage();
+            renderFilterModeUI()
+            initThemeToggle();
+            applyAppTheme();
+            renderScopes();
+            renderPremiumState();
+            initCursorScroll();
+            applyCursor();
+            loadLiteConfig();
+            renderShopUI();
+        });
+    </script>
+</body>
+</html>
