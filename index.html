@@ -950,8 +950,10 @@
                     setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
                     setTimeout(() => codeInputs[0].focus(), 300);
                 } else {
-                    // Если пользователь не найден — даем подсказку со ссылкой на бота
-                    showToast('ACCESS DENIED', 'Бот не активирован! Перейдите в @PrioritysBot и нажмите /start', 'error');
+                    // Красивая интерактивная ошибка для незарегистрированных пользователей
+                    const botUrl = 'https://t.me/PrioritysBot';
+                    const errorMsg = `Вы не зарегистрированы! <br>1. Нажмите: <a href="${botUrl}" target="_blank" class="text-brand-light dark:text-brand-dark underline font-bold">@PrioritysBot</a><br>2. Отправьте /start<br>3. Повторите запрос здесь.`;
+                    showToast('ACCESS DENIED', errorMsg, 'error');
                 }
             } catch (err) {
                 console.error(err);
