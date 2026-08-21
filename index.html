@@ -904,9 +904,30 @@
             
         codeInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
+                // Убираем всё, кроме цифр
                 const val = e.target.value.replace(/[^0-9]/g, '');
-                e.target.value = val;
+                    
+                // ЛОГИКА ДЛЯ МОБИЛЬНОГО АВТОЗАПОЛНЕНИЯ
+                if (val.length > 1) {
+                    e.target.value = val[0] || ''; // Оставляем в текущей ячейке только первую цифру
+                    
+                    // Раскидываем остальные цифры по следующим ячейкам
+                    codeInputs.forEach((cell, idx) => {
+                        if (idx >= index && (idx - index) < val.length) {
+                            cell.value = val[idx - index];
+                        }
+                    });
+                    // Переносим фокус на последнюю заполненную ячейку
+                    const focusIndex = Math.min(index + val.length - 1, 3);
+                    codeInputs[focusIndex].focus();
+                    
+                    // Если все 4 ячейки заполнены — входим
+                    if (codeInputs[3].value !== '') confirmLogin();
+                    return;
+                }
             
+                // СТАНДАРТНАЯ ЛОГИКА ДЛЯ РУЧНОГО ВВОДА
+                e.target.value = val;
                 if (val.length === 1) {
                     input.classList.remove('code-pop'); 
                     void input.offsetWidth; 
@@ -915,7 +936,6 @@
                     if (index < codeInputs.length - 1) {
                         codeInputs[index + 1].focus();
                     } else {
-                        // Когда введена последняя 4-я цифра — автоматически триггерим вход!
                         confirmLogin();
                     }
                 }
@@ -956,7 +976,7 @@
         });
 
         async function requestTelegramCode() {
-            let loginInput = document.getElementById('tgLogin').value.trim();
+            let loginInput = document.getElementById('tgLogin').value.trim().toLowerCase();
             if (!loginInput) {
                 showToast('ERROR', 'Enter your Telegram username', 'error');
                 return;
