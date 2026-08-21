@@ -22,6 +22,7 @@
         }
     </script>
     <script src="locales.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
@@ -474,6 +475,10 @@
         let scopes = [];
         let isPro = false;
 
+        const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // CORE ENGINE
         function showToast(title, desc, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -882,7 +887,36 @@
             if(val && val !== scopes[index] && !scopes.includes(val)) { scopes[index] = val; saveScopesData(); showToast(t('toast_sys'), t('toast_scope_upd'), 'info'); } 
             else { renderScopes(); }
         }
-        function saveScopesData() { localStorage.setItem('priority_scopes', JSON.stringify(scopes)); renderScopes(); }
+        
+        // --- ОБЛАЧНЫЙ ДВИЖОК ДЛЯ НАСТРОЕК ---
+        let cloudSyncTimeout = null;
+
+        function syncStateToCloud() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+        
+            clearTimeout(cloudSyncTimeout);
+            cloudSyncTimeout = setTimeout(async () => {
+                const appState = {
+                    scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
+                    tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
+                    macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
+                    templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
+                    badges: JSON.parse(localStorage.getItem('priority_badges') || '[]')
+                };
+
+                try {
+                    await supabaseClient.from('users').update({ app_data: appState }).eq('username', username);
+                    console.log('☁️ Config synced to cloud');
+                } catch (err) { console.error('Cloud sync failed', err); }
+            }, 1500);
+        }
+
+        function saveScopesData() { 
+            localStorage.setItem('priority_scopes', JSON.stringify(scopes)); 
+            renderScopes(); 
+            syncStateToCloud(); // <-- Теперь изменения сфер летят прямо в облако!
+        }
 
         // --- PREMIUM & FUNDING ---
         function renderPremiumState() {
@@ -940,8 +974,7 @@
         }
 
         function upgradeToPro() { 
-            localStorage.setItem('priority_is_pro', 'true'); isPro = true; 
-            renderPremiumState(); applyCursor(); applyAppTheme(); showToast(t('toast_upg'), t('toast_pro_act'), 'success');
+            showToast('ACCESS DENIED', 'Для активации PRO статуса обратитесь к администратору системы.', 'error');
         }
         function downgradeToFree() { 
             localStorage.setItem('priority_is_pro', 'false'); localStorage.removeItem('priority_theme'); localStorage.removeItem('priority_cursor');
@@ -1022,30 +1055,59 @@
             showToast(t('toast_sys'), t('toast_port_exp'), 'success');
         }
 
-        function importData(event) {
+        async function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
+
+            showToast('SYSTEM', 'Processing Neural Upload...', 'info');
+
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (data.scopes) localStorage.setItem('priority_scopes', data.scopes);
-                    if (data.templates) localStorage.setItem('priority_templates', data.templates);
+                    const username = localStorage.getItem('priority_user');
+
+                    // Умный парсер: лечит старые "строковые" массивы из бэкапа
+                    const parseIfString = (val) => {
+                        if (typeof val === 'string') {
+                            try { return JSON.parse(val); } catch(err) { return val; }
+                        }
+                        return val || [];
+                    };
+                
+                    const cleanState = {
+                        scopes: parseIfString(data.scopes),
+                        tasks: parseIfString(data.tasks),
+                        macros: parseIfString(data.macros),
+                        templates: parseIfString(data.templates),
+                        badges: parseIfString(data.badges)
+                    };
+                
+                    // Применяем локальные настройки визуала
                     if (data.theme) localStorage.setItem('priority_theme', data.theme);
                     if (data.cursor) localStorage.setItem('priority_cursor', data.cursor);
-                    if (data.lang) localStorage.setItem('priority_lang', data.lang);
                     if (data.shop_module) localStorage.setItem('priority_shop_module', data.shop_module);
                     if (data.currency) localStorage.setItem('priority_currency', data.currency);
-                    
-                    if (data.mode === 'full') {
-                        if (data.tasks) localStorage.setItem('priority_tasks', data.tasks);
-                        if (data.macros) localStorage.setItem('priority_macros', data.macros);
-                        if (data.badges) localStorage.setItem('priority_badges', data.badges);
+
+                    // Главное: заливаем вылеченный стейт прямо в Supabase
+                    if (data.mode === 'full' && username) {
+                        await supabaseClient.from('users').update({ app_data: cleanState }).eq('username', username);
+
+                        // Сохраняем локально, чтобы сразу отрисовать
+                        localStorage.setItem('priority_scopes', JSON.stringify(cleanState.scopes));
+                        localStorage.setItem('priority_tasks', JSON.stringify(cleanState.tasks));
+                        localStorage.setItem('priority_macros', JSON.stringify(cleanState.macros));
+                        localStorage.setItem('priority_templates', JSON.stringify(cleanState.templates));
+                        localStorage.setItem('priority_badges', JSON.stringify(cleanState.badges));
+
+                        localStorage.setItem('priority_onboarded', 'true'); // Убиваем баг с онбордингом
                     }
-                    showToast(t('toast_sys'), t('toast_port_imp'), 'success');
+                
+                    showToast('SYSTEM', 'Upload Successful. Rebooting...', 'success');
                     setTimeout(() => window.location.reload(), 1500);
                 } catch (err) {
-                    showToast(t('toast_err'), t('toast_port_err'), 'error');
+                    console.error(err);
+                    showToast('ERROR', 'Invalid Core Data format', 'error');
                 }
             };
             reader.readAsText(file);
