@@ -398,6 +398,8 @@ const translations = {
         "cfg_lite_act_del": "Delete Permanently",
         "cfg_lite_act_fail": "To Archive (Failed)",
         "cfg_lite_act_overdue": "To Overdue",
+
+        "cfg_lite_act_none": "Оставить (Старение)",
     },
 
 
@@ -575,6 +577,8 @@ const translations = {
         "toast_unreg_desc": "ВЫ НЕ ЗАРЕГИСТРИРОВАНЫ. ЧТОБЫ ЗАРЕГИСТРИРОВАТЬСЯ, НУЖНО ЗАПУСТИТЬ БОТА В ТЕЛЕГРАММЕ. ПОСЛЕ ЭТОГО МЫ ОТПРАВИМ ВАМ КОД.",
         "btn_open_bot": "ЗАПУСТИТЬ БОТА",
         "btn_copy_link": "СКОПИРОВАТЬ ССЫЛКУ",
+
+        "cfg_lite_act_none": "Оставить (Старение)",
 
         "toast_sys": "СИСТЕМА",
         "toast_err": "ОШИБКА",

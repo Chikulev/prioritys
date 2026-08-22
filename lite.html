@@ -343,6 +343,14 @@
             }
         }
 
+        function getLiteAgeStyle(isoDate) {
+            if(!isoDate) return '';
+            const diffDays = Math.floor((new Date() - new Date(isoDate)) / (1000*60*60*24));
+            if(diffDays <= 0) return '';
+            const int = Math.min(diffDays / 10, 1);
+            return `background-color: rgba(239, 68, 68, ${int * 0.15}); border-color: rgba(239, 68, 68, ${int * 0.5}); color: ${int > 0.5 ? '#ef4444' : ''}`;
+        }
+
         // --- ОСНОВНАЯ ОТРИСОВКА (ТЕГИ И АРХИВ) ---
         function renderLite() {
             const cloud = document.getElementById('liteTagsContainer');
@@ -355,21 +363,21 @@
             if(active.length === 0) {
                 cloud.innerHTML = `<div data-i18n="lite_empty" class="text-sm font-bold text-zinc-500 italic w-full text-center py-4 border-2 border-dashed border-borderline-light dark:border-borderline-dark rounded-xl opacity-50">${t('lite_empty')}</div>`;
             } else {
-                cloud.innerHTML = active.map(t => `
-                    <div class="lite-tag group inline-flex items-center bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-full overflow-hidden hover:border-yellow-500 transition-all shadow-sm pr-1">
-                        
+                cloud.innerHTML = active.map(t => {
+                const ageStyle = getLiteAgeStyle(t.date);
+                return `
+                    <div class="lite-tag group inline-flex items-center bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-full overflow-hidden hover:border-yellow-500 transition-all shadow-sm pr-1" style="${ageStyle}">
                         <button onclick="completeTask('${t.id}', this)" class="pl-4 pr-3 py-3 text-zinc-400 hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors focus:outline-none flex items-center justify-center">
                             <svg class="w-5 h-5 relative" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <path d="M8 12l2 2 4-4" class="opacity-0 group-hover:opacity-100 transition-opacity" stroke-width="3"></path>
                             </svg>
                         </button>
-                        
                         <span class="pr-3 py-2 font-bold text-sm uppercase tracking-wider text-zinc-700 dark:text-zinc-300 pointer-events-none">${t.text}</span>
-                        
                         <button onclick="deleteTask('${t.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:bg-red-500 hover:text-white transition-colors focus:outline-none font-black text-lg">×</button>
                     </div>
-                `).join('');
+                `;
+            }).join('');
             }
 
             // 2. ИСТОРИЯ (АРХИВ С УДАЛЕНИЕМ)
@@ -411,6 +419,7 @@
                 liteTasks.forEach(t => {
                     if (t.status === 'active') {
                         if (cronAction === 'delete') t.status = 'deleted';
+                        else if (cronAction === 'none') { /* Do nothing, leave it active */ }
                         else t.status = cronAction;
                         changed = true;
                     }

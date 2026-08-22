@@ -349,6 +349,26 @@
             </div>
         </div>
 
+        <!-- ВИДЖЕТ LITE BUFFER -->
+        <div class="bg-base-light/50 dark:bg-base-dark/50 border border-borderline-light dark:border-borderline-dark p-4 mb-6 rounded-md shadow-sm transition-colors relative z-20 font-mono-tech">
+            <div class="flex justify-between items-center cursor-pointer btn-press" onclick="toggleDashLite()">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                    <h3 class="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-widest m-0">LITE_BUFFER // RAM</h3>
+                    <span id="dashLiteCounter" class="text-[9px] font-bold text-zinc-500 ml-2">0</span>
+                </div>
+                <svg id="dashLiteIcon" class="w-4 h-4 text-zinc-500 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+
+            <div id="dashLiteWrapper" class="hidden mt-4 pt-4 border-t border-borderline-light dark:border-borderline-dark">
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="dashLiteInput" onkeypress="if(event.key==='Enter') addDashLite()" class="flex-1 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-2 text-xs focus:border-yellow-500 outline-none transition-colors placeholder-zinc-400 dark:placeholder-zinc-600" placeholder="Quick capture...">
+                    <button onclick="addDashLite()" class="bg-yellow-500 text-black px-4 rounded font-bold text-sm btn-press">+</button>
+                </div>
+                <div id="dashLiteContainer" class="flex flex-wrap gap-2"></div>
+            </div>
+        </div>
+
         <div class="flex flex-wrap justify-between items-center mb-6 gap-4 font-mono-tech">
             <div class="flex flex-wrap gap-2 pt-2 pb-2" id="scopeFilterContainer"></div>
             <div class="flex gap-2 bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors shrink-0">
@@ -367,8 +387,17 @@
             <div class="mb-8"><h3 data-i18n="quad_3" class="text-[13px] font-bold text-yellow-600 dark:text-yellow-500 mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">ROUTINE [SEV-2]</h3><div id="listQ3" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 3)"></div></div>
             <div class="mb-8"><h3 data-i18n="quad_4" class="text-[13px] font-bold text-zinc-500 dark:text-zinc-500 mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">BACKLOG [SEV-3]</h3><div id="listQ4" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 4)"></div></div>
             <div class="mt-12 p-5 border border-borderline-light dark:border-borderline-dark rounded-md bg-panel-light dark:bg-panel-dark transition-colors shadow-sm">
-                <h3 data-i18n="archived" class="text-[11px] font-bold text-zinc-500 dark:text-zinc-600 mb-4 uppercase tracking-widest">Archived Processes</h3>
-                <div id="completedTasks" class="space-y-3 opacity-50 grayscale transition-all hover:grayscale-0 hover:opacity-100"></div>
+                <div class="flex items-center justify-between cursor-pointer btn-press group" onclick="toggleArchive()">
+                    <div class="flex items-center gap-3">
+                        <h3 data-i18n="archived" class="text-[11px] font-bold text-zinc-500 dark:text-zinc-600 uppercase tracking-widest m-0 group-hover:text-brand-light transition-colors">Archived Processes</h3>
+                        <span id="archiveCounter" class="px-2 py-0.5 bg-base-light dark:bg-base-dark text-zinc-500 rounded text-[9px] font-bold border border-borderline-light dark:border-borderline-dark">0</span>
+                        <div id="archiveSparkline" class="hidden md:flex items-end gap-[2px] h-5 ml-4"></div>
+                    </div>
+                    <svg id="archiveIcon" class="w-4 h-4 text-zinc-500 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </div>
+                <div id="completedTasksWrapper" class="hidden mt-6 pt-4 border-t border-borderline-light dark:border-borderline-dark">
+                    <div id="completedTasks" class="space-y-3 opacity-50 grayscale transition-all hover:grayscale-0 hover:opacity-100"></div>
+                </div>
             </div>
         </div>
 
@@ -569,6 +598,8 @@
         let scopes = JSON.parse(localStorage.getItem('priority_scopes')) || ['СТУДИЯ', 'АВИТО', 'ВУЗ'];
         let activeFilterScopes = []; // Массив для мульти-фильтра
         let activeFilterPurchases = false; // Глобальный триггер для фильтра покупок
+
+        let liteTasks = JSON.parse(localStorage.getItem('priority_lite_tasks')) || [];
 
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
@@ -882,20 +913,22 @@
             clearTimeout(cloudSyncTimeout);
             cloudSyncTimeout = setTimeout(async () => {
                 const appState = {
-                    // Данные ядра
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
                     templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
                     badges: JSON.parse(localStorage.getItem('priority_badges') || '[]'),
-
-                    // Настройки и визуал
                     theme: localStorage.getItem('priority_theme') || 'cyber',
                     cursor: localStorage.getItem('priority_cursor') || 'default',
                     lang: localStorage.getItem('priority_lang') || 'en',
                     shop_module: localStorage.getItem('priority_shop_module') || 'false',
                     currency: localStorage.getItem('priority_currency') || '₽',
-                    scale: localStorage.getItem('priority_scale') || '1'
+                    scale: localStorage.getItem('priority_scale') || '1',
+                    // ДОБАВЛЯЕМ LITE, чтобы не стереть:
+                    lite_tasks: JSON.parse(localStorage.getItem('priority_lite_tasks') || '[]'),
+                    lite_log: JSON.parse(localStorage.getItem('priority_lite_log') || '{}'),
+                    lite_cron_time: localStorage.getItem('lite_cron_time') || '00:00',
+                    lite_cron_action: localStorage.getItem('lite_cron_action') || 'fail'
                 };
 
                 try {
@@ -938,7 +971,13 @@
                        if (cloudData.scale) {
                            localStorage.setItem('priority_scale', cloudData.scale);
                            document.documentElement.style.setProperty('--system-scale', cloudData.scale);
-                       }
+                        }
+
+                        if (cloudData.lite_tasks) {
+                            localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
+                            liteTasks = cloudData.lite_tasks;
+                            renderDashLite();
+                        }
                    
                        // Восстанавливаем ЯДРО
                        localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes || []));
@@ -1249,6 +1288,12 @@
         
             // Запускаем подтягивание данных из облака
             syncFromCloud();
+
+            if(localStorage.getItem('priority_dash_lite_open') === 'true') {
+                document.getElementById('dashLiteWrapper').classList.remove('hidden');
+                document.getElementById('dashLiteIcon').classList.add('rotate-180');
+            }
+            renderDashLite();
         }
 
         async function syncFromCloud() {
@@ -2020,6 +2065,8 @@
 
             qLists.forEach(l => { if(l.innerHTML === '') l.innerHTML = `<div class="p-4 border-2 border-dashed border-borderline-light dark:border-borderline-dark rounded-lg text-[11px] font-bold text-zinc-400 dark:text-zinc-600 text-center uppercase tracking-widest transition-colors font-mono-tech">${t('empty_tasks')}</div>`; });
             mLists.forEach(l => { if(l.innerHTML === '') l.innerHTML = `<div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest text-center mt-3 transition-colors font-mono-tech">${t('empty_matrix')}</div>`; });
+        
+        renderArchiveMetrics();
         }
 
         // --- РЕЖИМ ФОКУСА ---
@@ -2397,6 +2444,112 @@ YOUR OBJECTIVE (Answer in these steps):
                 console.error('Failed to copy text: ', err);
                 showToast('ERROR', 'Clipboard access denied', 'error');
             });
+        }
+
+        // --- ЛОГИКА АРХИВА ---
+        function toggleArchive() {
+            const w = document.getElementById('completedTasksWrapper');
+            const i = document.getElementById('archiveIcon');
+            w.classList.toggle('hidden');
+            i.classList.toggle('rotate-180');
+        }
+
+        function renderArchiveMetrics() {
+            const compTasks = tasks.filter(t => t.completed);
+            document.getElementById('archiveCounter').innerText = compTasks.length;
+
+            // Рисуем спарклайн (активность за последние 7 дней)
+            const sparkline = document.getElementById('archiveSparkline');
+            if(sparkline) {
+                const last7Days = Array.from({length: 7}, (_, i) => {
+                    const d = new Date(); d.setDate(d.getDate() - (6 - i));
+                    return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).slice(2)}`;
+                });
+                const counts = last7Days.map(date => compTasks.filter(t => t.completedAt && t.completedAt.startsWith(date)).length);
+                const max = Math.max(...counts, 1); // чтобы не делить на ноль
+
+                sparkline.innerHTML = counts.map(c => {
+                    const h = Math.max((c / max) * 100, 15); // минимум 15% высоты для видимости
+                    const color = c > 0 ? 'bg-brand-light dark:bg-brand-dark' : 'bg-zinc-300 dark:bg-zinc-700';
+                    return `<div class="w-1.5 rounded-t-sm ${color} transition-all" style="height: ${h}%" title="${c} tasks"></div>`;
+                }).join('');
+            }
+        }
+
+        // --- ЛОГИКА LITE-ВИДЖЕТА ---
+        function toggleDashLite() {
+            const w = document.getElementById('dashLiteWrapper');
+            const i = document.getElementById('dashLiteIcon');
+            const isHidden = w.classList.toggle('hidden');
+            i.classList.toggle('rotate-180');
+            localStorage.setItem('priority_dash_lite_open', !isHidden);
+        }
+
+        // Вычисляем старение задачи (красный градиент)
+        function getLiteAgeStyle(isoDate) {
+            if(!isoDate) return '';
+            const diffDays = Math.floor((new Date() - new Date(isoDate)) / (1000*60*60*24));
+            if(diffDays <= 0) return '';
+            const intensity = Math.min(diffDays / 10, 1); // Максимум 10 дней
+            return `background-color: rgba(239, 68, 68, ${intensity * 0.15}); border-color: rgba(239, 68, 68, ${intensity * 0.5}); color: ${intensity > 0.5 ? '#ef4444' : ''}`;
+        }
+
+        function renderDashLite() {
+            const activeLite = liteTasks.filter(t => t.status === 'active');
+            document.getElementById('dashLiteCounter').innerText = activeLite.length;
+            const container = document.getElementById('dashLiteContainer');
+
+            if(activeLite.length === 0) {
+                container.innerHTML = `<span class="text-[10px] text-zinc-500 uppercase">Buffer is empty</span>`;
+                return;
+            }
+        
+            container.innerHTML = activeLite.map(t => {
+                const ageStyle = getLiteAgeStyle(t.date);
+                return `
+                <div class="group flex items-center bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md overflow-hidden shadow-sm" style="${ageStyle}">
+                    <span class="px-3 py-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-300">${t.text}</span>
+                    <div class="flex opacity-0 group-hover:opacity-100 transition-opacity bg-base-light dark:bg-base-dark border-l border-borderline-light dark:border-borderline-dark">
+                        <button onclick="escalateLiteTask('${t.id}')" class="px-2.5 py-1.5 text-brand-light hover:bg-brand-light/20 transition-colors btn-press" title="Convert to Matrix Task">➚</button>
+                        <button onclick="deleteDashLite('${t.id}')" class="px-2.5 py-1.5 text-red-500 hover:bg-red-500/20 transition-colors btn-press" title="Delete">✕</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function escalateLiteTask(id) {
+            const t = liteTasks.find(x => x.id === id);
+            if(t) {
+                // Переносим текст в основной инпут
+                document.getElementById('taskInput').value = t.text;
+                document.getElementById('taskInput').focus();
+
+                // Удаляем из лайт-буфера
+                liteTasks = liteTasks.filter(x => x.id !== id);
+                localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+                saveData('priority_tasks', tasks); // Триггерим фоновый синк в облако
+                renderDashLite();
+                showToast('SYSTEM', 'Task escalated. Select scope and impact.', 'info');
+            }
+        }
+
+        function addDashLite() {
+            const input = document.getElementById('dashLiteInput');
+            if(input.value.trim() !== '') {
+                liteTasks.push({ id: Date.now().toString(), text: input.value.trim(), status: 'active', date: new Date().toISOString() });
+                localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+                saveData('priority_tasks', tasks); 
+                input.value = '';
+                renderDashLite();
+            }
+        }
+
+        function deleteDashLite(id) {
+            liteTasks = liteTasks.filter(t => t.id !== id);
+            localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+            saveData('priority_tasks', tasks);
+            renderDashLite();
         }
 
         // BOOT SEQUENCE
