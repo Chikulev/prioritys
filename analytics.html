@@ -31,6 +31,7 @@
             }
         }
     </script>
+    <script src="themes.js"></script>
     <script src="locales.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -267,9 +268,9 @@
         }
 
         function applyAppTheme() {
-            const theme = localStorage.getItem('priority_theme') || 'cyber';
-            document.body.className = `bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative theme-${theme}`;
-            applyI18n();
+            if (typeof applySystemTheme === 'function') {
+                applySystemTheme(); // Движок сам сделает всю магию!
+            }
         }
 
         function initThemeToggle() {

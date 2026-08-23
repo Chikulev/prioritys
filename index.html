@@ -36,8 +36,10 @@
             }
         }
     </script>
+    <script src="themes.js"></script>
     <script src="locales.js"></script>
     <style>
+        /* Базовые переменные (фолбэк до загрузки themes.js) */
         :root {
             --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
             --color-base-light: #FAFAFA; --color-base-dark: #09090B;
@@ -47,67 +49,50 @@
             --system-scale: 1;
         }
 
-        body.theme-royal {
-            --color-brand-light: #8B0000; --color-brand-dark: #D4AF37;
-            --color-base-light: #FDFBF7; --color-base-dark: #1A120B;
-            --color-panel-light: #F5EEDB; --color-panel-dark: #2A1D12;
-            --color-border-light: #D9CBB0; --color-border-dark: #3D2B1F;
-            --font-primary: 'Georgia', serif;
-        }
-
-        body.theme-brutal {
-            --color-brand-light: #FF3366; --color-brand-dark: #00FFCC;
-            --color-base-light: #E0E722; --color-base-dark: #121212;
-            --color-panel-light: #FFFFFF; --color-panel-dark: #000000;
-            --color-border-light: #000000; --color-border-dark: #E0E722;
-            --font-primary: 'Inter', sans-serif;
-        }
-        body.theme-brutal .rounded, body.theme-brutal .rounded-md, body.theme-brutal .rounded-lg, body.theme-brutal .rounded-sm, body.theme-brutal .rounded-full { border-radius: 0px !important; }
-        body.theme-brutal .border, body.theme-brutal .border-2, body.theme-brutal .border-b, body.theme-brutal .border-t { border-width: 3px !important; }
-        body.theme-brutal .shadow-sm, body.theme-brutal .shadow-md, body.theme-brutal .shadow-lg, body.theme-brutal .shadow-2xl { box-shadow: 6px 6px 0px var(--color-border-light) !important; }
-        .dark body.theme-brutal .shadow-sm, .dark body.theme-brutal .shadow-md, .dark body.theme-brutal .shadow-lg, .dark body.theme-brutal .shadow-2xl { box-shadow: 6px 6px 0px var(--color-border-dark) !important; }
-        body.theme-brutal .hover-magnet:hover { transform: translate(-4px, -4px) !important; box-shadow: 10px 10px 0px var(--color-border-light) !important; }
-        .dark body.theme-brutal .hover-magnet:hover { box-shadow: 10px 10px 0px var(--color-border-dark) !important; }
-        body.theme-brutal .btn-press:active { transform: translate(4px, 4px) !important; box-shadow: 0px 0px 0px transparent !important; }
-
         body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; overflow-x: hidden; }
-        
-        .bg-tech-grid { background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px); background-size: 20px 20px; }
-        .dark .bg-tech-grid { background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px); }
-        body.theme-royal .bg-tech-grid { background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>'); }
-        body.theme-brutal .bg-tech-grid { background-image: none; }
 
+        /* Кастомные чекбоксы */
         input[type="radio"].peer { display: none; }
-        .tech-checkbox { appearance: none; } .tech-checkbox:checked { background-color: var(--color-brand-light); border-color: var(--color-brand-light); }
+        .tech-checkbox { appearance: none; } 
+        .tech-checkbox:checked { background-color: var(--color-brand-light); border-color: var(--color-brand-light); }
         .dark .tech-checkbox:checked { background-color: var(--color-brand-dark); border-color: var(--color-brand-dark); box-shadow: 0 0 10px rgba(255,255,255, 0.1); }
         .tech-checkbox:checked::after { content: '✓'; color: #FFF; display: flex; justify-content: center; align-items: center; height: 100%; font-size: 16px; font-weight: 800; }
         .dark .tech-checkbox:checked::after { color: #000; }
         
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; } @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* Системные анимации */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; } 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         .hover-magnet { transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease; }
         .hover-magnet:hover { transform: translateY(-4px) scale(1.015); z-index: 10; border-color: var(--color-brand-light); box-shadow: 0 12px 30px -10px rgba(0,0,0, 0.2); }
         .dark .hover-magnet:hover { border-color: var(--color-brand-dark); }
         
         .btn-press { transition: transform 0.1s ease; } .btn-press:active { transform: scale(0.95); }
-        .dragging { opacity: 0.8; transform: scale(0.98); background-color: var(--color-base-light); border-color: var(--color-border-light); } 
-        .dark .dragging { background-color: var(--color-base-dark); border-color: var(--color-border-dark); }
-        .drag-over { border-top: 2px solid var(--color-brand-light); border-radius: 0; } .dark .drag-over { border-top: 2px solid var(--color-brand-dark); }
         .strike-through { text-decoration: line-through; opacity: 0.5; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-thumb { background: #A1A1AA; border-radius: 0px; } .dark ::-webkit-scrollbar-thumb { background: #52525B; }
-        .like-pop { animation: likePop 0.3s ease-out forwards; } @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #EF4444; } 100% { transform: scale(1); } }
-        .code-pop { animation: popIn 0.15s ease-out forwards; } @keyframes popIn { 0% { transform: scale(0.9); } 100% { transform: scale(1); } }
         
+        .like-pop { animation: likePop 0.3s ease-out forwards; } 
+        @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #EF4444; } 100% { transform: scale(1); } }
+        .code-pop { animation: popIn 0.15s ease-out forwards; } 
+        @keyframes popIn { 0% { transform: scale(0.9); } 100% { transform: scale(1); } }
+        
+        /* Кастомный скроллбар */
+        ::-webkit-scrollbar { width: 6px; height: 6px; } 
+        ::-webkit-scrollbar-thumb { background: #A1A1AA; border-radius: 0px; } 
+        .dark ::-webkit-scrollbar-thumb { background: #52525B; }
+        
+        /* Системные курсоры */
         body.cursor-tech, body.cursor-tech * { cursor: crosshair !important; }
         body.cursor-royal, body.cursor-royal * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🖋️</text></svg>") 0 20, auto !important; }
         body.cursor-sword, body.cursor-sword * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🗡️</text></svg>") 0 20, auto !important; }
         body.cursor-wand, body.cursor-wand * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🪄</text></svg>") 0 20, auto !important; }
 
+        /* Квиз (Академия) */
         .quiz-option.selected { border-color: var(--color-brand-light); background-color: rgba(0, 0, 0, 0.05); }
         .dark .quiz-option.selected { border-color: var(--color-brand-dark); background-color: rgba(255, 255, 255, 0.05); }
         .quiz-option.correct { border-color: #10B981; background-color: rgba(16, 185, 129, 0.1); }
         .quiz-option.wrong { border-color: #EF4444; background-color: rgba(239, 68, 68, 0.1); }
         
+        /* Скрытие стрелочек у инпутов типа number */
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         /* DRAG & DROP ANIMATIONS */
@@ -132,10 +117,10 @@
         } 
         .dark .drag-over { border-top: 4px solid var(--color-brand-dark) !important; }
 
+        /* Масштаб системы */
         html { 
-        font-size: calc(16px * var(--system-scale, 1)) !important; 
+            font-size: calc(16px * var(--system-scale, 1)) !important; 
         }
-
     </style>
 </head>
 <body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative transition-colors">
@@ -593,6 +578,8 @@
         let shopModuleActive = false;
         let shopCurrency = '₽';
 
+        let archiveLimit = 10;
+
         // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
         let tasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
         let scopes = JSON.parse(localStorage.getItem('priority_scopes')) || ['СТУДИЯ', 'АВИТО', 'ВУЗ'];
@@ -604,6 +591,15 @@
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function loadMoreArchive() {
+            archiveLimit += 10;
+            renderTasks();
+        }
+        function loadAllArchive() {
+            archiveLimit = 999999;
+            renderTasks();
+        }
 
         // --- ЛОГИКА ФИЛЬТРАЦИИ ---
         function renderFilters() {
@@ -711,6 +707,7 @@
         
         let openCommentsSet = new Set(); 
         let editTaskId = null;
+        let escalatedLiteTaskId = null; // Память для переносимой лайт-задачи
         let draggedTaskId = null;
 
         let hoveredTaskId = null; // Для Ctrl+C
@@ -834,12 +831,9 @@
         }
 
         function applyAppTheme() {
-            const theme = localStorage.getItem('priority_theme') || 'cyber';
-            document.body.classList.remove('theme-cyber', 'theme-royal', 'theme-brutal');
-            if (theme !== 'cyber') {
-                document.body.classList.add(`theme-${theme}`);
+            if (typeof applySystemTheme === 'function') {
+                applySystemTheme(); // Движок сам сделает всю магию!
             }
-            applyI18n(); 
         }
 
         function initThemeToggle() {
@@ -1513,6 +1507,8 @@
             deployBtn.innerText = t('btn_deploy');
             deployBtn.classList.remove('bg-brand-light', 'dark:bg-brand-dark');
             document.getElementById('cancelEditBtn').classList.add('hidden');
+            
+            escalatedLiteTaskId = null; // Сброс при отмене
         }
 
         function deployOrUpdateTask() {
@@ -1567,6 +1563,14 @@
             saveData('priority_tasks', tasks);
             renderTasks();
             renderMacros(); 
+
+            // Если задача была создана из LITE-буфера — теперь удаляем её оттуда
+            if (escalatedLiteTaskId && !editTaskId) {
+                liteTasks = liteTasks.filter(x => x.id !== escalatedLiteTaskId);
+                localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+                escalatedLiteTaskId = null;
+                renderDashLite();
+            }
         }
 
         function getQuadrant(isImportant, isUrgent) { if(isImportant && isUrgent) return 1; if(isImportant && !isUrgent) return 2; if(!isImportant && isUrgent) return 3; return 4; }
@@ -1913,41 +1917,35 @@
             const mLists = [document.getElementById('matrixQ1'), document.getElementById('matrixQ2'), document.getElementById('matrixQ3'), document.getElementById('matrixQ4')];
             const comp = document.getElementById('completedTasks');
             qLists.forEach(l => l.innerHTML = ''); mLists.forEach(l => l.innerHTML = ''); comp.innerHTML = '';
-
-            // Сортируем: Золотые всегда сверху, остальные по новизне
+                
             const sortedTasks = [...tasks].sort((a, b) => {
                 if (a.isGolden && !b.isGolden) return -1;
                 if (!a.isGolden && b.isGolden) return 1;
                 return b.id - a.id;
             });
-
-            // Перебираем отсортированные задачи
+        
+            let renderedArchiveCount = 0;
+            let totalArchiveCount = 0;
+            let archiveHTML = '';
+        
             sortedTasks.forEach(task => {
-                // --- ЛОГИКА СИСТЕМНОЙ СФЕРЫ ---
-                // Если сфера задачи системная или была удалена - приравниваем её к SYS_OTHER
                 let effectiveSphere = task.sphere;
                 if (task.sphere === 'SYS_OTHER' || !scopes.includes(task.sphere)) {
                     effectiveSphere = 'SYS_OTHER';
                 }
-
-                // --- ПРОВЕРКА МУЛЬТИ-ФИЛЬТРА ---
-                // Проверяем по эффективной сфере (чтобы задачи из "ДРУГОЕ" не пропадали при фильтрации)
+            
                 const isMatch = activeFilterScopes.length === 0 || activeFilterScopes.includes(effectiveSphere);
                 if (!isMatch) return; 
-                // --- ПРОВЕРКА ФИЛЬТРА ПОКУПОК ---
                 if (activeFilterPurchases && !task.price) return;
-                // -------------------------------
-
-                // МАГИЯ ПЕРЕВОДА: Готовим правильное имя сферы для карточки
+            
                 const displaySphereName = effectiveSphere === 'SYS_OTHER' ? t('scope_other') : task.sphere;
-
                 const quad = getQuadrant(task.isImportant, task.isUrgent);
                 const isCommentsOpen = openCommentsSet.has(task.id);
                 
                 const priceBadge = task.price ? `<span class="px-2 py-0.5 bg-transparent text-brand-light dark:text-brand-dark border border-brand-light/30 dark:border-brand-dark/30 rounded text-[10px] font-bold uppercase tracking-widest transition-colors">${shopCurrency}${task.price}</span>` : '';
                 const linkedMacro = task.macroId ? macros.find(m => m.id === task.macroId) : null;
                 const macroTag = linkedMacro ? `<button type="button" onclick="unlinkTask(${task.id})" class="px-2 py-0.5 bg-brand-light/10 text-brand-light dark:text-brand-dark border border-brand-light/30 rounded text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30" title="Click to Unlink">${t('lbl_linked_to')} ${linkedMacro.title} ✕</button>` : '';
-
+            
                 const commentsHTML = `
                     <div id="comments-${task.id}" class="mt-4 border-t border-borderline-light dark:border-borderline-dark pt-4 ${isCommentsOpen ? '' : 'hidden'} comments-section transition-colors">
                         <div class="space-y-3 mb-4 pr-1 font-mono-tech">
@@ -1967,12 +1965,11 @@
                         </div>
                     </div>
                 `;
-
-                // Стили для золотой карточки
+                
                 const goldClassList = task.isGolden 
                     ? 'border-yellow-400 dark:border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.15)] bg-yellow-50/20 dark:bg-yellow-900/10' 
                     : 'border-borderline-light dark:border-borderline-dark hover:border-brand-light/50 dark:hover:border-brand-dark/50';
-
+                
                 const listHTML = `
                     <div id="task-${task.id}" onmouseenter="hoveredTaskId = ${task.id}" onmouseleave="hoveredTaskId = null" class="tech-card-task group flex flex-col p-4 bg-panel-light dark:bg-panel-dark border ${goldClassList} rounded-lg transition-all shadow-sm hover-magnet" ondragend="this.removeAttribute('draggable'); dragEnd(event)" ondragstart="drag(event, ${task.id})">
                         <div class="flex items-center gap-2 w-full">
@@ -1990,9 +1987,7 @@
                             </div>
                             
                             <div class="flex items-center gap-1 font-mono-tech shrink-0">
-                                
                                 <input type="checkbox" id="action-toggle-${task.id}" class="peer hidden">
-                                
                                 <div class="flex items-center gap-1 overflow-hidden transition-all duration-200 max-w-0 opacity-0 peer-checked:max-w-[200px] peer-checked:opacity-100 md:max-w-none md:opacity-0 md:group-hover:opacity-100">
                                     ${!task.completed ? `
                                         <button type="button" onclick="openFocusMode(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-lg" title="${t('btn_focus')}">🎯</button>
@@ -2001,44 +1996,31 @@
                                     ` : ''}
                                     <button type="button" onclick="copyTask(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_copy')}">📋</button>
                                 </div>
-
-                                <label for="action-toggle-${task.id}" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex items-center justify-center transition-colors text-xl cursor-pointer md:hidden ml-1">
-                                    ⋮
-                                </label>
-
+                                <label for="action-toggle-${task.id}" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex items-center justify-center transition-colors text-xl cursor-pointer md:hidden ml-1">⋮</label>
                                 <div class="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
                                     <button type="button" onclick="toggleComments(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 flex shrink-0 items-center justify-center transition-colors relative text-lg" title="${t('btn_logs')}">
                                         📝 ${task.comments.length > 0 ? `<span class="absolute -top-1 -right-1 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black rounded px-1.5 shadow-sm">${task.comments.length}</span>` : ''}
                                     </button>
                                     <button type="button" onclick="deleteTask(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-red-50 dark:hover:bg-red-500/10 text-zinc-400 dark:text-zinc-600 hover:text-red-600 dark:hover:text-red-500 flex shrink-0 items-center justify-center transition-colors text-lg" title="${t('btn_delete')}">🗑️</button>
                                 </div>
-
                                 <button type="button" onclick="toggleGolden(${task.id})" class="px-2 text-2xl transition-all btn-press ${task.isGolden ? 'text-yellow-500 opacity-100 md:opacity-100 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'text-zinc-300 dark:text-zinc-700 hover:text-yellow-500 md:opacity-0 md:group-hover:opacity-100'}" title="Golden Task">★</button>
-
-                                <button type="button" onclick="openTeleport(${task.id})" class="text-zinc-300 dark:text-zinc-700 md:opacity-0 md:group-hover:opacity-100 hover:text-brand-light dark:hover:text-brand-dark px-2 text-lg transition-all font-bold font-mono-tech btn-press" title="Change Priority">
-                                    ⣿
-                                </button>
+                                <button type="button" onclick="openTeleport(${task.id})" class="text-zinc-300 dark:text-zinc-700 md:opacity-0 md:group-hover:opacity-100 hover:text-brand-light dark:hover:text-brand-dark px-2 text-lg transition-all font-bold font-mono-tech btn-press" title="Change Priority">⣿</button>
                             </div>
                         </div>
                         ${commentsHTML}
                     </div>
                 `;
-
-                // Стили для золотой карточки в матрице
+                
                 const goldClassMatrix = task.isGolden 
                     ? 'border-yellow-400 dark:border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.15)] bg-yellow-50/20 dark:bg-yellow-900/10' 
                     : 'border-borderline-light dark:border-borderline-dark hover:border-brand-light/50 dark:hover:border-brand-dark/50';
-
+                
                 const matrixHTML = `
                     <div id="matrix-task-${task.id}" class="p-4 bg-panel-light dark:bg-panel-dark border ${goldClassMatrix} rounded-md flex items-start gap-3 transition-colors shadow-sm dark:shadow-none hover-magnet tech-card-task group">
-                        
                         <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})" class="tech-checkbox shrink-0 w-5 h-5 mt-0.5 rounded border-2 border-zinc-300 dark:border-zinc-600 bg-base-light dark:bg-base-dark cursor-pointer transition-colors">
-                        
                         <div class="flex-1 min-w-0">
                             <div class="font-bold text-sm ${task.completed ? 'strike-through' : 'text-zinc-900 dark:text-zinc-100'} mb-3 leading-snug transition-colors truncate whitespace-normal" style="font-family: var(--font-primary);">${task.title}</div>
-                            
                             ${macroTag ? `<div class="mb-2">${macroTag}</div>` : ''}
-                            
                             <div class="flex justify-between items-center mt-3 pt-2 border-t border-borderline-light dark:border-borderline-dark transition-colors font-mono-tech">
                                 <div class="flex gap-2 items-center flex-wrap">
                                     <span class="px-2 py-1 bg-base-light dark:bg-base-dark text-zinc-600 dark:text-zinc-400 rounded text-[9px] font-bold uppercase tracking-widest transition-colors">${displaySphereName}</span>
@@ -2047,26 +2029,42 @@
                                 ${task.comments.length > 0 ? `<span class="text-[10px] font-bold text-brand-light dark:text-brand-dark transition-colors">${t('btn_logs')}:${task.comments.length}</span>` : ''}
                             </div>
                         </div>
-
                         <div class="flex flex-col items-center gap-1 shrink-0 -mt-1 -mr-1">
                             <button type="button" onclick="toggleGolden(${task.id})" class="px-1 text-2xl transition-all btn-press ${task.isGolden ? 'text-yellow-500 opacity-100 md:opacity-100 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'text-zinc-300 dark:text-zinc-700 hover:text-yellow-500 opacity-100 md:opacity-0 md:group-hover:opacity-100'}" title="Golden Task">★</button>
-
-                            <button type="button" onclick="openTeleport(${task.id})" class="text-zinc-300 dark:text-zinc-700 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-brand-light dark:hover:text-brand-dark transition-all text-xl font-bold font-mono-tech btn-press cursor-pointer px-1" title="Relocate">
-                                ⣿
-                            </button>
+                            <button type="button" onclick="openTeleport(${task.id})" class="text-zinc-300 dark:text-zinc-700 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-brand-light dark:hover:text-brand-dark transition-all text-xl font-bold font-mono-tech btn-press cursor-pointer px-1" title="Relocate">⣿</button>
                         </div>
-                        
                     </div>
                 `;
-
-                if (task.completed) comp.innerHTML += listHTML;
-                else { qLists[quad - 1].innerHTML += listHTML; mLists[quad - 1].innerHTML += matrixHTML; }
+                
+                if (task.completed) {
+                    totalArchiveCount++;
+                    if (renderedArchiveCount < archiveLimit) {
+                        archiveHTML += listHTML;
+                        renderedArchiveCount++;
+                    }
+                } else {
+                    qLists[quad - 1].innerHTML += listHTML;
+                    mLists[quad - 1].innerHTML += matrixHTML;
+                }
             });
-
+        
+            comp.innerHTML = archiveHTML;
+        
+            // Генерируем кнопки для архива
+            if (totalArchiveCount > archiveLimit) {
+                comp.innerHTML += `
+                <div class="flex flex-wrap md:flex-nowrap gap-3 mt-6 pt-5 border-t border-borderline-light dark:border-borderline-dark">
+                    <button type="button" onclick="loadMoreArchive()" class="flex-1 py-2.5 bg-base-light dark:bg-base-dark text-[10px] font-bold text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark hover:border-brand-light/30 transition-colors border border-borderline-light dark:border-borderline-dark rounded btn-press uppercase tracking-[0.2em] shadow-sm">Показать еще 10</button>
+                    <button type="button" onclick="loadAllArchive()" class="flex-1 py-2.5 bg-base-light dark:bg-base-dark text-[10px] font-bold text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark hover:border-brand-light/30 transition-colors border border-borderline-light dark:border-borderline-dark rounded btn-press uppercase tracking-[0.2em] shadow-sm">Загрузить все (${totalArchiveCount})</button>
+                </div>`;
+            } else if (totalArchiveCount === 0) {
+                comp.innerHTML = `<div class="p-4 border-2 border-dashed border-borderline-light dark:border-borderline-dark rounded-lg text-[11px] font-bold text-zinc-400 dark:text-zinc-600 text-center uppercase tracking-widest transition-colors font-mono-tech">Архив пуст</div>`;
+            }
+        
             qLists.forEach(l => { if(l.innerHTML === '') l.innerHTML = `<div class="p-4 border-2 border-dashed border-borderline-light dark:border-borderline-dark rounded-lg text-[11px] font-bold text-zinc-400 dark:text-zinc-600 text-center uppercase tracking-widest transition-colors font-mono-tech">${t('empty_tasks')}</div>`; });
             mLists.forEach(l => { if(l.innerHTML === '') l.innerHTML = `<div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest text-center mt-3 transition-colors font-mono-tech">${t('empty_matrix')}</div>`; });
         
-        renderArchiveMetrics();
+            renderArchiveMetrics();
         }
 
         // --- РЕЖИМ ФОКУСА ---
@@ -2521,16 +2519,13 @@ YOUR OBJECTIVE (Answer in these steps):
         function escalateLiteTask(id) {
             const t = liteTasks.find(x => x.id === id);
             if(t) {
-                // Переносим текст в основной инпут
                 document.getElementById('taskInput').value = t.text;
                 document.getElementById('taskInput').focus();
 
-                // Удаляем из лайт-буфера
-                liteTasks = liteTasks.filter(x => x.id !== id);
-                localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
-                saveData('priority_tasks', tasks); // Триггерим фоновый синк в облако
-                renderDashLite();
-                showToast('SYSTEM', 'Task escalated. Select scope and impact.', 'info');
+                // Запоминаем ID, но НЕ удаляем из массива!
+                escalatedLiteTaskId = id; 
+
+                showToast('SYSTEM', 'Задача подготовлена. Выберите сферу и нажмите Deploy.', 'info');
             }
         }
 

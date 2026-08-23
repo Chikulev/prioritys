@@ -197,42 +197,6 @@ const translations = {
         "toast_onb_pro": "This is a Premium theme preview. Please select the Cyber theme to complete setup.",
         "ref_promo_text": "Check out the best notepad on the planet: ",
 
-        "dash_subtitle_main_royal": "Kingdom Ledger v8.1",
-        "btn_deploy_royal": "Issue Decree",
-        "task_ph_royal": "Inscribe your quest...",
-        "btn_logs_royal": "Chronicles",
-        "log_ph_royal": "Write with quill...",
-        "macro_title_royal": "EPIC QUESTS",
-        "macro_desc_royal": "> Great kingdoms are built stone by stone.<br>> <span class=\"font-bold text-[#800000]\">Slay the dragons closest to the gates.</span>",
-        "quad_1_royal": "DRAGON THREAT [SEV-0]",
-        "quad_2_royal": "KINGDOM CORE [SEV-1]",
-        "quad_3_royal": "PEASANT WORK [SEV-2]",
-        "quad_4_royal": "TAVERN RUMORS [SEV-3]",
-        "archived_royal": "Dusty Tomes",
-        "empty_tasks_royal": "The realm is peaceful",
-        "lbl_macro_royal": "Epic",
-        "btn_init_macro_royal": "Declare Campaign",
-        "toast_task_upd_royal": "Decree amended",
-        "toast_task_del_royal": "Decree revoked",
-
-        "dash_subtitle_main_brutal": "BRUTAL DASHBOARD V8.1",
-        "btn_deploy_brutal": "EXECUTE",
-        "task_ph_brutal": "What needs to be crushed?...",
-        "btn_logs_brutal": "DUMP",
-        "log_ph_brutal": "Drop info here...",
-        "macro_title_brutal": "BIG MOVES",
-        "macro_desc_brutal": "> Stop planning. Start doing.<br>> <span class=\"font-black uppercase tracking-tighter\">Smash immediate blockers first.</span>",
-        "quad_1_brutal": "DO IT NOW [0]",
-        "quad_2_brutal": "LEVEL UP [1]",
-        "quad_3_brutal": "GRIND [2]",
-        "quad_4_brutal": "TRASH [3]",
-        "archived_brutal": "GRAVEYARD",
-        "empty_tasks_brutal": "NOTHING. GO TOUCH GRASS.",
-        "lbl_macro_brutal": "GIGA",
-        "btn_init_macro_brutal": "START BIG PROJECT",
-        "focus_active_brutal": "IN THE ZONE",
-        "focus_complete_brutal": "SMASH IT()",
-
         "cfg_modules": "SYS.MODULES // Expansions",
         "cfg_shop_module": "Shopping Module",
         "cfg_shop_desc": "Enables a dedicated 'SHOPPING' scope with price tracking.",
@@ -288,8 +252,6 @@ const translations = {
         "cfg_filter_single": "Single-selection (Classic)",
 
         "scope_other": "OTHER",
-        "scope_other_royal": "MISC",       // Королевский: Разное/Смешанное
-        "scope_other_brutal": "VOID",      // Брутал: Пустота/Бездна
         "toast_scope_del": "Scope deleted",
 
         "cfg_shop_desc": "Enables price tracking checkbox for any task across all scopes.",
@@ -606,42 +568,6 @@ const translations = {
         "toast_onb_pro": "Это предпросмотр премиум-темы. Для запуска системы выберите базовую тему Cyber.",
         "ref_promo_text": "Смотри, лучший планер планеты: ",
 
-        "dash_subtitle_main_royal": "Королевская Летопись v8.1",
-        "btn_deploy_royal": "Издать Указ",
-        "task_ph_royal": "Впишите деяние в пергамент...",
-        "btn_logs_royal": "Летопись",
-        "log_ph_royal": "Сделать запись пером...",
-        "macro_title_royal": "ВЕЛИКИЕ СВЕРШЕНИЯ",
-        "macro_desc_royal": "> Истинное величие королевства строится из малых побед.<br>> <span class=\"font-bold text-[#800000]\">Убивайте драконов, что подошли ближе всего к вратам.</span>",
-        "quad_1_royal": "УГРОЗА ДРАКОНА [SEV-0]",
-        "quad_2_royal": "ФУНДАМЕНТ ЗАМКА [SEV-1]",
-        "quad_3_royal": "КРЕСТЬЯНСКИЙ ТРУД [SEV-2]",
-        "quad_4_royal": "СЛУХИ ИЗ ТРАКТИРА [SEV-3]",
-        "archived_royal": "Пыльные фолианты",
-        "empty_tasks_royal": "В королевстве штиль",
-        "lbl_macro_royal": "Эпос",
-        "btn_init_macro_royal": "Огласить Поход",
-        "toast_task_upd_royal": "Указ изменен",
-        "toast_task_del_royal": "Указ отозван",
-        
-        "dash_subtitle_main_brutal": "ЖЕСТКИЙ ДАШБОРД V8.1",
-        "btn_deploy_brutal": "ЗАДЕПЛОИТЬ",
-        "task_ph_brutal": "Что будем уничтожать?...",
-        "btn_logs_brutal": "ДАМП",
-        "log_ph_brutal": "Сбросить инфу сюда...",
-        "macro_title_brutal": "БАЗА",
-        "macro_desc_brutal": "> Хватит планировать. Начинай делать.<br>> <span class=\"font-black uppercase tracking-tighter\">Разнеси блокеры в первую очередь.</span>",
-        "quad_1_brutal": "ГОРИТ [0]",
-        "quad_2_brutal": "КАЧ [1]",
-        "quad_3_brutal": "ГРИНД [2]",
-        "quad_4_brutal": "МУСОРКА [3]",
-        "archived_brutal": "КЛАДБИЩЕ",
-        "empty_tasks_brutal": "ПУСТО. ИДИ ПОТРОГАЙ ТРАВУ.",
-        "lbl_macro_brutal": "ГИГА",
-        "btn_init_macro_brutal": "НОВЫЙ ГИГА-ПРОЕКТ",
-        "focus_active_brutal": "В ЗОНЕ",
-        "focus_complete_brutal": "<БОМБИМ>()",
-
         "cfg_modules": "SYS.MODULES // Расширения",
         "cfg_shop_module": "Модуль Покупок",
         "cfg_shop_desc": "Добавляет системную сферу 'ПОКУПКИ' с трекингом цен.",
@@ -697,8 +623,6 @@ const translations = {
         "cfg_filter_single": "Одиночный выбор (Классика)",
 
         "scope_other": "ДРУГОЕ",
-        "scope_other_royal": "ПРОЧЕЕ",     // Королевский
-        "scope_other_brutal": "БЕЗДНА",    // Брутал
         "toast_scope_del": "Сфера удалена",
 
         "cfg_shop_desc": "Добавляет чекбокс 'Покупка' для отслеживания цен в абсолютно любой сфере.",
@@ -819,13 +743,16 @@ const translations = {
 
 function t(key) {
     const lang = localStorage.getItem('priority_lang') || 'en';
-    const theme = localStorage.getItem('priority_theme') || 'cyber';
-    if (theme !== 'cyber') {
-        const themeKey = key + '_' + theme;
-        if (translations[lang] && translations[lang][themeKey]) {
-            return translations[lang][themeKey];
+    const themeId = localStorage.getItem('priority_theme') || 'cyber';
+    
+    // Сначала ищем слово внутри кастомного словаря текущей темы
+    if (typeof SYSTEM_THEMES !== 'undefined' && SYSTEM_THEMES[themeId] && SYSTEM_THEMES[themeId].locales) {
+        if (SYSTEM_THEMES[themeId].locales[lang] && SYSTEM_THEMES[themeId].locales[lang][key]) {
+            return SYSTEM_THEMES[themeId].locales[lang][key];
         }
     }
+    
+    // Если его там нет — берем базовое значение
     return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
 }
 

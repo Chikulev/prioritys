@@ -15,19 +15,36 @@
     <meta property="og:image" content="https://prioritys.ru/og-image.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="themes.js"></script>
     <script src="locales.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Базовые переменные (фолбэк до загрузки themes.js) */
         :root {
-            --color-brand-light: #06B6D4; --color-brand-dark: #22D3EE;
-            --color-base-light: #F4F4F5; --color-base-dark: #09090B;
-            --color-panel-light: #FFFFFF; --color-panel-dark: #121214;
-            --color-border-light: #E4E4E7; --color-border-dark: #27272A;
+            --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
+            --color-base-light: #FAFAFA; --color-base-dark: #09090B;
+            --color-panel-light: #ffffff; --color-panel-dark: #121214;
+            --color-border-light: #d4d4d8; --color-border-dark: #27272a;
+            --font-primary: 'JetBrains Mono', monospace;
         }
+
+        body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; }
+
+        /* Системные анимации кнопок */
+        .btn-press { transition: transform 0.1s ease; } 
+        .btn-press:active { transform: scale(0.95); }
+
+        /* LITE-специфичные классы */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .heatmap-cell { width: 12px; height: 12px; border-radius: 2px; }
         
-        /* Анимация Уведомления */
+        /* Системные курсоры */
+        body.cursor-tech, body.cursor-tech * { cursor: crosshair !important; }
+        body.cursor-royal, body.cursor-royal * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🖋️</text></svg>") 0 20, auto !important; }
+        body.cursor-sword, body.cursor-sword * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🗡️</text></svg>") 0 20, auto !important; }
+        body.cursor-wand, body.cursor-wand * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🪄</text></svg>") 0 20, auto !important; }
+
+        /* Анимация Уведомления BRAVO */
         .animate-bravo { animation: bravo-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes bravo-pop { 
             0% { transform: translate(-50%, 20px); opacity: 0; }
@@ -41,6 +58,9 @@
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(0.8); opacity: 0; }
         }
+
+        /* Масштаб системы */
+        html { font-size: calc(16px * var(--system-scale, 1)) !important; }
     </style>
     <script>
         tailwind.config = {

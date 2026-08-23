@@ -31,9 +31,11 @@
             }
         }
     </script>
+    <script src="themes.js"></script>
     <script src="locales.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Базовые переменные (фолбэк до загрузки themes.js) */
         :root {
             --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
             --color-base-light: #FAFAFA; --color-base-dark: #09090B;
@@ -42,44 +44,22 @@
             --font-primary: 'JetBrains Mono', monospace;
         }
 
-        body.theme-royal {
-            --color-brand-light: #8B0000; --color-brand-dark: #D4AF37;
-            --color-base-light: #FDFBF7; --color-base-dark: #1A120B;
-            --color-panel-light: #F5EEDB; --color-panel-dark: #2A1D12;
-            --color-border-light: #D9CBB0; --color-border-dark: #3D2B1F;
-            --font-primary: 'Georgia', serif;
-        }
-
-        body.theme-brutal {
-            --color-brand-light: #FF3366; --color-brand-dark: #00FFCC;
-            --color-base-light: #E0E722; --color-base-dark: #121212;
-            --color-panel-light: #FFFFFF; --color-panel-dark: #000000;
-            --color-border-light: #000000; --color-border-dark: #E0E722;
-            --font-primary: 'Inter', sans-serif;
-        }
-        body.theme-brutal .rounded, body.theme-brutal .rounded-md, body.theme-brutal .rounded-lg, body.theme-brutal .rounded-sm, body.theme-brutal .rounded-full { border-radius: 0px !important; }
-        body.theme-brutal .border, body.theme-brutal .border-2, body.theme-brutal .border-b, body.theme-brutal .border-t { border-width: 3px !important; }
-        body.theme-brutal .shadow-sm, body.theme-brutal .shadow-md, body.theme-brutal .shadow-lg, body.theme-brutal .shadow-2xl { box-shadow: 6px 6px 0px var(--color-border-light) !important; }
-        .dark body.theme-brutal .shadow-sm, .dark body.theme-brutal .shadow-md, .dark body.theme-brutal .shadow-lg, .dark body.theme-brutal .shadow-2xl { box-shadow: 6px 6px 0px var(--color-border-dark) !important; }
-        body.theme-brutal .hover-magnet:hover { transform: translate(-4px, -4px) !important; box-shadow: 10px 10px 0px var(--color-border-light) !important; }
-        .dark body.theme-brutal .hover-magnet:hover { box-shadow: 10px 10px 0px var(--color-border-dark) !important; }
-        body.theme-brutal .btn-press:active { transform: translate(4px, 4px) !important; box-shadow: 0px 0px 0px transparent !important; }
-
         body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; overflow-x: hidden; }
-        .bg-tech-grid { background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px); background-size: 20px 20px; }
-        .dark .bg-tech-grid { background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px); }
-        body.theme-royal .bg-tech-grid { background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>'); }
-        body.theme-brutal .bg-tech-grid { background-image: none; }
 
+        /* Системные анимации и классы */
         .btn-press { transition: transform 0.1s ease; } .btn-press:active { transform: scale(0.95); }
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; } 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .premium-locked { position: relative; overflow: hidden; }
         .premium-locked::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px); pointer-events: none; z-index: 10; }
         .dark .premium-locked::after { background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px); }
         
-        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-thumb { background: #A1A1AA; border-radius: 0px; } .dark ::-webkit-scrollbar-thumb { background: #52525B; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } 
+        ::-webkit-scrollbar-thumb { background: #A1A1AA; border-radius: 0px; } 
+        .dark ::-webkit-scrollbar-thumb { background: #52525B; }
         
+        /* Кастомные курсоры (настраиваются независимо от тем) */
         body.cursor-tech, body.cursor-tech * { cursor: crosshair !important; }
         body.cursor-royal, body.cursor-royal * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🖋️</text></svg>") 0 20, auto !important; }
         body.cursor-sword, body.cursor-sword * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🗡️</text></svg>") 0 20, auto !important; }
@@ -88,12 +68,13 @@
         .cursor-box.active { border-color: var(--color-brand-light); background-color: rgba(8, 145, 178, 0.1); }
         .dark .cursor-box.active { border-color: var(--color-brand-dark); background-color: rgba(6, 182, 212, 0.1); }
 
+        /* Уведомления */
         .toast-enter { animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         .toast-leave { animation: fadeOutRight 0.3s ease-in forwards; }
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
-        /* Custom Toggle Switch */
+        /* Системные переключатели (Toggle) */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-border-light); transition: .4s; border-radius: 24px; }
@@ -102,12 +83,9 @@
         input:checked + .slider { background-color: var(--color-brand-light); }
         .dark input:checked + .slider { background-color: var(--color-brand-dark); }
         input:checked + .slider:before { transform: translateX(20px); }
-        body.theme-brutal .slider, body.theme-brutal .slider:before { border-radius: 0; }
 
-        html { 
-        font-size: calc(16px * var(--system-scale, 1)) !important; 
-        }
-
+        /* Масштабирование */
+        html { font-size: calc(16px * var(--system-scale, 1)) !important; }
     </style>
 </head>
 <body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative transition-colors">
@@ -314,35 +292,7 @@
                         <span data-i18n="ui_config" class="text-[10px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-1 rounded font-mono-tech">UI CONFIG</span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="themesGrid">
-                        <div id="theme-card-cyber" class="theme-card border border-borderline-light dark:border-borderline-dark rounded-md p-5 relative overflow-hidden bg-base-light dark:bg-base-dark hover-magnet transition-all" data-theme="cyber">
-                            <div id="badge-theme-cyber" class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold px-2 py-1 rounded hidden font-mono-tech"></div>
-                            <h3 class="font-bold text-lg mb-1 pr-16" style="font-family: 'JetBrains Mono', monospace;">Cyber-Industrial</h3>
-                            <p class="text-[11px] text-zinc-500 mb-4" style="font-family: 'JetBrains Mono', monospace;">Default developer pro aesthetics.</p>
-                            <button id="btn-theme-cyber" onclick="activateTheme('cyber')" class="theme-btn w-full py-2 bg-brand-light dark:bg-brand-dark text-white dark:text-black text-xs font-bold rounded btn-press font-mono-tech transition-colors">ACTIVATE</button>
-                        </div>
-
-                        <div id="theme-card-royal" class="theme-card premium-locked border border-borderline-light dark:border-borderline-dark rounded-md p-5 relative bg-panel-light dark:bg-panel-dark group hover-magnet transition-all" data-theme="royal">
-                            <div id="badge-theme-royal" class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold px-2 py-1 rounded hidden z-20 font-mono-tech"></div>
-                            <h3 class="font-bold text-lg mb-1 text-[#800000]" style="font-family: 'Georgia', serif;">Royal Fantasy</h3>
-                            <p class="text-[11px] text-zinc-500 mb-4" style="font-family: 'Georgia', serif;">Medieval parchment, wax seals, and epic quests.</p>
-                            <button id="btn-theme-royal" onclick="activateTheme('royal')" class="theme-btn pro-btn relative z-20 w-full py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black text-xs font-bold rounded transition-colors btn-press font-mono-tech">UNLOCK</button>
-                        </div>
-
-                        <div id="theme-card-brutal" class="theme-card premium-locked border border-borderline-light dark:border-borderline-dark rounded-md p-5 relative bg-panel-light dark:bg-panel-dark group hover-magnet transition-all" data-theme="brutal">
-                            <div id="badge-theme-brutal" class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold px-2 py-1 rounded hidden z-20 font-mono-tech"></div>
-                            <h3 class="font-bold text-lg mb-1 pr-16 text-[#FF3366] dark:text-[#00FFCC]" style="font-family: 'Inter', sans-serif; text-transform: uppercase; font-weight: 900;">Neo-Brutalism</h3>
-                            <p class="text-[11px] text-zinc-500 mb-4" style="font-family: 'JetBrains Mono', monospace;">High contrast, sharp edges, pure aggressive action.</p>
-                            <button id="btn-theme-brutal" onclick="activateTheme('brutal')" class="theme-btn pro-btn relative z-20 w-full py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black text-xs font-bold rounded transition-colors btn-press font-mono-tech">UNLOCK</button>
-                        </div>
-
-                        <div class="border border-dashed border-brand-light/50 dark:border-brand-dark/50 rounded-md p-5 relative bg-brand-light/5 dark:bg-brand-dark/5 flex flex-col items-center justify-center text-center font-mono-tech">
-                            <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✨</div>
-                            <h3 data-i18n="ai_theme" class="font-bold text-sm mb-1 text-brand-light dark:text-brand-dark">AI Theme Generator</h3>
-                            <p data-i18n="ai_desc" class="text-[10px] text-zinc-500 mb-4 px-4">Generate custom UI schemes using LLM Prompts.</p>
-                            <button data-i18n="btn_soon" class="w-full py-2 bg-zinc-200 dark:bg-zinc-800 text-zinc-500 text-xs font-bold rounded cursor-not-allowed transition-colors">COMING SOON</button>
-                        </div>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="themesGrid"></div>
                 </div>
 
                 <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden transition-colors">
@@ -553,7 +503,7 @@
             document.documentElement.style.setProperty('--system-scale', val);
             showToast(t('toast_sys'), 'Scale updated: ' + (val * 100) + '%', 'info');
 
-            syncStateToCloud();
+            syncStateToCloud(true);
         }
 
         function toggleLang() {
@@ -567,7 +517,7 @@
             renderShopUI();
             renderScopes();
             showToast(t('toast_sys'), t('toast_lang'), 'info');
-            syncStateToCloud(); // <-- ДОБАВИТЬ СЮДА
+            syncStateToCloud(true); // <-- ДОБАВИТЬ СЮДА
         }
 
         function updateThemeIcons() {
@@ -597,50 +547,10 @@
         }
 
         function applyAppTheme() {
-    const theme = localStorage.getItem('priority_theme') || 'cyber';
-    document.body.classList.remove('theme-cyber', 'theme-royal', 'theme-brutal');
-    if(theme !== 'cyber') document.body.classList.add(`theme-${theme}`);
-    applyI18n(); 
-    
-    const themesArr = ['cyber', 'royal', 'brutal'];
-    themesArr.forEach(tName => {
-        const card = document.getElementById('theme-card-' + tName);
-        const btn = document.getElementById('btn-theme-' + tName);
-        const badge = document.getElementById('badge-theme-' + tName);
-        if(!card || !btn) return;
-        
-        // СБРОС: Делаем кнопку "неактивной" (твои цвета)
-        btn.classList.remove('bg-brand-light', 'dark:bg-brand-dark');
-        btn.classList.add('bg-zinc-900', 'dark:bg-zinc-100');
-        
-        // Сбрасываем рамку карточки
-        card.classList.remove('border-brand-light', 'dark:border-brand-dark');
-        card.classList.add('border-borderline-light', 'dark:border-borderline-dark');
-        
-        if(theme === tName) {
-            // АКТИВНАЯ ТЕМА: Красим кнопку в бирюзовый (твой цвет)
-            btn.classList.remove('bg-zinc-900', 'dark:bg-zinc-100');
-            btn.classList.add('bg-brand-light', 'dark:bg-brand-dark');
-            
-            card.classList.remove('border-borderline-light', 'dark:border-borderline-dark');
-            card.classList.add('border-brand-light', 'dark:border-brand-dark');
-            
-            btn.innerText = t('btn_in_use');
-            badge.innerHTML = t('theme_active');
-            badge.className = "theme-status-badge absolute top-3 right-3 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black px-2 py-1 rounded font-mono-tech z-20";
-        } else {
-            // НЕАКТИВНАЯ ТЕМА: Логика текста
-            if (tName === 'cyber' || isPro) {
-                btn.innerText = t('btn_activate');
-                badge.className = "hidden";
-            } else {
-                btn.innerText = t('btn_unlock');
-                badge.innerHTML = "🔒 PRO";
-                badge.className = "theme-status-badge absolute top-3 right-3 text-[9px] font-bold text-zinc-500 bg-zinc-200 dark:bg-zinc-800 px-2 py-1 rounded group-hover:bg-brand-light dark:group-hover:bg-brand-dark group-hover:text-white dark:group-hover:text-black transition-colors z-20 pro-badge font-mono-tech";
+            if (typeof applySystemTheme === 'function') {
+                applySystemTheme(); // Движок сам сделает всю магию!
             }
         }
-    });
-}
 
         function activateTheme(themeName) {
             if(!isPro && themeName !== 'cyber') { showToast(t('toast_acc_denied'), t('toast_upgrade_pro'), 'error'); return; }
@@ -648,6 +558,9 @@
             applyAppTheme();
             showToast(t('toast_theme_mgr'), t('toast_theme_act'), 'success');
             syncStateToCloud(); // <-- ДОБАВИТЬ СЮДА
+            renderThemesMarketplace()
+
+            syncStateToCloud(true)
         }
 
         // --- CURSORS ---
@@ -720,7 +633,7 @@
             }
             localStorage.setItem('priority_cursor', cursorClass);
             applyCursor();
-            syncStateToCloud();
+            syncStateToCloud(true);
         }
 
         function setCustomEmojiCursor(val) {
@@ -735,11 +648,11 @@
                 const singleEmoji = Array.from(emoji)[0]; 
                 localStorage.setItem('priority_cursor', 'emoji:' + singleEmoji);
                 applyCursor();
-                syncStateToCloud();
+                syncStateToCloud(true);
             } else {
                 localStorage.setItem('priority_cursor', 'default');
                 applyCursor();
-                syncStateToCloud();
+                syncStateToCloud(true);
             }
         }
 
@@ -784,7 +697,7 @@
             // Если есть функция renderScopes, обновляем и её
             if (typeof renderScopes === 'function') renderScopes();
 
-            syncStateToCloud();
+            syncStateToCloud(true);
         }
 
         function saveCurrency() {
@@ -792,7 +705,7 @@
             localStorage.setItem('priority_currency', val);
             showToast(t('toast_sys'), 'Currency updated', 'info');
 
-            syncStateToCloud();
+            syncStateToCloud(true);
         }
 
         // --- SCOPES ---
@@ -917,22 +830,19 @@
         
         // --- ОБЛАЧНЫЙ ДВИЖОК ДЛЯ НАСТРОЕК ---
         let cloudSyncTimeout = null;
-            
-        function syncStateToCloud() {
+
+        // Добавили параметр immediate (по умолчанию false)
+        function syncStateToCloud(immediate = false) {
             const username = localStorage.getItem('priority_user');
             if (!username) return;
         
-            clearTimeout(cloudSyncTimeout);
-            cloudSyncTimeout = setTimeout(async () => {
+            const performSync = async () => {
                 const appState = {
-                    // 1. Данные ядра
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
                     templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
                     badges: JSON.parse(localStorage.getItem('priority_badges') || '[]'),
-                    
-                    // 2. Настройки и визуал (НОВОЕ)
                     theme: localStorage.getItem('priority_theme') || 'cyber',
                     cursor: localStorage.getItem('priority_cursor') || 'default',
                     lang: localStorage.getItem('priority_lang') || 'en',
@@ -940,18 +850,26 @@
                     currency: localStorage.getItem('priority_currency') || '₽',
                     scale: localStorage.getItem('priority_scale') || '1'
                 };
-                
+
                 try {
                     await supabaseClient.from('users').update({ app_data: appState }).eq('username', username);
-                    console.log('☁️ Config & Preferences synced to cloud');
+                    console.log('☁️ Config synced to cloud');
                 } catch (err) { console.error('Cloud sync failed', err); }
-            }, 1500);
+            };
+        
+            if (immediate) {
+                clearTimeout(cloudSyncTimeout);
+                performSync(); // Отправляем мгновенно
+            } else {
+                clearTimeout(cloudSyncTimeout);
+                cloudSyncTimeout = setTimeout(performSync, 1500); // Ждем 1.5 сек
+            }
         }
 
         function saveScopesData() { 
             localStorage.setItem('priority_scopes', JSON.stringify(scopes)); 
             renderScopes(); 
-            syncStateToCloud(); // <-- Теперь изменения сфер летят прямо в облако!
+            syncStateToCloud(true); // <-- Теперь изменения сфер летят прямо в облако!
         }
 
         // --- PREMIUM & FUNDING ---
@@ -1094,6 +1012,7 @@
                     applyI18n();
                     renderShopUI();
                     renderPremiumState();
+                    renderThemesMarketplace();
 
                     console.log('☁️ Preferences synchronized from cloud');
                 }
@@ -1211,6 +1130,54 @@
             };
             reader.readAsText(file);
         }
+
+        function renderThemesMarketplace() {
+            const grid = document.getElementById('themesGrid');
+            if(!grid) return;
+            
+            const activeTheme = localStorage.getItem('priority_theme') || 'cyber';
+            const lang = localStorage.getItem('priority_lang') || 'en';
+            
+            let html = '';
+            Object.values(SYSTEM_THEMES).forEach(theme => {
+                const isLocked = theme.isPro && !isPro;
+                const isActive = activeTheme === theme.id;
+                const btnText = isActive ? t('btn_in_use') : (isLocked ? t('btn_unlock') : t('btn_activate'));
+                
+                const btnClass = isActive 
+                    ? 'bg-brand-light dark:bg-brand-dark text-white dark:text-black' 
+                    : 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black';
+                
+                const badgeHTML = isActive 
+                    ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black px-2 py-1 rounded font-mono-tech z-20">${t('theme_active')}</div>`
+                    : (isLocked ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold text-zinc-500 bg-zinc-200 dark:bg-zinc-800 px-2 py-1 rounded z-20 pro-badge font-mono-tech">🔒 PRO</div>` : '');
+
+                html += `
+                    <div id="theme-card-${theme.id}" class="theme-card ${isLocked ? 'premium-locked' : ''} border ${isActive ? 'border-brand-light dark:border-brand-dark' : 'border-borderline-light dark:border-borderline-dark'} rounded-md p-5 relative overflow-hidden bg-panel-light dark:bg-panel-dark group hover-magnet transition-all">
+                        ${badgeHTML}
+                        <h3 class="font-bold text-lg mb-1" style="font-family: ${theme.fontPrimary}; color: var(--color-brand-light);">${theme.icon} ${theme.name}</h3>
+                        <p class="text-[11px] text-zinc-500 mb-4" style="font-family: ${theme.fontPrimary};">${theme.desc[lang] || theme.desc.en}</p>
+                        <button onclick="activateTheme('${theme.id}')" class="theme-btn relative z-20 w-full py-2 ${btnClass} text-xs font-bold rounded transition-colors btn-press font-mono-tech">${btnText}</button>
+                    </div>
+                `;
+            });
+            
+            // Добавляем карточку генератора AI в конец
+            html += `
+                <div class="border border-dashed border-brand-light/50 dark:border-brand-dark/50 rounded-md p-5 relative bg-brand-light/5 dark:bg-brand-dark/5 flex flex-col items-center justify-center text-center font-mono-tech">
+                    <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✨</div>
+                    <h3 class="font-bold text-sm mb-1 text-brand-light dark:text-brand-dark">${t('ai_theme')}</h3>
+                    <p class="text-[10px] text-zinc-500 mb-4 px-4">${t('ai_desc')}</p>
+                    <button class="w-full py-2 bg-zinc-200 dark:bg-zinc-800 text-zinc-500 text-xs font-bold rounded cursor-not-allowed transition-colors">${t('btn_soon')}</button>
+                </div>
+            `;
+            grid.innerHTML = html;
+        }
+
+        // Вызови её при загрузке:
+        document.addEventListener('DOMContentLoaded', () => {
+            renderThemesMarketplace();
+        });
 
         function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
 

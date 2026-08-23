@@ -9,6 +9,7 @@
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brand: { light: 'var(--color-brand-light)', dark: 'var(--color-brand-dark)' }, base: { light: 'var(--color-base-light)', dark: 'var(--color-base-dark)' }, panel: { light: 'var(--color-panel-light)', dark: 'var(--color-panel-dark)' }, borderline: { light: 'var(--color-border-light)', dark: 'var(--color-border-dark)' } } } } }
     </script>
+    <script src="themes.js"></script>
     <script src="locales.js"></script>
     <style>
         :root {
@@ -223,7 +224,9 @@
         let selectedTheme = 'cyber';
 
         function applyAppTheme() {
-            document.body.className = `bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen flex items-center justify-center p-4 theme-${selectedTheme}`;
+            if (typeof applySystemTheme === 'function') {
+                applySystemTheme(); // Движок сам сделает всю магию!
+            }
         }
 
         function toggleTheme() {
