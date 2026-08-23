@@ -49,7 +49,7 @@
             --system-scale: 1;
         }
 
-        body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; overflow-x: hidden; }
+        body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
         /* Кастомные чекбоксы */
         input[type="radio"].peer { display: none; }
@@ -123,7 +123,7 @@
         }
     </style>
 </head>
-<body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative transition-colors">
+<body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative">
     <script>
         (function() {
             // 1. Темная/Светлая тема
@@ -168,7 +168,8 @@
             <div class="mb-10">
                 <div data-i18n="auth_welcome_title" class="text-brand-light dark:text-brand-dark text-[11px] mb-3 tracking-[0.4em] font-black font-mono-tech uppercase animate-pulse">SYSTEM_AUTH_REQUIRED</div>
                 <h1 class="text-6xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100 font-mono-tech mb-8">PRIORITYS<span class="text-brand-light dark:text-brand-dark animate-ping">_</span></h1>
-                
+                <div id="userGreeting" class="text-xs font-bold text-brand-light mt-2 uppercase tracking-widest font-mono-tech"></div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                     <div class="space-y-4">
                         <div class="bg-brand-light/5 dark:bg-brand-dark/5 border-l-2 border-brand-light dark:border-brand-dark p-4 transition-transform hover:scale-[1.02]">
@@ -1261,6 +1262,8 @@
 
         // --- MAIN APP LOGIC ---
         function loadDataFromStorage() {
+            document.getElementById('userGreeting').innerText = "Привет, " + (localStorage.getItem('priority_user') || 'UNKNOWN');
+
             dynamicScopes = JSON.parse(localStorage.getItem('priority_scopes')) || [];
             tasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
             templates = JSON.parse(localStorage.getItem('priority_templates')) || [];

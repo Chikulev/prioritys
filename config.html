@@ -44,7 +44,7 @@
             --font-primary: 'JetBrains Mono', monospace;
         }
 
-        body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; overflow-x: hidden; }
+        body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
         /* Системные анимации и классы */
         .btn-press { transition: transform 0.1s ease; } .btn-press:active { transform: scale(0.95); }
@@ -88,7 +88,7 @@
         html { font-size: calc(16px * var(--system-scale, 1)) !important; }
     </style>
 </head>
-<body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative transition-colors">
+<body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative">
     <script>
         (function() {
             // 1. Темная/Светлая тема
