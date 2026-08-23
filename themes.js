@@ -284,6 +284,48 @@ const SYSTEM_THEMES = {
             ru: { "dash_subtitle_main": "ГЛАВНЫЙ ЦЕХ", "macro_title": "ПРОИЗВОДСТВО", "quad_1": "АВАРИЯ 🔥 [Q1]", "quad_2": "ФУНДАМЕНТ 🏗️ [Q2]", "quad_3": "КОНВЕЙЕР ⚙️ [Q3]", "quad_4": "В УТИЛЬ 🗑️ [Q4]", "empty_tasks": "СТАНКИ ПРОСТАИВАЮТ.", "lbl_macro": "ЦЕХ", "btn_init_macro": "ЗАПУСТИТЬ ЛИНИЮ", "archived": "ОТГРУЖЕНО" }
         }
     },
+    kawaii: {
+        id: 'kawaii',
+        name: 'Kawaii Bubblegum',
+        fontPrimary: "'Nunito', 'Segoe UI', sans-serif",
+        desc: { en: "Fluffy, pink, and absolutely adorable.", ru: "Зефирно, розово и абсолютно очаровательно." },
+        icon: "🎀",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#F472B6", "--color-brand-dark": "#EC4899",
+            "--color-base-light": "#FDF2F8", "--color-base-dark": "#4A1D38",
+            "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#5D2446",
+            "--color-border-light": "#FBCFE8", "--color-border-dark": "#831843"
+        },
+        customCss: `
+            body { background: radial-gradient(circle at top right, #FDF2F8, #FCE7F3, #FBCFE8) !important; background-attachment: fixed !important; }
+            .dark body { background: radial-gradient(circle at top right, #4A1D38, #3A142A, #2A0E1D) !important; background-attachment: fixed !important; }
+            
+            /* Максимально круглые, пухлые элементы */
+            .rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: 32px !important; }
+            .border, .border-2 { border-width: 3px !important; border-color: var(--color-border-light) !important; }
+            .dark .border, .dark .border-2 { border-color: var(--color-border-dark) !important; }
+            
+            /* Мягкие, цветные тени */
+            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: 0 12px 30px rgba(244, 114, 182, 0.25) !important; }
+            .dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4) !important; }
+            
+            .btn-press { border-radius: 9999px !important; font-weight: 900 !important; } 
+            
+            /* Пухлые инпуты */
+            input[type="text"], input[type="time"], select { 
+                border-radius: 24px !important; 
+                padding: 0.8rem 1.5rem !important; 
+                background: rgba(255,255,255,0.6) !important; 
+            }
+            .dark input[type="text"], .dark input[type="time"], .dark select { background: rgba(0,0,0,0.2) !important; }
+            h1, h2, h3 { font-weight: 900 !important; letter-spacing: -0.02em !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "MAGIC DASHBOARD 💖", "macro_title": "DREAMS", "quad_1": "DO IT NOW! 🚨 [Q1]", "quad_2": "CUTE IDEAS 🌸 [Q2]", "quad_3": "BORING STUFF 🥱 [Q3]", "quad_4": "IGNORE 🗑️ [Q4]", "empty_tasks": "You are amazing! ✨", "lbl_macro": "Dream", "btn_init_macro": "Make a Wish", "archived": "Sweet Memories" },
+            ru: { "dash_subtitle_main": "ВОЛШЕБНАЯ ПАНЕЛЬ 💖", "macro_title": "МЕЧТЫ И ЦЕЛИ", "quad_1": "ОЧЕНЬ ВАЖНО 🚨 [Q1]", "quad_2": "ВДОХНОВЕНИЕ 🌸 [Q2]", "quad_3": "СКУЧНАЯ РУТИНА 🥱 [Q3]", "quad_4": "В МУСОРКУ 🗑️ [Q4]", "empty_tasks": "Ты просто супер! ✨", "lbl_macro": "Мечта", "btn_init_macro": "Загадать желание", "archived": "Сладкие воспоминания" }
+        }
+    },
     library: {
         id: 'library',
         name: 'Grand Library',
