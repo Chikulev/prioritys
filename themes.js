@@ -76,7 +76,7 @@ const SYSTEM_THEMES = {
         icon: "🧊",
         isPro: true,
         cssVars: {
-            "--color-brand-light": "#000000", "--color-brand-dark": "#ffffff",
+            "--color-brand-light": "#5b5b5b", "--color-brand-dark": "#ffffff",
             "--color-base-light": "#F1F5F9", "--color-base-dark": "#020617",
             "--color-panel-light": "rgba(255, 255, 255, 0.55)", "--color-panel-dark": "rgba(15, 23, 42, 0.55)",
             "--color-border-light": "rgba(255, 255, 255, 0.7)", "--color-border-dark": "rgba(255, 255, 255, 0.08)"
