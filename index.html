@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <script>
+        // Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
+        const cachedCss = localStorage.getItem('priority_theme_css_cache');
+        if (cachedCss) {
+            const style = document.createElement('style');
+            style.id = 'dynamic-theme-styles';
+            style.innerHTML = cachedCss;
+            document.head.appendChild(style);
+        }
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PRIORITYS // SYS.DASHBOARD</title>
@@ -141,10 +152,6 @@
                 const textColor = isDark ? '%2306B6D4' : '%230891B2';
                 link.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='${textColor}' text-anchor='middle'>/&gt;_</text></svg>`;
             }
-
-            // 3. Применение PRO-стиля (Brutal/Royal)
-            const theme = localStorage.getItem('priority_theme') || 'cyber';
-            if (theme !== 'cyber') document.body.classList.add('theme-' + theme);
 
             // 4. Применение кастомного курсора
             const cursor = localStorage.getItem('priority_cursor') || 'default';
@@ -791,22 +798,6 @@
                     setTimeout(() => toast.remove(), 400); 
                 }, duration);
             }
-        }
-
-        function t(key) {
-            const lang = localStorage.getItem('priority_lang') || 'en';
-            const theme = localStorage.getItem('priority_theme') || 'cyber';
-            if (theme !== 'cyber') {
-                const themeKey = key + '_' + theme;
-                if (translations[lang] && translations[lang][themeKey]) { return translations[lang][themeKey]; }
-            }
-            return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
-        }
-
-        function applyI18n() {
-            document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
-            document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
-            document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
         }
 
         function toggleLang() {
@@ -1551,6 +1542,8 @@
                 if(macroId) newTask.macroId = parseInt(macroId);
                 
                 tasks.unshift(newTask);
+
+                pushSysLog('TASK_DEPLOY', `Deployed new task: ${newTask.title}`);
                 
                 input.value = '';
                 if(shopModuleActive) {
@@ -1763,6 +1756,7 @@
             if(!task.completed) {
                 task.completedAt = getDateTimeStr();
                 task.completed = true;
+                pushSysLog('TASK_DONE', `Completed task: ${task.title}`);
                 
                 // УМНЫЙ РЕНДЕР: Мгновенно переносим карточку в DOM, не трогая другие!
                 const taskCard = document.getElementById(`task-${id}`);
@@ -1788,6 +1782,7 @@
                     renderTasks(); // Фолбек для вида "Матрица"
                 }
             } else {
+                pushSysLog('TASK_RESTORE', `Restored task: ${task.title}`);
                 // Если отменяем завершение (возвращаем) — здесь лучше полный рендер,
                 // так как нужно вернуть задачу в правильный квадрант
                 task.completed = false;
@@ -2319,6 +2314,15 @@
                 modal.classList.remove('opacity-0'); 
                 modal.querySelector('div').classList.remove('scale-95'); 
             }, 10);
+        }
+
+        function pushSysLog(action, details) {
+            const logs = JSON.parse(localStorage.getItem('priority_sys_logs') || '[]');
+            const d = new Date();
+            const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            logs.unshift({ action, details, time });
+            if (logs.length > 50) logs.pop(); // Храним только последние 50 записей
+            localStorage.setItem('priority_sys_logs', JSON.stringify(logs));
         }
 
         function closeTeleport() {
