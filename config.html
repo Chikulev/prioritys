@@ -114,6 +114,7 @@
             // 4. Применение кастомного курсора
             const cursor = localStorage.getItem('priority_cursor') || 'default';
             if (cursor !== 'default') document.body.classList.add(cursor);
+
         })();
     </script>
 
@@ -148,7 +149,10 @@
                     <div data-i18n="cfg_subtitle" class="text-[11px] text-zinc-500 uppercase tracking-widest mt-1 font-mono-tech">Preferences & Marketplace</div>
                 </div>
             </div>
-            <div class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400">                
+            <div class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400">    
+                
+                <span id="userGreeting" class="text-[10px] font-bold text-brand-light dark:text-brand-dark uppercase tracking-widest hidden md:inline-block mr-2"></span>
+                
                 <span class="text-zinc-300 dark:text-zinc-700">|</span>
                 <a href="index.html" data-i18n-title="nav_dash" class="shrink-0 p-2 hover:text-brand-light dark:hover:text-brand-dark hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors btn-press">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -164,6 +168,16 @@
             
             <div class="space-y-6 lg:col-span-1">
                 <div id="proBanner" class="bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-zinc-100 dark:to-white p-6 rounded-md shadow-sm border border-zinc-700 dark:border-zinc-200 relative overflow-hidden font-mono-tech hover-magnet transition-all">
+                </div>
+
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech mt-6">
+                    <div class="flex items-center gap-2 mb-4 border-b border-borderline-light dark:border-borderline-dark pb-4">
+                        <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">📡</div>
+                        <h2 data-i18n="cfg_activity" class="text-lg font-bold uppercase tracking-widest">Sys.Logs // Activity</h2>
+                    </div>
+                    <div id="sysLogsContainer" class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                        <!-- Логи будут здесь -->
+                    </div>
                 </div>
 
                 <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech">
@@ -206,6 +220,7 @@
                     <p data-i18n="reset_desc" class="text-xs text-red-800 dark:text-red-400 mb-6 leading-relaxed">Внимание: Это удалит все задачи...</p>
                     <button onclick="askFactoryReset()" data-i18n="btn_reset" class="btn-press w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Начать новую жизнь</button>
                 </div>
+
             </div>
 
             <div class="space-y-6 lg:col-span-2">
@@ -972,6 +987,8 @@
 
         // --- SAFE INITIALIZATION ---
         function loadDataFromStorage() {
+            document.getElementById('userGreeting').innerText = "" + (localStorage.getItem('priority_user') || 'UNKNOWN');
+
             let storedScopes = localStorage.getItem('priority_scopes');
             if (!storedScopes) {
                 scopes = ['СТУДИЯ', 'АВИТО', '3Д_ПЕЧАТЬ', 'ВУЗ', 'МАСТЕРСКАЯ', 'ADAMA-ART', 'МЕДИЦИНА'];
@@ -1131,6 +1148,34 @@
             reader.readAsText(file);
         }
 
+        function renderSysLogs() {
+            const logs = JSON.parse(localStorage.getItem('priority_sys_logs') || '[]');
+            const container = document.getElementById('sysLogsContainer');
+            if (!container) return;
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="text-xs text-zinc-500 italic">No logs recorded yet.</div>';
+                return;
+            }
+            
+            container.innerHTML = logs.slice().reverse().map(log => `
+                <div class="flex flex-col gap-1 border-b border-borderline-light dark:border-borderline-dark pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[9px] font-bold text-brand-light dark:text-brand-dark">[${log.action}]</span>
+                        <span class="text-[8px] text-zinc-400">${log.time}</span>
+                    </div>
+                    <div class="text-xs text-zinc-700 dark:text-zinc-300 leading-tight">${log.details}</div>
+                </div>
+            `).join('');
+        }
+
+        // Заглушка для теста
+        if (!localStorage.getItem('priority_sys_logs')) {
+             localStorage.setItem('priority_sys_logs', JSON.stringify([
+                 { action: "SYS_BOOT", details: "Core systems initialized.", time: "Just now" }
+             ]));
+        }
+
         function renderThemesMarketplace() {
             const grid = document.getElementById('themesGrid');
             if(!grid) return;
@@ -1211,6 +1256,7 @@
             loadLiteConfig();
             renderShopUI();
             syncFromCloud();
+            renderSysLogs()
         });
     </script>
 </body>

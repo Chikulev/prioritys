@@ -6,12 +6,7 @@ const SYSTEM_THEMES = {
         desc: { en: "Default developer pro aesthetics.", ru: "Базовый стиль для разработчиков." },
         icon: "💻",
         isPro: false,
-        cssVars: {
-            "--color-brand-light": "#0891B2", "--color-brand-dark": "#06B6D4",
-            "--color-base-light": "#FAFAFA", "--color-base-dark": "#09090B",
-            "--color-panel-light": "#ffffff", "--color-panel-dark": "#121214",
-            "--color-border-light": "#d4d4d8", "--color-border-dark": "#27272a"
-        },
+        cssVars: { "--color-brand-light": "#0891B2", "--color-brand-dark": "#06B6D4", "--color-base-light": "#FAFAFA", "--color-base-dark": "#09090B", "--color-panel-light": "#ffffff", "--color-panel-dark": "#121214", "--color-border-light": "#d4d4d8", "--color-border-dark": "#27272a" },
         customCss: `
             body { background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px); background-size: 20px 20px; }
             .dark body { background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px); }
@@ -25,15 +20,8 @@ const SYSTEM_THEMES = {
         desc: { en: "Medieval parchment, wax seals, and epic quests.", ru: "Средневековые пергаменты, сургучные печати и эпичные квесты." },
         icon: "👑",
         isPro: true,
-        cssVars: {
-            "--color-brand-light": "#8B0000", "--color-brand-dark": "#D4AF37",
-            "--color-base-light": "#FDFBF7", "--color-base-dark": "#1A120B",
-            "--color-panel-light": "#F5EEDB", "--color-panel-dark": "#2A1D12",
-            "--color-border-light": "#D9CBB0", "--color-border-dark": "#3D2B1F"
-        },
-        customCss: `
-            body { background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>'); }
-        `,
+        cssVars: { "--color-brand-light": "#8B0000", "--color-brand-dark": "#D4AF37", "--color-base-light": "#FDFBF7", "--color-base-dark": "#1A120B", "--color-panel-light": "#F5EEDB", "--color-panel-dark": "#2A1D12", "--color-border-light": "#D9CBB0", "--color-border-dark": "#3D2B1F" },
+        customCss: `body { background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>'); }`,
         locales: {
             en: { "dash_subtitle_main": "Kingdom Ledger v9.0", "btn_deploy": "Issue Decree", "task_ph": "Inscribe your quest...", "btn_logs": "Chronicles", "macro_title": "EPIC QUESTS", "quad_1": "DRAGON THREAT [SEV-0]", "quad_2": "KINGDOM CORE [SEV-1]", "quad_3": "PEASANT WORK [SEV-2]", "quad_4": "TAVERN RUMORS [SEV-3]", "archived": "Dusty Tomes", "empty_tasks": "The realm is peaceful", "lbl_macro": "Epic", "btn_init_macro": "Declare Campaign" },
             ru: { "dash_subtitle_main": "Королевская Летопись v9.0", "btn_deploy": "Издать Указ", "task_ph": "Впишите деяние в пергамент...", "btn_logs": "Летопись", "macro_title": "ВЕЛИКИЕ СВЕРШЕНИЯ", "quad_1": "УГРОЗА ДРАКОНА [SEV-0]", "quad_2": "ФУНДАМЕНТ ЗАМКА [SEV-1]", "quad_3": "КРЕСТЬЯНСКИЙ ТРУД [SEV-2]", "quad_4": "СЛУХИ ИЗ ТРАКТИРА [SEV-3]", "archived": "Пыльные фолианты", "empty_tasks": "В королевстве штиль", "lbl_macro": "Эпос", "btn_init_macro": "Огласить Поход" }
@@ -46,12 +34,7 @@ const SYSTEM_THEMES = {
         desc: { en: "High contrast, sharp edges, pure aggressive action.", ru: "Высокий контраст, острые углы, агрессивное действие." },
         icon: "💥",
         isPro: true,
-        cssVars: {
-            "--color-brand-light": "#FF3366", "--color-brand-dark": "#00FFCC",
-            "--color-base-light": "#E0E722", "--color-base-dark": "#121212",
-            "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#000000",
-            "--color-border-light": "#000000", "--color-border-dark": "#E0E722"
-        },
+        cssVars: { "--color-brand-light": "#FF3366", "--color-brand-dark": "#00FFCC", "--color-base-light": "#E0E722", "--color-base-dark": "#121212", "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#000000", "--color-border-light": "#000000", "--color-border-dark": "#E0E722" },
         customCss: `
             body { background-image: none !important; }
             .rounded, .rounded-md, .rounded-lg, .rounded-sm, .rounded-full { border-radius: 0px !important; }
@@ -75,61 +58,24 @@ const SYSTEM_THEMES = {
         desc: { en: "Aurora gradients, frosted glass panels, and absolute minimalism.", ru: "Мягкие цветовые ауры, матовое стекло и абсолютный минимализм." },
         icon: "🧊",
         isPro: true,
-        cssVars: {
-            "--color-brand-light": "#000000", "--color-brand-dark": "#ffffff",
-            "--color-base-light": "#F1F5F9", "--color-base-dark": "#020617",
-            "--color-panel-light": "rgba(255, 255, 255, 0.55)", "--color-panel-dark": "rgba(15, 23, 42, 0.55)",
-            "--color-border-light": "rgba(255, 255, 255, 0.7)", "--color-border-dark": "rgba(255, 255, 255, 0.08)"
-        },
+        cssVars: { "--color-brand-light": "#000000", "--color-brand-dark": "#ffffff", "--color-base-light": "#F1F5F9", "--color-base-dark": "#020617", "--color-panel-light": "rgba(255, 255, 255, 0.55)", "--color-panel-dark": "rgba(15, 23, 42, 0.55)", "--color-border-light": "rgba(255, 255, 255, 0.7)", "--color-border-dark": "rgba(255, 255, 255, 0.08)" },
         customCss: `
-            /* Мягкий фон с размытыми цветными сферами (Mesh Gradient) */
             body { 
                 background-color: #f8fafc !important;
-                background-image: 
-                    radial-gradient(at 40% 20%, rgba(167, 139, 250, 0.4) 0px, transparent 50%),
-                    radial-gradient(at 80% 0%, rgba(96, 165, 250, 0.4) 0px, transparent 50%),
-                    radial-gradient(at 0% 50%, rgba(244, 114, 182, 0.4) 0px, transparent 50%),
-                    radial-gradient(at 80% 50%, rgba(52, 211, 153, 0.4) 0px, transparent 50%),
-                    radial-gradient(at 0% 100%, rgba(251, 191, 36, 0.4) 0px, transparent 50%),
-                    radial-gradient(at 80% 100%, rgba(129, 140, 248, 0.4) 0px, transparent 50%),
-                    radial-gradient(at 0% 0%, rgba(248, 113, 113, 0.4) 0px, transparent 50%) !important;
+                background-image: radial-gradient(at 40% 20%, rgba(167, 139, 250, 0.4) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(96, 165, 250, 0.4) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(244, 114, 182, 0.4) 0px, transparent 50%), radial-gradient(at 80% 50%, rgba(52, 211, 153, 0.4) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(251, 191, 36, 0.4) 0px, transparent 50%), radial-gradient(at 80% 100%, rgba(129, 140, 248, 0.4) 0px, transparent 50%), radial-gradient(at 0% 0%, rgba(248, 113, 113, 0.4) 0px, transparent 50%) !important;
                 background-attachment: fixed !important; 
             }
             .dark body { 
                 background-color: #0f172a !important;
-                background-image: 
-                    radial-gradient(at 40% 20%, rgba(139, 92, 246, 0.25) 0px, transparent 50%),
-                    radial-gradient(at 80% 0%, rgba(59, 130, 246, 0.25) 0px, transparent 50%),
-                    radial-gradient(at 0% 50%, rgba(236, 72, 153, 0.25) 0px, transparent 50%),
-                    radial-gradient(at 80% 50%, rgba(16, 185, 129, 0.25) 0px, transparent 50%),
-                    radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.25) 0px, transparent 50%),
-                    radial-gradient(at 80% 100%, rgba(99, 102, 241, 0.25) 0px, transparent 50%),
-                    radial-gradient(at 0% 0%, rgba(239, 68, 68, 0.25) 0px, transparent 50%) !important;
+                background-image: radial-gradient(at 40% 20%, rgba(139, 92, 246, 0.25) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(59, 130, 246, 0.25) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(236, 72, 153, 0.25) 0px, transparent 50%), radial-gradient(at 80% 50%, rgba(16, 185, 129, 0.25) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.25) 0px, transparent 50%), radial-gradient(at 80% 100%, rgba(99, 102, 241, 0.25) 0px, transparent 50%), radial-gradient(at 0% 0%, rgba(239, 68, 68, 0.25) 0px, transparent 50%) !important;
                 background-attachment: fixed !important; 
             }
-            
-            /* Эффект матового стекла */
             .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
-                backdrop-filter: blur(40px) saturate(150%) !important;
-                -webkit-backdrop-filter: blur(40px) saturate(150%) !important;
-                border-radius: 20px !important;
-                box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1) !important;
-                border: 1px solid var(--color-border-light) !important;
+                backdrop-filter: blur(40px) saturate(150%) !important; -webkit-backdrop-filter: blur(40px) saturate(150%) !important; border-radius: 20px !important; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1) !important; border: 1px solid var(--color-border-light) !important;
             }
-            .dark .bg-panel-light, .dark .dark\\:bg-panel-dark, .dark .tech-card-task, .dark #templatesDropdown, .dark .theme-card {
-                box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5) !important;
-                border: 1px solid var(--color-border-dark) !important;
-            }
-
-            /* ИСПРАВЛЕНИЕ ВЫСОТЫ ИНПУТОВ */
-            input[type="text"], input[type="time"], select {
-                background-color: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(10px) !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important;
-                padding: 0.75rem 1.25rem !important; /* Увеличили высоту и отступы */
-            }
-            .dark input[type="text"], .dark input[type="time"], .dark select {
-                background-color: rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            }
-
+            .dark .bg-panel-light, .dark .dark\\:bg-panel-dark, .dark .tech-card-task, .dark #templatesDropdown, .dark .theme-card { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5) !important; border: 1px solid var(--color-border-dark) !important; }
+            input[type="text"], input[type="time"], select { background-color: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(10px) !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important; padding: 0.75rem 1.25rem !important; }
+            .dark input[type="text"], .dark input[type="time"], .dark select { background-color: rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
             h1, h2, h3 { font-weight: 400 !important; letter-spacing: -0.03em !important; text-transform: none !important; }
             .uppercase { letter-spacing: 0.05em !important; }
             .btn-press { border-radius: 12px !important; }
@@ -146,12 +92,7 @@ const SYSTEM_THEMES = {
         desc: { en: "Earthy tones, soft greens, and natural tranquility.", ru: "Природные оттенки, мягкая зелень и абсолютное спокойствие." },
         icon: "🌿",
         isPro: true,
-        cssVars: {
-            "--color-brand-light": "#2E7D32", "--color-brand-dark": "#81C784",
-            "--color-base-light": "#F1F8E9", "--color-base-dark": "#1B2614",
-            "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#25351D",
-            "--color-border-light": "#DCEDC8", "--color-border-dark": "#334A27"
-        },
+        cssVars: { "--color-brand-light": "#2E7D32", "--color-brand-dark": "#81C784", "--color-base-light": "#F1F8E9", "--color-base-dark": "#1B2614", "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#25351D", "--color-border-light": "#DCEDC8", "--color-border-dark": "#334A27" },
         customCss: `
             body { background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M54.627 0l.83 22.09c-14.512.645-25.597 10.985-26.242 25.497L7.125 46.757C7.77 32.245 18.855 21.905 33.367 21.26L54.627 0z" fill="%2381C784" fill-opacity="0.05" fill-rule="evenodd"/></svg>'); }
             .dark body { background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M54.627 0l.83 22.09c-14.512.645-25.597 10.985-26.242 25.497L7.125 46.757C7.77 32.245 18.855 21.905 33.367 21.26L54.627 0z" fill="%232E7D32" fill-opacity="0.1" fill-rule="evenodd"/></svg>'); }
@@ -171,12 +112,7 @@ const SYSTEM_THEMES = {
         desc: { en: "Acid colors, heavy shadows, and pure dopamine.", ru: "Кислотные цвета, жесткие тени и чистый дофамин." },
         icon: "🍭",
         isPro: true,
-        cssVars: {
-            "--color-brand-light": "#FF00FF", "--color-brand-dark": "#00FFFF",
-            "--color-base-light": "#FFFF00", "--color-base-dark": "#1A0033",
-            "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#2D0066",
-            "--color-border-light": "#000000", "--color-border-dark": "#FF00FF"
-        },
+        cssVars: { "--color-brand-light": "#FF00FF", "--color-brand-dark": "#00FFFF", "--color-base-light": "#FFFF00", "--color-base-dark": "#1A0033", "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#2D0066", "--color-border-light": "#000000", "--color-border-dark": "#FF00FF" },
         customCss: `
             body { background-image: radial-gradient(#FF00FF 2px, transparent 2px); background-size: 30px 30px; }
             .dark body { background-image: radial-gradient(#00FFFF 2px, transparent 2px); background-size: 30px 30px; }
@@ -191,6 +127,27 @@ const SYSTEM_THEMES = {
         locales: {
             en: { "dash_subtitle_main": "NEON RUSH V9.0", "macro_title": "LEVEL UP", "quad_1": "HOT 🔥 [Q1]", "quad_2": "COOL 🧊 [Q2]", "quad_3": "MEH 🥱 [Q3]", "quad_4": "TRASH 🗑️ [Q4]", "empty_tasks": "NOTHING HERE. BOOOORING.", "lbl_macro": "VIBE", "btn_init_macro": "NEW VIBE", "archived": "HALL OF FAME" },
             ru: { "dash_subtitle_main": "NEON RUSH V9.0", "macro_title": "ПРОКАЧКА", "quad_1": "ГОРИТ 🔥 [Q1]", "quad_2": "НА ЧИЛЛЕ 🧊 [Q2]", "quad_3": "СУЕТА 🥱 [Q3]", "quad_4": "МУСОР 🗑️ [Q4]", "empty_tasks": "ПУСТО. СКУУУЧНО.", "lbl_macro": "ВАЙБ", "btn_init_macro": "НОВЫЙ ВАЙБ", "archived": "ЗАЛ СЛАВЫ" }
+        }
+    },
+    paper: {
+        id: 'paper',
+        name: 'E-Ink Paper',
+        fontPrimary: "'Courier New', Courier, monospace",
+        desc: { en: "Pure monochrome focus. High contrast, paper-like texture.", ru: "Чистый монохромный фокус. Высокий контраст, текстура бумаги." },
+        icon: "📰",
+        isPro: true,
+        cssVars: { "--color-brand-light": "#000000", "--color-brand-dark": "#ffffff", "--color-base-light": "#f4f4f0", "--color-base-dark": "#121212", "--color-panel-light": "#ffffff", "--color-panel-dark": "#1a1a1a", "--color-border-light": "#000000", "--color-border-dark": "#404040" },
+        customCss: `
+            body { background-image: url('data:image/svg+xml;utf8,<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="1.5" numOctaves="3" stitchTiles="stitch"/></filter><rect width="200" height="200" filter="url(%23noise)" opacity="0.04"/></svg>') !important; }
+            .dark body { background-image: url('data:image/svg+xml;utf8,<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="1.5" numOctaves="3" stitchTiles="stitch"/></filter><rect width="200" height="200" filter="url(%23noise)" opacity="0.08"/></svg>') !important; }
+            .rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: 2px !important; }
+            .border, .border-2 { border-width: 2px !important; }
+            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: 4px 4px 0px rgba(0,0,0,0.15) !important; }
+            .dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg { box-shadow: 4px 4px 0px rgba(255,255,255,0.15) !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "Daily Ledger", "macro_title": "CHAPTERS", "quad_1": "IMMEDIATE [Q1]", "quad_2": "DRAFT [Q2]", "quad_3": "REVIEW [Q3]", "quad_4": "DISCARD [Q4]", "empty_tasks": "Blank page.", "lbl_macro": "Chapter", "btn_init_macro": "New Chapter", "archived": "Printed Archive" },
+            ru: { "dash_subtitle_main": "Ежедневник", "macro_title": "ГЛАВЫ ЖИЗНИ", "quad_1": "НЕМЕДЛЕННО [Q1]", "quad_2": "ЧЕРНОВИК [Q2]", "quad_3": "ПЕРЕСМОТР [Q3]", "quad_4": "В КОРЗИНУ [Q4]", "empty_tasks": "Чистый лист.", "lbl_macro": "Глава", "btn_init_macro": "Начать главу", "archived": "Отправлено в печать" }
         }
     }
 };
@@ -216,6 +173,9 @@ function applySystemTheme() {
         body { font-family: var(--font-primary); }
         ${theme.customCss}
     `;
+
+    // Кэшируем собранный CSS, чтобы при следующем открытии он применился мгновенно, до загрузки themes.js из сети
+    localStorage.setItem('priority_theme_css_cache', styleTag.innerHTML);
 
     if (typeof applyI18n === 'function') applyI18n(); 
 }

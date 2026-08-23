@@ -149,6 +149,7 @@
             // 4. Применение кастомного курсора
             const cursor = localStorage.getItem('priority_cursor') || 'default';
             if (cursor !== 'default') document.body.classList.add(cursor);
+
         })();
     </script>
 
@@ -168,7 +169,6 @@
             <div class="mb-10">
                 <div data-i18n="auth_welcome_title" class="text-brand-light dark:text-brand-dark text-[11px] mb-3 tracking-[0.4em] font-black font-mono-tech uppercase animate-pulse">SYSTEM_AUTH_REQUIRED</div>
                 <h1 class="text-6xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100 font-mono-tech mb-8">PRIORITYS<span class="text-brand-light dark:text-brand-dark animate-ping">_</span></h1>
-                <div id="userGreeting" class="text-xs font-bold text-brand-light mt-2 uppercase tracking-widest font-mono-tech"></div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                     <div class="space-y-4">
@@ -236,6 +236,7 @@
             </div>
             
             <div class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 font-mono-tech">
+
                 <span class="text-zinc-300 dark:text-zinc-700">|</span>
                 <button type="button" id="guideBtn" onclick="openGuideModal()" data-i18n-title="nav_guide" class="shrink-0 p-2 hover:text-brand-light dark:hover:text-brand-dark hover:bg-base-light dark:hover:bg-base-dark rounded transition-colors btn-press">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
@@ -1262,7 +1263,6 @@
 
         // --- MAIN APP LOGIC ---
         function loadDataFromStorage() {
-            document.getElementById('userGreeting').innerText = "Привет, " + (localStorage.getItem('priority_user') || 'UNKNOWN');
 
             dynamicScopes = JSON.parse(localStorage.getItem('priority_scopes')) || [];
             tasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
