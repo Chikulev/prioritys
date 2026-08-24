@@ -1219,9 +1219,31 @@
             localStorage.setItem('lite_cron_action', document.getElementById('liteCronAction').value);
         }
 
-        // BOOT SEQUENCE (Запускается мгновенно!)
-        initThemeToggle();
-        checkAuth();
+                // BOOT SEQUENCE (Запускается мгновенно!)
+                const savedScale = localStorage.getItem('priority_scale') || 1;
+                document.documentElement.style.setProperty('--system-scale', savedScale);
+                const scaleSlider = document.getElementById('scaleSlider');
+                if (scaleSlider) {
+                    const currentScale = localStorage.getItem('priority_scale') || 1;
+                    scaleSlider.value = currentScale;
+                    if(document.getElementById('scaleValueDisplay')) {
+                        document.getElementById('scaleValueDisplay').innerText = Math.round(currentScale * 100) + '%';
+                    }
+                }
+
+                loadDataFromStorage();
+                renderFilterModeUI();
+                initThemeToggle();
+                applyAppTheme();
+                renderScopes();
+                renderPremiumState();
+                initCursorScroll();
+                applyCursor();
+                loadLiteConfig();
+                renderShopUI();
+                renderSysLogs();
+                renderThemesMarketplace();
+                syncFromCloud();
     </script>
 </body>
 </html>

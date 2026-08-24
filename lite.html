@@ -440,8 +440,13 @@
         }
 
         // BOOT SEQUENCE (Запускается мгновенно!)
+        if (localStorage.getItem('priority_theme_mode') === 'dark') document.documentElement.classList.add('dark');
         initThemeToggle();
-        checkAuth();
+        updateThemeIcon();
+        checkCronJob();
+        applyI18n();
+        saveAndRender();
+        syncFromCloud();
     </script>
 </body>
 </html>
