@@ -269,9 +269,20 @@
                     <button type="button" onclick="toggleTemplates()" class="btn-press text-[11px] font-bold text-zinc-600 dark:text-zinc-400 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark px-4 py-2.5 rounded transition-colors uppercase tracking-widest flex items-center gap-2">
                         <span data-i18n="btn_templates">Templates</span> <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </button>
-                    <div id="templatesDropdown" class="hidden absolute right-0 mt-2 w-72 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md shadow-xl overflow-hidden z-50">
-                        <div id="templatesList" class="max-h-48 overflow-y-auto"></div>
-                        <div class="border-t border-borderline-light dark:border-borderline-dark p-2">
+                    <div id="templatesDropdown" class="hidden absolute right-0 mt-2 w-80 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md shadow-xl overflow-hidden z-50">
+                        
+                        <!-- Переключатель вкладок -->
+                        <div class="flex text-[10px] font-bold uppercase tracking-widest border-b border-borderline-light dark:border-borderline-dark">
+                            <button type="button" onclick="switchTemplateTab('user')" id="tab-user-tpl" class="btn-press flex-1 py-3 text-brand-light dark:text-brand-dark border-b-2 border-brand-light dark:border-brand-dark bg-brand-light/5 dark:bg-brand-dark/5 transition-colors">My Templates</button>
+                            <button type="button" onclick="switchTemplateTab('system')" id="tab-sys-tpl" class="btn-press flex-1 py-3 text-zinc-500 border-b-2 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 bg-panel-light dark:bg-panel-dark transition-colors">Presets</button>
+                        </div>
+
+                        <!-- Списки -->
+                        <div id="templatesList" class="max-h-60 overflow-y-auto"></div>
+                        <div id="blueprintsList" class="max-h-60 overflow-y-auto hidden"></div>
+
+                        <!-- Кнопка сохранения (только для вкладки User) -->
+                        <div class="border-t border-borderline-light dark:border-borderline-dark p-2" id="saveTplBtnContainer">
                             <button type="button" onclick="saveCurrentAsTemplate()" data-i18n="btn_save_template" class="w-full text-left px-3 py-2 text-[10px] font-bold text-brand-light dark:text-brand-dark hover:bg-base-light dark:hover:bg-base-dark uppercase transition-colors rounded">+ Save as template</button>
                         </div>
                     </div>
@@ -565,6 +576,7 @@
 
     <script src="themes.js"></script>
     <script src="locales.js"></script>
+    <script src="presets.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
@@ -2256,6 +2268,129 @@
             if(guideBtn) guideBtn.classList.add('opacity-40', 'grayscale');
             closeGuide();
             unlockAchievement('guide_passed');
+        }
+
+        // --- PRESETS ENGINE ---
+        function switchTemplateTab(tab) {
+            const userList = document.getElementById('templatesList');
+            const sysList = document.getElementById('blueprintsList');
+            const userTab = document.getElementById('tab-user-tpl');
+            const sysTab = document.getElementById('tab-sys-tpl');
+            const saveBtn = document.getElementById('saveTplBtnContainer');
+
+            if (tab === 'user') {
+                userList.classList.remove('hidden');
+                sysList.classList.add('hidden');
+                saveBtn.classList.remove('hidden');
+                
+                userTab.className = "btn-press flex-1 py-3 text-brand-light dark:text-brand-dark border-b-2 border-brand-light dark:border-brand-dark bg-brand-light/5 dark:bg-brand-dark/5 transition-colors";
+                sysTab.className = "btn-press flex-1 py-3 text-zinc-500 border-b-2 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 bg-panel-light dark:bg-panel-dark transition-colors";
+            } else {
+                userList.classList.add('hidden');
+                sysList.classList.remove('hidden');
+                saveBtn.classList.add('hidden');
+                
+                sysTab.className = "btn-press flex-1 py-3 text-brand-light dark:text-brand-dark border-b-2 border-brand-light dark:border-brand-dark bg-brand-light/5 dark:bg-brand-dark/5 transition-colors";
+                userTab.className = "btn-press flex-1 py-3 text-zinc-500 border-b-2 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 bg-panel-light dark:bg-panel-dark transition-colors";
+                renderBlueprints();
+            }
+        }
+
+        function renderBlueprints() {
+            const list = document.getElementById('blueprintsList');
+            const lang = localStorage.getItem('priority_lang') || 'en';
+
+            list.innerHTML = SYSTEM_PRESETS.map(p => {
+                // Проверяем, есть ли у нас активные задачи из этого пресета
+                const isActive = tasks.some(t => t.presetId === p.id && !t.completed);
+                
+                const btnStyle = isActive 
+                    ? 'border-red-500/50 bg-red-500/5 hover:bg-red-500/10' 
+                    : 'border-borderline-light dark:border-borderline-dark hover:bg-base-light dark:hover:bg-base-dark';
+                
+                const statusBadge = isActive 
+                    ? `<span class="text-[9px] bg-red-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-widest">Удалить пресет</span>`
+                    : '';
+
+                return `
+                <button type="button" onclick="toggleBlueprint('${p.id}')" class="w-full text-left px-4 py-3 border-b ${btnStyle} transition-colors group flex items-start gap-3">
+                    <div class="text-2xl mt-0.5 group-hover:scale-110 transition-transform">${p.icon}</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-light dark:group-hover:text-brand-dark transition-colors" style="font-family: var(--font-primary);">${p.title[lang] || p.title.en}</div>
+                            ${statusBadge}
+                        </div>
+                        <div class="text-[9px] text-zinc-500 uppercase tracking-widest leading-relaxed">${p.desc[lang] || p.desc.en}</div>
+                    </div>
+                </button>
+            `}).join('');
+        }
+
+        function toggleBlueprint(id) {
+            const isActive = tasks.some(t => t.presetId === id);
+
+            if (isActive) {
+                // УДАЛЕНИЕ ПРЕСЕТА
+                tasks = tasks.filter(t => t.presetId !== id);
+                saveData('priority_tasks', tasks);
+                renderTasks();
+                renderBlueprints();
+                showToast('SYSTEM', 'Задачи пресета удалены', 'info');
+                return;
+            }
+
+            // ДОБАВЛЕНИЕ ПРЕСЕТА
+            const preset = SYSTEM_PRESETS.find(p => p.id === id);
+            const lang = localStorage.getItem('priority_lang') || 'en';
+            const scopeName = preset.scope[lang] || preset.scope.en;
+
+            // 1. Синхронизируем сферу жестко, чтобы не падало в "Другое"
+            if (!scopes.includes(scopeName)) {
+                scopes.unshift(scopeName);
+                dynamicScopes = [...scopes];
+                saveData('priority_scopes', scopes);
+                initDynamicScopes(); // Перерисовываем радио-кнопки сверху
+            }
+
+            // 2. Генерируем задачи с датами и комментариями
+            const baseDate = new Date();
+            const newTasks = preset.tasks.map((t, idx) => {
+                let finalTitle = t.title;
+
+                if (finalTitle.includes('[DATE]')) {
+                    const targetDate = new Date(baseDate);
+                    targetDate.setDate(baseDate.getDate() + t.offset);
+                    const dateStr = `${String(targetDate.getDate()).padStart(2, '0')}.${String(targetDate.getMonth()+1).padStart(2, '0')}.${String(targetDate.getFullYear()).slice(2)}`;
+                    finalTitle = finalTitle.replace('[DATE]', dateStr);
+                }
+
+                const taskComments = [];
+                if (t.comment) {
+                    // Системный лог, который будет виден при открытии 📝
+                    taskComments.push({ text: `[INFO]: ${t.comment}`, createdAt: getDateTimeStr() });
+                }
+
+                return {
+                    id: Date.now() + idx,
+                    presetId: id, // <--- СЕКРЕТНЫЙ ИДЕНТИФИКАТОР ПРЕСЕТА
+                    title: finalTitle,
+                    sphere: scopeName,
+                    isImportant: t.isImportant,
+                    isUrgent: t.isUrgent,
+                    completed: false,
+                    createdAt: getDateStr(),
+                    completedAt: null,
+                    comments: taskComments
+                };
+            });
+
+            // 3. Заливаем массив в Матрицу
+            tasks = [...newTasks.reverse(), ...tasks]; 
+            saveData('priority_tasks', tasks);
+            renderTasks();
+            renderBlueprints();
+            
+            showToast('SYSTEM', `Пресет загружен! Открой логи (📝) у задач для инструкций.`, 'success');
         }
 
         // --- СИСТЕМА ТЕЛЕПОРТАЦИИ (ЗАМЕНА DRAG & DROP) ---

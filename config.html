@@ -185,7 +185,8 @@
                         
                         <div class="relative w-full mt-4 border-t border-borderline-light dark:border-borderline-dark pt-4">
                             <input type="file" id="importFile" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="importData(event)">
-                            <button data-i18n="port_import" class="btn-press w-full bg-transparent border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-brand-light dark:hover:border-brand-dark hover:text-brand-light dark:hover:text-brand-dark hover:bg-brand-light/5 dark:hover:bg-brand-dark/5 font-bold py-3 rounded text-xs uppercase tracking-widest transition-all">Import (.json)</button>                        </div>
+                            <button data-i18n="port_import" class="btn-press w-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Import (.json)</button>
+                        </div>
                     </div>
                 </div>
 
@@ -197,7 +198,7 @@
                     
                     <div class="flex gap-2 mb-6">
                         <input type="text" id="newScopeInput" data-i18n-ph="scope_ph" onkeypress="if(event.key==='Enter') addScope()" class="flex-1 min-w-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-light dark:focus:border-brand-dark transition-colors placeholder-zinc-400 dark:placeholder-zinc-600 font-mono-tech" placeholder="New Scope Name...">
-                        <button onclick="addScope()" data-i18n="btn_add" class="shrink-0 btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black px-5 rounded font-bold text-xs uppercase transition-colors shadow-sm font-mono-tech">ADD</button>
+                        <button onclick="addScope()" data-i18n="btn_add" class="shrink-0 btn-press bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black px-4 rounded font-bold text-xs uppercase transition-colors font-mono-tech">ADD</button>
                     </div>
                     <div id="scopesList" class="space-y-2 max-h-[300px] overflow-y-auto pr-2 font-mono-tech"></div>
                 </div>
@@ -787,28 +788,91 @@
 
         function deleteScope(index) {
             const scopeToDelete = scopes[index];
+            const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
             
-            openModal('DELETE SCOPE?', `Are you sure you want to remove "${scopeToDelete}"?`, () => {
-                const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
-                let tasksChanged = false;
+            // Считаем, сколько задач привязано к этой сфере
+            const tasksInScope = allTasks.filter(t => t.sphere === scopeToDelete).length;
+            
+            const modal = document.getElementById('systemModal');
+            const btnContainer = modal.querySelector('.flex.gap-3.justify-end');
+
+            document.getElementById('modalTitle').innerText = 'УДАЛЕНИЕ СФЕРЫ';
+            
+            if (tasksInScope > 0) {
+                document.getElementById('modalText').innerText = `Сфера "${scopeToDelete}" содержит ${tasksInScope} активных/завершенных задач(и). Что вы хотите с ними сделать?`;
                 
-                // Перебрасываем задачи в системную корзину
+                // Временно подменяем кнопки: даем пользователю 3 варианта
+                btnContainer.innerHTML = `
+                    <button onclick="closeScopeModal()" class="px-3 py-2.5 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Отмена</button>
+                    <button onclick="executeScopeDelete(${index}, 'move')" class="px-3 py-2.5 bg-brand-light dark:bg-brand-dark text-white dark:text-black hover:opacity-90 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">В "ДРУГОЕ"</button>
+                    <button onclick="executeScopeDelete(${index}, 'delete')" class="px-3 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Удалить всё</button>
+                `;
+            } else {
+                document.getElementById('modalText').innerText = `Сфера "${scopeToDelete}" пуста. Удалить её?`;
+                
+                // Если задач нет - просто стандартные 2 кнопки
+                btnContainer.innerHTML = `
+                    <button onclick="closeScopeModal()" class="px-6 py-2.5 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Отмена</button>
+                    <button onclick="executeScopeDelete(${index}, 'delete')" class="px-6 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Удалить</button>
+                `;
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10);
+        }
+
+        // Логика исполнения выбранного действия
+        function executeScopeDelete(index, action) {
+            const scopeToDelete = scopes[index];
+            let allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
+            let tasksChanged = false;
+
+            if (action === 'move') {
+                // ПЕРЕНОС: Меняем тег у всех связанных задач
                 allTasks.forEach(task => {
                     if (task.sphere === scopeToDelete) {
-                        task.sphere = 'SYS_OTHER'; // Мертвая хватка, системный ID
+                        task.sphere = 'SYS_OTHER';
                         tasksChanged = true;
                     }
                 });
-                
-                if (tasksChanged) localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
-                
-                scopes.splice(index, 1); 
-                localStorage.setItem('priority_scopes', JSON.stringify(scopes)); 
-                
-                renderScopes();
-                showToast(t('toast_sys'), t('toast_scope_del'), 'info');
-            });
+            } else if (action === 'delete') {
+                // УДАЛЕНИЕ: Фильтруем массив, оставляя всё, КРОМЕ этой сферы
+                const initialLength = allTasks.length;
+                allTasks = allTasks.filter(task => task.sphere !== scopeToDelete);
+                if (allTasks.length !== initialLength) tasksChanged = true;
+            }
+
+            // Сохраняем обновленные задачи локально
+            if (tasksChanged) {
+                localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
+            }
+
+            // Удаляем саму сферу
+            scopes.splice(index, 1); 
+            localStorage.setItem('priority_scopes', JSON.stringify(scopes)); 
+            
+            renderScopes();
+            showToast(t('toast_sys'), t('toast_scope_del'), 'info');
+            syncStateToCloud(true); // Мгновенно шлем в облако!
+            
+            closeScopeModal();
         }
+
+        // Возвращаем оригинальные кнопки модалки на место (чтобы не сломать Factory Reset)
+        function closeScopeModal() {
+            const modal = document.getElementById('systemModal');
+            modal.classList.remove('opacity-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                const btnContainer = modal.querySelector('.flex.gap-3.justify-end');
+                btnContainer.innerHTML = `
+                    <button onclick="closeModal()" data-i18n="btn_cancel" class="px-6 py-2.5 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs font-bold uppercase tracking-widest rounded btn-press">Cancel</button>
+                    <button id="modalConfirmBtn" data-i18n="btn_confirm" class="px-6 py-2.5 bg-red-600 text-white text-xs font-bold uppercase tracking-widest hover:bg-red-700 transition-colors rounded btn-press">Confirm</button>
+                `;
+                if (typeof applyI18n === 'function') applyI18n();
+            }, 300);
+        }
+
         function enableScopeEdit(index) {
             const input = document.getElementById(`scope-edit-${index}`);
             input.readOnly = false;
