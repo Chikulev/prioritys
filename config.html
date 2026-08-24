@@ -185,8 +185,7 @@
                         
                         <div class="relative w-full mt-4 border-t border-borderline-light dark:border-borderline-dark pt-4">
                             <input type="file" id="importFile" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="importData(event)">
-                            <button data-i18n="port_import" class="btn-press w-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Import (.json)</button>
-                        </div>
+                            <button data-i18n="port_import" class="btn-press w-full bg-transparent border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-brand-light dark:hover:border-brand-dark hover:text-brand-light dark:hover:text-brand-dark hover:bg-brand-light/5 dark:hover:bg-brand-dark/5 font-bold py-3 rounded text-xs uppercase tracking-widest transition-all">Import (.json)</button>                        </div>
                     </div>
                 </div>
 
@@ -198,7 +197,7 @@
                     
                     <div class="flex gap-2 mb-6">
                         <input type="text" id="newScopeInput" data-i18n-ph="scope_ph" onkeypress="if(event.key==='Enter') addScope()" class="flex-1 min-w-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-light dark:focus:border-brand-dark transition-colors placeholder-zinc-400 dark:placeholder-zinc-600 font-mono-tech" placeholder="New Scope Name...">
-                        <button onclick="addScope()" data-i18n="btn_add" class="shrink-0 btn-press bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black px-4 rounded font-bold text-xs uppercase transition-colors font-mono-tech">ADD</button>
+                        <button onclick="addScope()" data-i18n="btn_add" class="shrink-0 btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black px-5 rounded font-bold text-xs uppercase transition-colors shadow-sm font-mono-tech">ADD</button>
                     </div>
                     <div id="scopesList" class="space-y-2 max-h-[300px] overflow-y-auto pr-2 font-mono-tech"></div>
                 </div>
@@ -1174,8 +1173,8 @@
                 const btnText = isActive ? t('btn_in_use') : (isLocked ? t('btn_unlock') : t('btn_activate'));
                 
                 const btnClass = isActive 
-                    ? 'bg-brand-light dark:bg-brand-dark text-white dark:text-black' 
-                    : 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black';
+                    ? 'bg-brand-light dark:bg-brand-dark text-white dark:text-black shadow-sm' 
+                    : 'bg-transparent border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:border-brand-light dark:hover:border-brand-dark hover:text-brand-light dark:hover:text-brand-dark hover:bg-brand-light/5 dark:hover:bg-brand-dark/5';
                 
                 const badgeHTML = isActive 
                     ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black px-2 py-1 rounded font-mono-tech z-20">${t('theme_active')}</div>`
