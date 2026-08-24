@@ -28,13 +28,9 @@
     <meta property="og:description" content="Захватывайте идеи, управляйте фокусом и отсекайте информационный шум. Система для тех, кто ценит свое время.">
     <meta property="og:image" content="https://prioritys.ru/og-image.png">
     <meta name="twitter:card" content="summary_large_image">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <link rel="stylesheet" href="style.css">
     
-    <script src="themes.js"></script>
-    <script src="locales.js"></script>
     <style>
         /* Базовые переменные (фолбэк до загрузки themes.js) */
         :root {
@@ -566,6 +562,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="badgesContainer"></div>
         </div>
     </div>
+
+    <script src="themes.js"></script>
+    <script src="locales.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         // CORE ENGINE & LOGIC
@@ -2540,19 +2540,9 @@ YOUR OBJECTIVE (Answer in these steps):
             renderDashLite();
         }
 
-        // BOOT SEQUENCE
-        document.addEventListener('DOMContentLoaded', () => {
-            initThemeToggle();
-            checkAuth(); 
-
-            applyAppTheme();
-            applyCursor();
-            
-            // --- ЗАПУСК ЯДРА ---
-            renderFilters(); // <--- ВОТ ЭТА СТРОЧКА РИСУЕТ КНОПКИ ПРИ ЗАГРУЗКЕ
-            renderTasks();
-            renderMacros();
-        });
+        // BOOT SEQUENCE (Запускается мгновенно!)
+        initThemeToggle();
+        checkAuth();
     </script>
 </body>
 </html>

@@ -27,9 +27,6 @@
 
     <link rel="stylesheet" href="style.css">
     
-    <script src="themes.js"></script>
-    <script src="locales.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Базовые переменные (фолбэк до загрузки themes.js) */
         :root {
@@ -145,6 +142,10 @@
             [ BRAVO! ] TARGET_NEUTRALIZED
         </div>
     </div>
+
+    <script src="themes.js"></script>
+    <script src="locales.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         // ЗАЩИТА РОУТИНГА: Переброс неавторизованных на главную
@@ -438,15 +439,9 @@
             localStorage.setItem('lite_cron_last_run', todayStr);
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ ---
-        document.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('priority_theme_mode') === 'dark') document.documentElement.classList.add('dark');
-            updateThemeIcon();
-            checkCronJob();
-            applyI18n();
-            saveAndRender();
-            syncFromCloud();
-        });
+        // BOOT SEQUENCE (Запускается мгновенно!)
+        initThemeToggle();
+        checkAuth();
     </script>
 </body>
 </html>

@@ -19,8 +19,6 @@
     
     <link rel="stylesheet" href="style.css">
 
-    <script src="themes.js"></script>
-    <script src="locales.js"></script>
     <style>
         :root {
             --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
@@ -199,6 +197,9 @@
 
     </div>
 
+    <script src="themes.js"></script>
+    <script src="locales.js"></script>
+
     <script>
         function showToast(title, desc, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -363,9 +364,11 @@
 
         function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
 
-        // BOOT
+        // BOOT SEQUENCE (Запускается мгновенно!)
+        initThemeToggle();
+        checkAuth();
         updateThemeIcons();
-        applyI18n();
+
     </script>
 </body>
 </html>

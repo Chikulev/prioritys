@@ -29,9 +29,6 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <script src="themes.js"></script>
-    <script src="locales.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Базовые переменные (фолбэк до загрузки themes.js) */
         :root {
@@ -439,6 +436,10 @@
             </div>
         </div>
     </div>
+
+    <script src="themes.js"></script>
+    <script src="locales.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         // ЗАЩИТА РОУТИНГА: Переброс неавторизованных на главную
@@ -1218,29 +1219,9 @@
             localStorage.setItem('lite_cron_action', document.getElementById('liteCronAction').value);
         }
 
-        // BOOT SEQUENCE
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedScale = localStorage.getItem('priority_scale') || 1;
-            document.documentElement.style.setProperty('--system-scale', savedScale);
-            const scaleSlider = document.getElementById('scaleSlider');
-            if (scaleSlider) {
-                const currentScale = localStorage.getItem('priority_scale') || 1;
-                scaleSlider.value = currentScale;
-                document.getElementById('scaleValueDisplay').innerText = Math.round(currentScale * 100) + '%';
-            }
-            loadDataFromStorage();
-            renderFilterModeUI()
-            initThemeToggle();
-            applyAppTheme();
-            renderScopes();
-            renderPremiumState();
-            initCursorScroll();
-            applyCursor();
-            loadLiteConfig();
-            renderShopUI();
-            syncFromCloud();
-            renderSysLogs()
-        });
+        // BOOT SEQUENCE (Запускается мгновенно!)
+        initThemeToggle();
+        checkAuth();
     </script>
 </body>
 </html>
