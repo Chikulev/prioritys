@@ -25,7 +25,8 @@
     <meta property="og:description" content="Очистите нейронные пути. Быстрый буфер для ежедневных задач с интеграцией Telegram Quick Capture.">
     <meta property="og:image" content="https://prioritys.ru/og-image.png">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    
     <script src="themes.js"></script>
     <script src="locales.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -73,21 +74,7 @@
         /* Масштаб системы */
         html { font-size: calc(16px * var(--system-scale, 1)) !important; }
     </style>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { light: '#06B6D4', dark: '#22D3EE' },
-                        base: { light: '#F4F4F5', dark: '#09090B' },
-                        panel: { light: '#FFFFFF', dark: '#121214' },
-                        borderline: { light: '#E4E4E7', dark: '#27272A' }
-                    }
-                }
-            }
-        }
-    </script>
+
 </head>
 <body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 font-mono min-h-screen pb-20">
 
