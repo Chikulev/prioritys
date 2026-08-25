@@ -3,7 +3,12 @@
 <head>
 
     <script>
-        // Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
+        // 1. Мгновенно применяем темную тему ДО рендеринга страницы (убивает белую вспышку)
+        const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+
+        // 2. Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
         const cachedCss = localStorage.getItem('priority_theme_css_cache');
         if (cachedCss) {
             const style = document.createElement('style');
@@ -86,13 +91,6 @@
 <body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative">
     <script>
         (function() {
-            // 1. Темная/Светлая тема
-            const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
 
             // 2. Мгновенная смена фавиконки
             const link = document.getElementById('dynamic-favicon');
@@ -130,7 +128,7 @@
         </div>
     </div>
 
-    <div class="max-w-6xl mx-auto p-4 md:p-6 fade-in">
+    <div id="mainApp" class="hidden w-full max-w-6xl mx-auto p-4 md:p-6 fade-in">
         
         <header class="flex flex-wrap justify-between items-center mb-8 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-4 rounded-md gap-4 shadow-sm transition-colors">
             <div class="flex items-center gap-4">
@@ -914,7 +912,12 @@
                 };
 
                 try {
-                    await supabaseClient.from('users').update({ app_data: appState }).eq('username', username);
+                    await supabaseClient.from('users')
+                    .update({ 
+                    app_data: appState,
+                    last_active_at: new Date().toISOString() 
+                })
+                    .eq('username', username);
                     console.log('☁️ Config synced to cloud');
                 } catch (err) { console.error('Cloud sync failed', err); }
             };
@@ -1307,6 +1310,8 @@
                 renderSysLogs();
                 renderThemesMarketplace();
                 syncFromCloud();
+
+                document.getElementById('mainApp').classList.remove('hidden');
     </script>
 </body>
 </html>

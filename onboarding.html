@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+
     <script>
-        // Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
+        // 1. Мгновенно применяем темную тему ДО рендеринга страницы (убивает белую вспышку)
+        const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+
+        // 2. Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
         const cachedCss = localStorage.getItem('priority_theme_css_cache');
         if (cachedCss) {
             const style = document.createElement('style');
@@ -64,13 +70,6 @@
 <body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen flex items-center justify-center p-4">
     <script>
         (function() {
-            // 1. Темная/Светлая тема
-            const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
 
             // 2. Мгновенная смена фавиконки
             const link = document.getElementById('dynamic-favicon');
@@ -96,7 +95,7 @@
         </button>
     </div>
 
-    <div class="w-full max-w-2xl bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-lg shadow-lg p-8 fade-in relative overflow-hidden transition-colors font-mono-tech min-h-[450px] flex flex-col">
+    <div id="mainApp" class="hidden w-full max-w-2xl bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-lg shadow-lg p-8 relative overflow-hidden transition-colors font-mono-tech min-h-[450px] flex flex-col">
         <div class="absolute top-0 left-0 w-full h-1.5 bg-brand-light dark:bg-brand-dark transition-colors"></div>
         
         <div class="text-center mb-10 mt-2">
@@ -368,7 +367,13 @@
         initThemeToggle();
         checkAuth();
         updateThemeIcons();
-
+        
+        // Проявляем интерфейс с анимацией после применения переводов
+        const app = document.getElementById('mainApp');
+        if (app) {
+            app.classList.remove('hidden');
+            app.classList.add('fade-in');
+        }
     </script>
 </body>
 </html>

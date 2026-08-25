@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+
     <script>
-        // Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
+        // 1. Мгновенно применяем темную тему ДО рендеринга страницы (убивает белую вспышку)
+        const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+
+        // 2. Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
         const cachedCss = localStorage.getItem('priority_theme_css_cache');
         if (cachedCss) {
             const style = document.createElement('style');
@@ -91,7 +97,7 @@
         </div>
     </header>
 
-    <div class="max-w-4xl mx-auto p-6 mt-8">
+    <div id="mainApp" class="hidden w-full max-w-4xl mx-auto p-6 mt-8 fade-in">
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
             <div class="bg-panel-light dark:bg-panel-dark p-5 rounded-xl border border-borderline-light dark:border-borderline-dark shadow-sm">
@@ -193,7 +199,12 @@
                 };
 
                 try {
-                    await supabaseClient.from('users').update({ app_data: appState }).eq('username', username);
+                    await supabaseClient.from('users')
+                    .update({ 
+                    app_data: appState,
+                    last_active_at: new Date().toISOString() 
+                })
+                    .eq('username', username);
                     console.log('☁️ Lite Buffer synced to cloud');
                 } catch (err) { console.error('Cloud sync failed', err); }
             }, 1500);
@@ -447,6 +458,8 @@
         applyI18n();
         saveAndRender();
         syncFromCloud();
+
+        document.getElementById('mainApp').classList.remove('hidden');
     </script>
 </body>
 </html>
