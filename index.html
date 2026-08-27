@@ -2600,12 +2600,41 @@ YOUR OBJECTIVE (Answer in these steps):
                 <div class="group flex items-center bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md overflow-hidden shadow-sm" style="${ageStyle}">
                     <span class="px-3 py-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-300">${t.text}</span>
                     <div class="flex opacity-0 group-hover:opacity-100 transition-opacity bg-base-light dark:bg-base-dark border-l border-borderline-light dark:border-borderline-dark">
+                        <button onclick="completeDashLiteTask('${t.id}', this)" class="px-2.5 py-1.5 text-emerald-500 hover:bg-emerald-500/20 transition-colors btn-press" title="Complete">✓</button>
                         <button onclick="escalateLiteTask('${t.id}')" class="px-2.5 py-1.5 text-brand-light hover:bg-brand-light/20 transition-colors btn-press" title="Convert to Matrix Task">➚</button>
                         <button onclick="deleteDashLite('${t.id}')" class="px-2.5 py-1.5 text-red-500 hover:bg-red-500/20 transition-colors btn-press" title="Delete">✕</button>
                     </div>
                 </div>
                 `;
             }).join('');
+        }
+
+        function completeDashLiteTask(id, btnEl) {
+            // Анимация мягкого скрытия перед удалением
+            const el = btnEl.closest('.group');
+            if (el) {
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0.9)';
+                el.style.transition = 'all 0.2s ease';
+            }
+            
+            setTimeout(() => {
+                const t = liteTasks.find(x => x.id === id);
+                if(t) {
+                    t.status = 'done';
+                    t.completedAt = new Date().toISOString().split('T')[0];
+                    
+                    // Обновляем статистику для хитмапа на странице LITE
+                    let liteLog = JSON.parse(localStorage.getItem('priority_lite_log')) || {};
+                    liteLog[t.completedAt] = (liteLog[t.completedAt] || 0) + 1;
+                    localStorage.setItem('priority_lite_log', JSON.stringify(liteLog));
+                    
+                    // Сохраняем и отправляем в облако
+                    localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+                    saveData('priority_tasks', tasks); // Этот вызов триггерит syncStateToCloud
+                    renderDashLite();
+                }
+            }, 200); // Ждем завершения анимации
         }
 
         function escalateLiteTask(id) {
