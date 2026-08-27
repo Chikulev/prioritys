@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-
     <script>
-        // 1. Мгновенно применяем темную тему ДО рендеринга страницы (убивает белую вспышку)
         const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
         if (isDark) document.documentElement.classList.add('dark');
         else document.documentElement.classList.remove('dark');
 
-        // 2. Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
         const cachedCss = localStorage.getItem('priority_theme_css_cache');
         if (cachedCss) {
             const style = document.createElement('style');
@@ -17,24 +14,19 @@
             document.head.appendChild(style);
         }
     </script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PRIORITYS // LITE_BUFFER</title>
-
-    <meta name="description" content="Оперативная память для ваших задач. Мгновенный захват мыслей, синхронизация с Telegram и ежедневная автоочистка.">
-    <meta name="author" content="PRIORITYS">
+    <meta name="description" content="LITE_BUFFER: Оперативная память для ваших задач. Мгновенный захват мыслей, синхронизация с Telegram и ежедневная автоочистка мусора.">
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://prioritys.ru/lite.html">
     <meta property="og:title" content="PRIORITYS // LITE_BUFFER">
-    <meta property="og:description" content="Очистите нейронные пути. Быстрый буфер для ежедневных задач с интеграцией Telegram Quick Capture.">
+    <meta property="og:description" content="Очистите нейронные пути. Быстрый буфер для ежедневных задач с интеграцией Telegram Quick Capture. Разгрузите мозг для глубокой работы.">
     <meta property="og:image" content="https://prioritys.ru/og-image.png">
-
     <link rel="stylesheet" href="style.css">
     
     <style>
-        /* Базовые переменные (фолбэк до загрузки themes.js) */
         :root {
             --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
             --color-base-light: #FAFAFA; --color-base-dark: #09090B;
@@ -42,42 +34,29 @@
             --color-border-light: #d4d4d8; --color-border-dark: #27272a;
             --font-primary: 'JetBrains Mono', monospace;
         }
-
         body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; }
-
-        /* Системные анимации кнопок */
-        .btn-press { transition: transform 0.1s ease; } 
-        .btn-press:active { transform: scale(0.95); }
-
-        /* LITE-специфичные классы */
+        .btn-press { transition: transform 0.1s ease; } .btn-press:active { transform: scale(0.95); }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .heatmap-cell { width: 12px; height: 12px; border-radius: 2px; }
         
-        /* Системные курсоры */
         body.cursor-tech, body.cursor-tech * { cursor: crosshair !important; }
         body.cursor-royal, body.cursor-royal * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🖋️</text></svg>") 0 20, auto !important; }
         body.cursor-sword, body.cursor-sword * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🗡️</text></svg>") 0 20, auto !important; }
         body.cursor-wand, body.cursor-wand * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🪄</text></svg>") 0 20, auto !important; }
 
-        /* Анимация Уведомления BRAVO */
         .animate-bravo { animation: bravo-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes bravo-pop { 
             0% { transform: translate(-50%, 20px); opacity: 0; }
             50% { transform: translate(-50%, -10px); opacity: 1; }
             100% { transform: translate(-50%, 0); opacity: 1; }
         }
-
-        /* Анимация исчезновения тега */
         .tag-vanish { animation: pop-out 0.3s ease-in forwards; }
         @keyframes pop-out {
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(0.8); opacity: 0; }
         }
-
-        /* Масштаб системы */
         html { font-size: calc(16px * var(--system-scale, 1)) !important; }
     </style>
-
 </head>
 <body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 font-mono min-h-screen pb-20">
 
@@ -87,7 +66,6 @@
                 <a href="index.html" class="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded transition-all font-black text-xl hover:text-brand-light"><-</a>
                 <h1 class="font-black text-[10px] md:text-sm tracking-widest uppercase text-yellow-500">Lite_Engine_v2</h1>
             </div>
-            
             <div class="flex items-center gap-4">
                 <button onclick="toggleTheme()" class="p-2 text-zinc-500 hover:text-yellow-500 transition-colors">
                     <svg id="theme-icon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"></svg>
@@ -98,7 +76,6 @@
     </header>
 
     <div id="mainApp" class="hidden w-full max-w-4xl mx-auto p-6 mt-8 fade-in">
-        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
             <div class="bg-panel-light dark:bg-panel-dark p-5 rounded-xl border border-borderline-light dark:border-borderline-dark shadow-sm">
                 <div data-i18n="lite_stats_total" class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">TOTAL_OPS</div>
@@ -132,7 +109,7 @@
                     </svg>
                 </button>
             </div>
-            <div data-i18n="lite_tip" class="mt-4 text-[9px] font-bold text-zinc-400 uppercase tracking-widest text-center animate-pulse">UX_TIP: Левый кружок (О) - выполнить. Правый крестик (X) - удалить.</div>
+            <div data-i18n="lite_tip" class="mt-4 text-[9px] font-bold text-zinc-400 uppercase tracking-widest text-center animate-pulse">UX_TIP: Left circle (O) - execute. Right cross (X) - delete.</div>
         </div>
 
         <div id="liteTagsContainer" class="flex flex-wrap gap-4 mb-16"></div>
@@ -154,23 +131,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // ЗАЩИТА РОУТИНГА: Переброс неавторизованных на главную
-        if (localStorage.getItem('priority_auth') !== 'true') {
-            window.location.href = 'index.html';
-        }
+        if (localStorage.getItem('priority_auth') !== 'true') window.location.href = 'index.html';
 
-        // --- ДАННЫЕ И СОСТОЯНИЕ ---
         let liteTasks = JSON.parse(localStorage.getItem('priority_lite_tasks')) || [];
         let completedLog = JSON.parse(localStorage.getItem('priority_lite_log')) || {};
 
-        // --- ИНИЦИАЛИЗАЦИЯ SUPABASE ---
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let cloudSyncTimeout = null;
 
-        // ФОНОВАЯ ОТПРАВКА ДАННЫХ
         function syncStateToCloud() {
             const username = localStorage.getItem('priority_user');
             if (!username) return;
@@ -178,7 +149,6 @@
             clearTimeout(cloudSyncTimeout);
             cloudSyncTimeout = setTimeout(async () => {
                 const appState = {
-                    // Главное Ядро и Настройки (чтобы не затереть их)
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
@@ -190,8 +160,6 @@
                     shop_module: localStorage.getItem('priority_shop_module') || 'false',
                     currency: localStorage.getItem('priority_currency') || '₽',
                     scale: localStorage.getItem('priority_scale') || '1',
-
-                    // LITE-ДАННЫЕ (Ради чего мы здесь)
                     lite_tasks: JSON.parse(localStorage.getItem('priority_lite_tasks') || '[]'),
                     lite_log: JSON.parse(localStorage.getItem('priority_lite_log') || '{}'),
                     lite_cron_time: localStorage.getItem('lite_cron_time') || '00:00',
@@ -199,18 +167,11 @@
                 };
 
                 try {
-                    await supabaseClient.from('users')
-                    .update({ 
-                    app_data: appState,
-                    last_active_at: new Date().toISOString() 
-                })
-                    .eq('username', username);
-                    console.log('☁️ Lite Buffer synced to cloud');
-                } catch (err) { console.error('Cloud sync failed', err); }
+                    await supabaseClient.from('users').update({ app_data: appState, last_active_at: new Date().toISOString() }).eq('username', username);
+                } catch (err) {}
             }, 1500);
         }
 
-        // ФОНОВАЯ ЗАГРУЗКА ПРИ F5
         async function syncFromCloud() {
             const username = localStorage.getItem('priority_user');
             if (!username) return;
@@ -220,7 +181,6 @@
                 if (data && data.app_data && Object.keys(data.app_data).length > 0) {
                     const cloudData = data.app_data;
                 
-                    // Восстанавливаем LITE-память
                     if (cloudData.lite_tasks) {
                         localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
                         liteTasks = cloudData.lite_tasks;
@@ -232,16 +192,12 @@
                     if (cloudData.lite_cron_time) localStorage.setItem('lite_cron_time', cloudData.lite_cron_time);
                     if (cloudData.lite_cron_action) localStorage.setItem('lite_cron_action', cloudData.lite_cron_action);
                 
-                    // Отрисовываем интерфейс новыми данными
                     renderLite();
                     renderStats();
                     renderHeatmap();
-                    console.log('☁️ Lite Buffer synchronized from cloud');
                 }
-            } catch (e) { console.error('Cloud pull failed:', e); }
+            } catch (e) {}
         }
-
-        // --- CORE UI (СИНХРОНИЗАЦИЯ ЯЗЫКА И ТЕМЫ) ---
 
         function toggleLang() {
             const currentLang = localStorage.getItem('priority_lang') || 'en';
@@ -268,52 +224,46 @@
             }
         }
 
-        // --- LITE ENGINE (ВВОД И УПРАВЛЕНИЕ ЗАДАЧАМИ) ---
-        function handleLiteKeyPress(e) {
-            if (e.key === 'Enter') submitLiteInput();
-        }
+        function handleLiteKeyPress(e) { if (e.key === 'Enter') submitLiteInput(); }
 
         function submitLiteInput() {
             const inputEl = document.getElementById('liteInput');
             const val = inputEl.value.trim();
             if (val !== '') {
-                liteTasks.push({
-                    id: Date.now().toString(),
-                    text: val,
-                    status: 'active',
-                    date: new Date().toISOString()
-                });
+                liteTasks.push({ id: Date.now().toString(), text: val, status: 'active', date: new Date().toISOString() });
                 inputEl.value = '';
                 saveAndRender();
             }
         }
 
-        // --- АНИМАЦИЯ И ЛОГИКА ВЫПОЛНЕНИЯ ---
         function completeTask(id, btnEl) {
-            // Эффект исчезновения тега
             const tagEl = btnEl.closest('.lite-tag');
             tagEl.classList.add('tag-vanish');
-            
             setTimeout(() => {
                 const task = liteTasks.find(t => t.id === id);
                 if(task) {
                     task.status = 'done';
                     task.completedAt = new Date().toISOString().split('T')[0];
-                    
-                    // Пишем в тепловую карту (Heatmap)
                     const today = task.completedAt;
                     completedLog[today] = (completedLog[today] || 0) + 1;
-                    
                     showBravo();
                     saveAndRender();
                 }
-            }, 300); // Ждем конец анимации
+            }, 300);
         }
 
-        // --- УДАЛЕНИЕ (РАБОТАЕТ ДЛЯ АКТИВНЫХ И АРХИВНЫХ) ---
         function deleteTask(id) {
             liteTasks = liteTasks.filter(t => t.id !== id);
             saveAndRender();
+        }
+
+        function escalateLiteTask(id) {
+            const t = liteTasks.find(x => x.id === id);
+            if(t) {
+                // Передача задачи на главную страницу через localStorage
+                localStorage.setItem('priority_escalate_lite', JSON.stringify({id: t.id, text: t.text}));
+                window.location.href = 'index.html';
+            }
         }
 
         function saveAndRender() {
@@ -328,15 +278,12 @@
         function showBravo() {
             const el = document.getElementById('bravoNotice');
             el.classList.remove('hidden');
-            // Перезапуск анимации
             el.classList.remove('animate-bravo');
-            void el.offsetWidth; // trigger reflow
+            void el.offsetWidth;
             el.classList.add('animate-bravo');
-            
             setTimeout(() => el.classList.add('hidden'), 2500);
         }
 
-        // --- ОТРИСОВКА СТАТИСТИКИ ---
         function renderStats() {
             document.getElementById('stat-total').innerText = liteTasks.length;
             document.getElementById('stat-done').innerText = liteTasks.filter(t => t.status === 'done').length;
@@ -345,19 +292,15 @@
         function renderHeatmap() {
             const container = document.getElementById('heatmap');
             container.innerHTML = '';
-            
-            // Генерируем последние 30 дней от сегодня
             for (let i = 29; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 const dStr = date.toISOString().split('T')[0];
                 const count = completedLog[dStr] || 0;
-                
                 let colorClass = 'bg-zinc-200 dark:bg-zinc-800';
                 if (count > 0) colorClass = 'bg-emerald-200 dark:bg-emerald-900';
                 if (count > 2) colorClass = 'bg-emerald-400 dark:bg-emerald-600';
                 if (count > 4) colorClass = 'bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_5px_var(--color-emerald-500)]';
-
                 container.innerHTML += `<div class="heatmap-cell ${colorClass}" title="${dStr}: ${count} ops"></div>`;
             }
         }
@@ -366,60 +309,49 @@
             if(!isoDate) return '';
             const diffDays = Math.floor((new Date() - new Date(isoDate)) / (1000*60*60*24));
             if(diffDays <= 0) return '';
-            const int = Math.min(diffDays / 10, 1);
-            return `background-color: rgba(239, 68, 68, ${int * 0.15}); border-color: rgba(239, 68, 68, ${int * 0.5}); color: ${int > 0.5 ? '#ef4444' : ''}`;
+            const intensity = Math.min(diffDays / 10, 1);
+            return `background-color: rgba(239, 68, 68, ${intensity * 0.15}); border-color: rgba(239, 68, 68, ${intensity * 0.5}); color: ${intensity > 0.5 ? '#ef4444' : ''}`;
         }
 
-        // --- ОСНОВНАЯ ОТРИСОВКА (ТЕГИ И АРХИВ) ---
         function renderLite() {
             const cloud = document.getElementById('liteTagsContainer');
             const archive = document.getElementById('liteHistoryContainer');
-            
             const active = liteTasks.filter(t => t.status === 'active');
             const history = liteTasks.filter(t => t.status !== 'active');
 
-            // 1. АКТИВНЫЕ ЗАДАЧИ (ТЕГИ)
             if(active.length === 0) {
                 cloud.innerHTML = `<div data-i18n="lite_empty" class="text-sm font-bold text-zinc-500 italic w-full text-center py-4 border-2 border-dashed border-borderline-light dark:border-borderline-dark rounded-xl opacity-50">${t('lite_empty')}</div>`;
             } else {
                 cloud.innerHTML = active.map(t => {
                 const ageStyle = getLiteAgeStyle(t.date);
                 return `
-                    <div class="lite-tag group inline-flex items-center bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-full overflow-hidden hover:border-yellow-500 transition-all shadow-sm pr-1" style="${ageStyle}">
-                        <button onclick="completeTask('${t.id}', this)" class="pl-4 pr-3 py-3 text-zinc-400 hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors focus:outline-none flex items-center justify-center">
-                            <svg class="w-5 h-5 relative" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <path d="M8 12l2 2 4-4" class="opacity-0 group-hover:opacity-100 transition-opacity" stroke-width="3"></path>
-                            </svg>
-                        </button>
-                        <span class="pr-3 py-2 font-bold text-sm uppercase tracking-wider text-zinc-700 dark:text-zinc-300 pointer-events-none">${t.text}</span>
-                        <button onclick="deleteTask('${t.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:bg-red-500 hover:text-white transition-colors focus:outline-none font-black text-lg">×</button>
-                    </div>
+                <div class="lite-tag group inline-flex items-center bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-full overflow-hidden hover:border-yellow-500 transition-all shadow-sm pr-1" style="${ageStyle}">
+                    <button onclick="completeTask('${t.id}', this)" class="pl-4 pr-3 py-3 text-zinc-400 hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors focus:outline-none flex items-center justify-center">
+                        <svg class="w-5 h-5 relative" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 12l2 2 4-4" class="opacity-0 group-hover:opacity-100 transition-opacity" stroke-width="3"></path></svg>
+                    </button>
+                    <span class="pr-3 py-2 font-bold text-sm uppercase tracking-wider text-zinc-700 dark:text-zinc-300 pointer-events-none">${t.text}</span>
+                    <button onclick="escalateLiteTask('${t.id}')" class="w-8 h-8 flex items-center justify-center text-brand-light hover:bg-brand-light hover:text-white transition-colors focus:outline-none font-black text-sm mr-1" title="Escalate to Matrix">➚</button>
+                    <button onclick="deleteTask('${t.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:bg-red-500 hover:text-white transition-colors focus:outline-none font-black text-lg">×</button>
+                </div>
                 `;
             }).join('');
             }
 
-            // 2. ИСТОРИЯ (АРХИВ С УДАЛЕНИЕМ)
             if(history.length === 0) {
                 archive.innerHTML = `<div class="text-xs text-zinc-500 italic">No records found.</div>`;
             } else {
-                // Сортируем: новые сверху
                 history.sort((a,b) => new Date(b.date) - new Date(a.date));
-                
                 archive.innerHTML = history.map(t => {
                     let statusColor = 'text-zinc-500';
                     let statusLabel = 'ARCHIVED';
-                    
                     if(t.status === 'done') { statusColor = 'text-emerald-500'; statusLabel = 'DONE'; }
                     if(t.status === 'fail') { statusColor = 'text-red-500'; statusLabel = 'FAILED'; }
                     if(t.status === 'overdue') { statusColor = 'text-orange-500'; statusLabel = 'OVERDUE'; }
-
                     return `
                     <div class="group flex items-center gap-4 text-[10px] font-bold p-2 hover:bg-panel-light dark:hover:bg-panel-dark rounded border border-transparent hover:border-borderline-light dark:hover:border-borderline-dark transition-all">
                         <span class="${statusColor} w-16">[ ${statusLabel} ]</span>
                         <span class="line-through text-zinc-500 dark:text-zinc-400 flex-1 text-xs truncate">${t.text}</span>
                         <span class="text-[9px] text-zinc-400">${t.completedAt || new Date(t.date).toLocaleDateString()}</span>
-                        
                         <button onclick="deleteTask('${t.id}')" class="opacity-0 group-hover:opacity-100 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-2 py-1 rounded transition-all">DEL</button>
                     </div>
                     `;
@@ -427,9 +359,8 @@
             }
         }
 
-        // --- CRON JOB (АВТО-ОЧИСТКА В КОНЦЕ ДНЯ) ---
         function checkCronJob() {
-            const cronAction = localStorage.getItem('lite_cron_action') || 'fail'; // fail, overdue, delete
+            const cronAction = localStorage.getItem('lite_cron_action') || 'fail';
             const lastRun = localStorage.getItem('lite_cron_last_run') || '';
             const todayStr = new Date().toDateString();
             
@@ -438,28 +369,26 @@
                 liteTasks.forEach(t => {
                     if (t.status === 'active') {
                         if (cronAction === 'delete') t.status = 'deleted';
-                        else if (cronAction === 'none') { /* Do nothing, leave it active */ }
+                        else if (cronAction === 'none') { }
                         else t.status = cronAction;
                         changed = true;
                     }
                 });
-                
                 liteTasks = liteTasks.filter(t => t.status !== 'deleted');
                 if (changed) localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
             }
             localStorage.setItem('lite_cron_last_run', todayStr);
         }
 
-        // BOOT SEQUENCE (Запускается мгновенно!)
-        if (localStorage.getItem('priority_theme_mode') === 'dark') document.documentElement.classList.add('dark');
-        initThemeToggle();
-        updateThemeIcon();
-        checkCronJob();
-        applyI18n();
-        saveAndRender();
-        syncFromCloud();
-
-        document.getElementById('mainApp').classList.remove('hidden');
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('priority_theme_mode') === 'dark') document.documentElement.classList.add('dark');
+            updateThemeIcon();
+            checkCronJob();
+            applyI18n();
+            saveAndRender();
+            syncFromCloud();
+            document.getElementById('mainApp').classList.remove('hidden');
+        });
     </script>
 </body>
 </html>

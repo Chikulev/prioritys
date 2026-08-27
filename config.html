@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-
     <script>
-        // 1. Мгновенно применяем темную тему ДО рендеринга страницы (убивает белую вспышку)
         const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
         if (isDark) document.documentElement.classList.add('dark');
         else document.documentElement.classList.remove('dark');
 
-        // 2. Мгновенная предзагрузка темы из кэша (убивает белый экран на хостинге)
         const cachedCss = localStorage.getItem('priority_theme_css_cache');
         if (cachedCss) {
             const style = document.createElement('style');
@@ -17,25 +14,24 @@
             document.head.appendChild(style);
         }
     </script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PRIORITYS // SYS.CONFIG</title>
-    <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121214'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='%2306B6D4' text-anchor='middle'>/&gt;_</text></svg>">
-    
-    <meta name="description" content="Настройки рабочего пространства PRIORITY. Кастомизация интерфейса, маркетплейс тем и управление системными модулями.">
+    <meta name="description" content="Настройки рабочего пространства PRIORITYS. Кастомизация интерфейса, маркетплейс тем, кастомные курсоры и управление системными модулями.">
     <meta name="author" content="PRIORITYS">
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://prioritys.ru/config.html">
-    <meta property="og:title" content="PRIORITYS // Конфигурация Системы">
-    <meta property="og:description" content="Настройте окружение под себя: динамические темы, кастомные курсоры и управление модулями.">
+    <meta property="og:title" content="PRIORITYS // Конфигурация Ядра">
+    <meta property="og:description" content="Настройте среду под себя: от агрессивного Нео-брутализма до спокойного ботанического сада. Маркетплейс тем, интеграция модулей и резервное копирование.">
     <meta property="og:image" content="https://prioritys.ru/og-image.png">
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
 
+    <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121214'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='%2306B6D4' text-anchor='middle'>/&gt;_</text></svg>">
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* Базовые переменные (фолбэк до загрузки themes.js) */
         :root {
             --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
             --color-base-light: #FAFAFA; --color-base-dark: #09090B;
@@ -43,10 +39,7 @@
             --color-border-light: #d4d4d8; --color-border-dark: #27272a;
             --font-primary: 'JetBrains Mono', monospace;
         }
-
         body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-
-        /* Системные анимации и классы */
         .btn-press { transition: transform 0.1s ease; } .btn-press:active { transform: scale(0.95); }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; } 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -59,7 +52,6 @@
         ::-webkit-scrollbar-thumb { background: #A1A1AA; border-radius: 0px; } 
         .dark ::-webkit-scrollbar-thumb { background: #52525B; }
         
-        /* Кастомные курсоры (настраиваются независимо от тем) */
         body.cursor-tech, body.cursor-tech * { cursor: crosshair !important; }
         body.cursor-royal, body.cursor-royal * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🖋️</text></svg>") 0 20, auto !important; }
         body.cursor-sword, body.cursor-sword * { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size:20px;'><text y='20'>🗡️</text></svg>") 0 20, auto !important; }
@@ -68,13 +60,11 @@
         .cursor-box.active { border-color: var(--color-brand-light); background-color: rgba(8, 145, 178, 0.1); }
         .dark .cursor-box.active { border-color: var(--color-brand-dark); background-color: rgba(6, 182, 212, 0.1); }
 
-        /* Уведомления */
         .toast-enter { animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         .toast-leave { animation: fadeOutRight 0.3s ease-in forwards; }
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
-        /* Системные переключатели (Toggle) */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-border-light); transition: .4s; border-radius: 24px; }
@@ -84,26 +74,20 @@
         .dark input:checked + .slider { background-color: var(--color-brand-dark); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* Масштабирование */
         html { font-size: calc(16px * var(--system-scale, 1)) !important; }
     </style>
 </head>
 <body class="bg-base-light dark:bg-base-dark text-zinc-900 dark:text-zinc-100 bg-tech-grid min-h-screen relative">
     <script>
         (function() {
-
-            // 2. Мгновенная смена фавиконки
             const link = document.getElementById('dynamic-favicon');
             if(link) {
                 const bgColor = isDark ? '%23121214' : '%23FAFAFA';
                 const textColor = isDark ? '%2306B6D4' : '%230891B2';
                 link.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='${textColor}' text-anchor='middle'>/&gt;_</text></svg>`;
             }
-
-            // 4. Применение кастомного курсора
             const cursor = localStorage.getItem('priority_cursor') || 'default';
             if (cursor !== 'default') document.body.classList.add(cursor);
-
         })();
     </script>
 
@@ -216,76 +200,76 @@
                 
                 <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden transition-colors">
     
-    <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-3 h-3 bg-brand-light dark:bg-brand-dark rounded-sm animate-pulse shadow-[0_0_10px_var(--color-brand-dark)]"></div>
-            <h2 data-i18n="cfg_core_params" class="text-sm font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">System Parameters</h2>
-        </div>
-        <div class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest border border-zinc-300 dark:border-zinc-700 px-2 py-1 rounded">RACK_VIEW // ACTIVE</div>
-    </div>
+                    <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 bg-brand-light dark:bg-brand-dark rounded-sm animate-pulse shadow-[0_0_10px_var(--color-brand-dark)]"></div>
+                            <h2 data-i18n="cfg_core_params" class="text-sm font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">System Parameters</h2>
+                        </div>
+                        <div class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest border border-zinc-300 dark:border-zinc-700 px-2 py-1 rounded">RACK_VIEW // ACTIVE</div>
+                    </div>
 
-    <div class="divide-y divide-borderline-light dark:divide-borderline-dark">
-        
-        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
-            <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1.5">
-                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
-                    <h3 data-i18n="cfg_shop_module" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Shopping</h3>
-                </div>
-                <p data-i18n="cfg_shop_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Enable price fields and spending analytics.</p>
-            </div>
-            <div class="w-full md:w-64 shrink-0 flex items-center justify-between md:justify-end gap-4 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
-                <div id="currencySelectorBlock" class="relative group/sel transition-all duration-300 origin-right">
-                    <select id="currencySelect" onchange="saveCurrency()" class="bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-1.5 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 outline-none appearance-none cursor-pointer hover:border-brand-light dark:hover:border-brand-dark transition-colors pr-8">
-                        <option value="$">USD ($)</option>
-                        <option value="€">EUR (€)</option>
-                        <option value="₽">RUB (₽)</option>
-                        <option value="¥">CNY (¥)</option>
-                        <option value="₸">KZT (₸)</option>
-                    </select>
-                    <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[8px]">▼</div>
-                </div>
-                <label class="switch scale-90 shrink-0 m-0">
-                    <input type="checkbox" id="moduleShopToggle" onchange="toggleShopModule()">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
+                    <div class="divide-y divide-borderline-light dark:divide-borderline-dark">
+                        
+                        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
+                                    <h3 data-i18n="cfg_shop_module" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Shopping</h3>
+                                </div>
+                                <p data-i18n="cfg_shop_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Enable price fields and spending analytics.</p>
+                            </div>
+                            <div class="w-full md:w-64 shrink-0 flex items-center justify-between md:justify-end gap-4 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
+                                <div id="currencySelectorBlock" class="relative group/sel transition-all duration-300 origin-right">
+                                    <select id="currencySelect" onchange="saveCurrency()" class="bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-1.5 text-[11px] font-bold text-zinc-700 dark:text-zinc-300 outline-none appearance-none cursor-pointer hover:border-brand-light dark:hover:border-brand-dark transition-colors pr-8">
+                                        <option value="$">USD ($)</option>
+                                        <option value="€">EUR (€)</option>
+                                        <option value="₽">RUB (₽)</option>
+                                        <option value="¥">CNY (¥)</option>
+                                        <option value="₸">KZT (₸)</option>
+                                    </select>
+                                    <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-[8px]">▼</div>
+                                </div>
+                                <label class="switch scale-90 shrink-0 m-0">
+                                    <input type="checkbox" id="moduleShopToggle" onchange="toggleShopModule()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
 
-        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
-            <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1.5">
-                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
-                    <h3 data-i18n="cfg_filter_mode" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Environment</h3>
-                </div>
-                <p data-i18n="cfg_filter_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Toggle single or multi-selection filters.</p>
-            </div>
-            <div class="w-full md:w-64 shrink-0 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
-                <button onclick="toggleFilterMode()" id="filterModeBtn" class="w-full py-2.5 font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press">
-                    LOADING...
-                </button>
-            </div>
-        </div>
+                        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
+                                    <h3 data-i18n="cfg_filter_mode" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Environment</h3>
+                                </div>
+                                <p data-i18n="cfg_filter_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Toggle single or multi-selection filters.</p>
+                            </div>
+                            <div class="w-full md:w-64 shrink-0 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
+                                <button onclick="toggleFilterMode()" id="filterModeBtn" class="w-full py-2.5 font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press">
+                                    LOADING...
+                                </button>
+                            </div>
+                        </div>
 
-        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
-            <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1.5">
-                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
-                    <h3 data-i18n="cfg_access" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Scaling</h3>
-                </div>
-                <p data-i18n="cfg_scale_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Adjust overall UI magnification.</p>
-            </div>
-            <div class="w-full md:w-64 shrink-0 flex items-center gap-4 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
-                <span id="scaleValueDisplay" class="text-[10px] font-bold text-brand-light dark:text-brand-dark w-10 shrink-0 text-right">100%</span>
-                <input type="range" id="scaleSlider" min="0.8" max="1.2" step="0.1" value="1" 
-                       oninput="document.getElementById('scaleValueDisplay').innerText = Math.round(this.value * 100) + '%'"
-                       onchange="updateScale(this.value)" 
-                       class="flex-1 accent-brand-light dark:accent-brand-dark cursor-pointer transition-all">
-            </div>
-        </div>
+                        <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <span class="text-zinc-400 dark:text-zinc-600 font-bold">></span>
+                                    <h3 data-i18n="cfg_access" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Scaling</h3>
+                                </div>
+                                <p data-i18n="cfg_scale_desc" class="text-[10px] text-zinc-500 uppercase leading-relaxed pl-4">Adjust overall UI magnification.</p>
+                            </div>
+                            <div class="w-full md:w-64 shrink-0 flex items-center gap-4 pl-4 md:pl-0 border-l-2 border-transparent group-hover:border-brand-light dark:group-hover:border-brand-dark transition-colors">
+                                <span id="scaleValueDisplay" class="text-[10px] font-bold text-brand-light dark:text-brand-dark w-10 shrink-0 text-right">100%</span>
+                                <input type="range" id="scaleSlider" min="0.8" max="1.2" step="0.1" value="1" 
+                                       oninput="document.getElementById('scaleValueDisplay').innerText = Math.round(this.value * 100) + '%'"
+                                       onchange="updateScale(this.value)" 
+                                       class="flex-1 accent-brand-light dark:accent-brand-dark cursor-pointer transition-all">
+                            </div>
+                        </div>
 
-    </div>
-</div>
+                    </div>
+                </div>
 
                 <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
@@ -358,7 +342,6 @@
                     </div>
                 </div>
 
-                <!-- Оперативные задачи - лайт lite режим -->
                 <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden mb-6">
                     <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
                         <div class="flex items-center gap-3">
@@ -440,12 +423,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // ЗАЩИТА РОУТИНГА: Переброс неавторизованных на главную
-        if (localStorage.getItem('priority_auth') !== 'true') {
-            window.location.href = 'index.html';
-        }
+        if (localStorage.getItem('priority_auth') !== 'true') window.location.href = 'index.html';
 
-        // GLOBALS
         let scopes = [];
         let isPro = false;
 
@@ -453,7 +432,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // CORE ENGINE
         function showToast(title, desc, type = 'success') {
             const container = document.getElementById('toastContainer');
             if(!container) return;
@@ -469,7 +447,6 @@
             setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }, 4000);
         }
 
-        // КИБЕР-МОДАЛКА ДЛЯ ПОДТВЕРЖДЕНИЙ
         function askFactoryReset() {
             openModal(t('sys_warning') || 'SYS.WARNING', t('reset_desc'), () => {
                 localStorage.clear();
@@ -483,10 +460,7 @@
             const modal = document.getElementById('systemModal');
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.add('opacity-100'), 10);
-            document.getElementById('modalConfirmBtn').onclick = () => {
-                onConfirm();
-                closeModal();
-            };
+            document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); closeModal(); };
         }
 
         function closeModal() {
@@ -499,7 +473,6 @@
             localStorage.setItem('priority_scale', val);
             document.documentElement.style.setProperty('--system-scale', val);
             showToast(t('toast_sys'), 'Scale updated: ' + (val * 100) + '%', 'info');
-
             syncStateToCloud(true);
         }
 
@@ -507,14 +480,13 @@
             const currentLang = localStorage.getItem('priority_lang') || 'en';
             const newLang = currentLang === 'en' ? 'ru' : 'en';
             localStorage.setItem('priority_lang', newLang);
-
             applyI18n();
             applyAppTheme();
             renderPremiumState(); 
             renderShopUI();
             renderScopes();
             showToast(t('toast_sys'), t('toast_lang'), 'info');
-            syncStateToCloud(true); // <-- ДОБАВИТЬ СЮДА
+            syncStateToCloud(true); 
         }
 
         function updateThemeIcons() {
@@ -533,9 +505,7 @@
             }
         }
 
-        function initThemeToggle() {
-            updateThemeIcons();
-        }
+        function initThemeToggle() { updateThemeIcons(); }
         
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
@@ -543,31 +513,22 @@
             updateThemeIcons();
         }
 
-        function applyAppTheme() {
-            if (typeof applySystemTheme === 'function') {
-                applySystemTheme(); // Движок сам сделает всю магию!
-            }
-        }
+        function applyAppTheme() { if (typeof applySystemTheme === 'function') applySystemTheme(); }
 
         function activateTheme(themeName) {
             if(!isPro && themeName !== 'cyber') { showToast(t('toast_acc_denied'), t('toast_upgrade_pro'), 'error'); return; }
             localStorage.setItem('priority_theme', themeName);
             applyAppTheme();
             showToast(t('toast_theme_mgr'), t('toast_theme_act'), 'success');
-            syncStateToCloud(); // <-- ДОБАВИТЬ СЮДА
-            renderThemesMarketplace()
-
-            syncStateToCloud(true)
+            renderThemesMarketplace();
+            syncStateToCloud(true);
         }
 
-        // --- CURSORS ---
-        // --- CURSORS ENGINE v3 ---
         function initCursorScroll() {
             const scrollContainer = document.getElementById('cursorScrollContainer');
             if (scrollContainer) {
                 scrollContainer.addEventListener('wheel', (evt) => {
                     evt.preventDefault();
-                    // Конвертируем скролл колесиком вверх/вниз в движение ленты вправо/влево
                     scrollContainer.scrollLeft += evt.deltaY;
                 });
             }
@@ -576,35 +537,23 @@
         function applyCursor() {
             if(!document.body) return; 
             const cursorVal = localStorage.getItem('priority_cursor') || 'default';
-            
-            // 1. Очистка старых системных курсоров
             document.body.classList.remove('cursor-tech', 'cursor-royal', 'cursor-sword', 'cursor-wand', 'cursor-custom-emoji');
             const oldStyle = document.getElementById('dynamic-emoji-style');
             if (oldStyle) oldStyle.remove();
             
-            // 2. Снимаем выделение со всех карточек
-            document.querySelectorAll('.cursor-box').forEach(el => {
-                el.classList.remove('active', 'ring-4', 'ring-brand-light/30', 'border-brand-light');
-            });
+            document.querySelectorAll('.cursor-box').forEach(el => el.classList.remove('active', 'ring-4', 'ring-brand-light/30', 'border-brand-light'));
 
             if (cursorVal.startsWith('emoji:')) {
-                // Если это ЭМОДЗИ
                 const emoji = cursorVal.replace('emoji:', '');
-                
-                // SVG для генерации курсора "на лету" (нормальный и нажатый)
                 const svgNormal = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='50%' y='50%' font-size='24' dominant-baseline='central' text-anchor='middle'>${emoji}</text></svg>`;
                 const svgActive = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='50%' y='50%' font-size='18' dominant-baseline='central' text-anchor='middle'>${emoji}</text></svg>`;
 
                 const style = document.createElement('style');
                 style.id = 'dynamic-emoji-style';
-                style.innerHTML = `
-                    body.cursor-custom-emoji, body.cursor-custom-emoji * { cursor: url("${svgNormal}") 16 16, auto !important; }
-                    body.cursor-custom-emoji:active, body.cursor-custom-emoji:active * { cursor: url("${svgActive}") 16 16, auto !important; }
-                `;
+                style.innerHTML = `body.cursor-custom-emoji, body.cursor-custom-emoji * { cursor: url("${svgNormal}") 16 16, auto !important; } body.cursor-custom-emoji:active, body.cursor-custom-emoji:active * { cursor: url("${svgActive}") 16 16, auto !important; }`;
                 document.head.appendChild(style);
                 document.body.classList.add('cursor-custom-emoji');
 
-                // Подсвечиваем UI
                 const customBox = document.getElementById('cursor-custom');
                 if(customBox) {
                     customBox.classList.add('ring-4', 'ring-brand-light/30', 'border-brand-light');
@@ -612,22 +561,16 @@
                     if (input) input.value = emoji;
                 }
             } else {
-                // Если это СТАНДАРТНЫЙ ПРЕСЕТ
                 if(cursorVal !== 'default') document.body.classList.add(cursorVal);
                 const activeBox = document.getElementById(cursorVal === 'default' ? 'cursor-default' : cursorVal);
                 if(activeBox) activeBox.classList.add('active', 'ring-4', 'ring-brand-light/30', 'border-brand-light');
-                
-                // Очищаем инпут
                 const input = document.getElementById('customEmojiInput');
                 if (input) input.value = '';
             }
         }
 
         function setCursor(cursorClass, btnEl) {
-            if(!isPro && cursorClass !== 'default') { 
-                showToast(t('toast_acc_denied'), t('toast_upgrade_pro'), 'error'); 
-                return; 
-            }
+            if(!isPro && cursorClass !== 'default') { showToast(t('toast_acc_denied'), t('toast_upgrade_pro'), 'error'); return; }
             localStorage.setItem('priority_cursor', cursorClass);
             applyCursor();
             syncStateToCloud(true);
@@ -641,7 +584,6 @@
             }
             const emoji = val.trim();
             if (emoji) {
-                // Гарантируем, что берем только первый символ-эмодзи, отсекая текст
                 const singleEmoji = Array.from(emoji)[0]; 
                 localStorage.setItem('priority_cursor', 'emoji:' + singleEmoji);
                 applyCursor();
@@ -653,7 +595,6 @@
             }
         }
 
-        // --- MODULES (SHOPPING) ---
         function renderShopUI() {
             const isActive = localStorage.getItem('priority_shop_module') === 'true';
             const toggle = document.getElementById('moduleShopToggle');
@@ -683,17 +624,11 @@
             const newState = !current;
             localStorage.setItem('priority_shop_module', newState);
             
-            // Уведомление
-            if (newState) {
-                showToast(t('toast_sys'), t('toast_shop_on'), 'success');
-            } else {
-                showToast(t('toast_sys'), t('toast_shop_off'), 'info');
-            }
+            if (newState) showToast(t('toast_sys'), t('toast_shop_on'), 'success');
+            else showToast(t('toast_sys'), t('toast_shop_off'), 'info');
 
             renderShopUI();
-            // Если есть функция renderScopes, обновляем и её
             if (typeof renderScopes === 'function') renderScopes();
-
             syncStateToCloud(true);
         }
 
@@ -701,20 +636,16 @@
             const val = document.getElementById('currencySelect').value;
             localStorage.setItem('priority_currency', val);
             showToast(t('toast_sys'), 'Currency updated', 'info');
-
             syncStateToCloud(true);
         }
 
-        // --- SCOPES ---
         function renderScopes() {
             const list = document.getElementById('scopesList');
             if(!list) return;
-                
             const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
                 
             list.innerHTML = scopes.map((s, index) => {
                 const count = allTasks.filter(t => t.sphere === s && !t.completed).length;
-            
                 return `
                     <div class="flex justify-between items-center bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark p-3 rounded transition-colors group gap-2">
                         <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -722,33 +653,19 @@
                             <input type="text" id="scope-edit-${index}" value="${s}" readonly 
                                 class="w-full bg-transparent border-none outline-none text-sm uppercase overflow-hidden text-ellipsis whitespace-nowrap" 
                                 ondblclick="enableScopeEdit(${index})" onblur="saveScopeEdit(${index})">
-                            <span class="px-1.5 py-0.5 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 rounded text-[9px] font-bold shrink-0">
-                                ${count}
-                            </span>
+                            <span class="px-1.5 py-0.5 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 rounded text-[9px] font-bold shrink-0">${count}</span>
                         </div>
-                        
                         <div class="flex gap-1 opacity-50 group-hover:opacity-100 transition-opacity shrink-0 items-center">
-                            
                             <div class="flex items-center gap-1 mr-2 pr-2 border-r border-borderline-light dark:border-borderline-dark">
-                                <button onclick="moveScopeUp(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === 0 ? 'disabled' : ''} title="Move Up">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                                </button>
-                                <button onclick="moveScopeDown(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === scopes.length - 1 ? 'disabled' : ''} title="Move Down">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </button>
+                                <button onclick="moveScopeUp(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === 0 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg></button>
+                                <button onclick="moveScopeDown(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === scopes.length - 1 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button>
                             </div>
-                            
-                            <button onclick="enableScopeEdit(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark p-1.5 rounded transition-colors btn-press" title="${t('btn_edit')}">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            </button>
-                            <button onclick="deleteScope(${index})" class="text-zinc-400 hover:text-red-500 p-1.5 rounded transition-colors btn-press" title="${t('btn_del')}">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
+                            <button onclick="enableScopeEdit(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark p-1.5 rounded transition-colors btn-press"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                            <button onclick="deleteScope(${index})" class="text-zinc-400 hover:text-red-500 p-1.5 rounded transition-colors btn-press"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                         </div>
                     </div>
                 `;
             }).join('');
-            
             if (typeof applyI18n === 'function') applyI18n(); 
         }
 
@@ -766,7 +683,6 @@
 
         function moveScopeUp(index) {
             if (index > 0) {
-                // Меняем местами текущий и предыдущий элементы
                 const temp = scopes[index];
                 scopes[index] = scopes[index - 1];
                 scopes[index - 1] = temp;
@@ -776,7 +692,6 @@
 
         function moveScopeDown(index) {
             if (index < scopes.length - 1) {
-                // Меняем местами текущий и следующий элементы
                 const temp = scopes[index];
                 scopes[index] = scopes[index + 1];
                 scopes[index + 1] = temp;
@@ -787,19 +702,14 @@
         function deleteScope(index) {
             const scopeToDelete = scopes[index];
             const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
-            
-            // Считаем, сколько задач привязано к этой сфере
             const tasksInScope = allTasks.filter(t => t.sphere === scopeToDelete).length;
             
             const modal = document.getElementById('systemModal');
             const btnContainer = modal.querySelector('.flex.gap-3.justify-end');
-
             document.getElementById('modalTitle').innerText = 'УДАЛЕНИЕ СФЕРЫ';
             
             if (tasksInScope > 0) {
                 document.getElementById('modalText').innerText = `Сфера "${scopeToDelete}" содержит ${tasksInScope} активных/завершенных задач(и). Что вы хотите с ними сделать?`;
-                
-                // Временно подменяем кнопки: даем пользователю 3 варианта
                 btnContainer.innerHTML = `
                     <button onclick="closeScopeModal()" class="px-3 py-2.5 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Отмена</button>
                     <button onclick="executeScopeDelete(${index}, 'move')" class="px-3 py-2.5 bg-brand-light dark:bg-brand-dark text-white dark:text-black hover:opacity-90 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">В "ДРУГОЕ"</button>
@@ -807,56 +717,37 @@
                 `;
             } else {
                 document.getElementById('modalText').innerText = `Сфера "${scopeToDelete}" пуста. Удалить её?`;
-                
-                // Если задач нет - просто стандартные 2 кнопки
                 btnContainer.innerHTML = `
                     <button onclick="closeScopeModal()" class="px-6 py-2.5 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Отмена</button>
                     <button onclick="executeScopeDelete(${index}, 'delete')" class="px-6 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Удалить</button>
                 `;
             }
-            
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.add('opacity-100'), 10);
         }
 
-        // Логика исполнения выбранного действия
         function executeScopeDelete(index, action) {
             const scopeToDelete = scopes[index];
             let allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
             let tasksChanged = false;
 
             if (action === 'move') {
-                // ПЕРЕНОС: Меняем тег у всех связанных задач
-                allTasks.forEach(task => {
-                    if (task.sphere === scopeToDelete) {
-                        task.sphere = 'SYS_OTHER';
-                        tasksChanged = true;
-                    }
-                });
+                allTasks.forEach(task => { if (task.sphere === scopeToDelete) { task.sphere = 'SYS_OTHER'; tasksChanged = true; } });
             } else if (action === 'delete') {
-                // УДАЛЕНИЕ: Фильтруем массив, оставляя всё, КРОМЕ этой сферы
                 const initialLength = allTasks.length;
                 allTasks = allTasks.filter(task => task.sphere !== scopeToDelete);
                 if (allTasks.length !== initialLength) tasksChanged = true;
             }
 
-            // Сохраняем обновленные задачи локально
-            if (tasksChanged) {
-                localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
-            }
-
-            // Удаляем саму сферу
+            if (tasksChanged) localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
             scopes.splice(index, 1); 
             localStorage.setItem('priority_scopes', JSON.stringify(scopes)); 
-            
             renderScopes();
             showToast(t('toast_sys'), t('toast_scope_del'), 'info');
-            syncStateToCloud(true); // Мгновенно шлем в облако!
-            
+            syncStateToCloud(true);
             closeScopeModal();
         }
 
-        // Возвращаем оригинальные кнопки модалки на место (чтобы не сломать Factory Reset)
         function closeScopeModal() {
             const modal = document.getElementById('systemModal');
             modal.classList.remove('opacity-100');
@@ -888,10 +779,8 @@
             else { renderScopes(); }
         }
         
-        // --- ОБЛАЧНЫЙ ДВИЖОК ДЛЯ НАСТРОЕК ---
         let cloudSyncTimeout = null;
 
-        // Добавили параметр immediate (по умолчанию false)
         function syncStateToCloud(immediate = false) {
             const username = localStorage.getItem('priority_user');
             if (!username) return;
@@ -908,36 +797,28 @@
                     lang: localStorage.getItem('priority_lang') || 'en',
                     shop_module: localStorage.getItem('priority_shop_module') || 'false',
                     currency: localStorage.getItem('priority_currency') || '₽',
-                    scale: localStorage.getItem('priority_scale') || '1'
+                    scale: localStorage.getItem('priority_scale') || '1',
+                    lite_tasks: JSON.parse(localStorage.getItem('priority_lite_tasks') || '[]'),
+                    lite_log: JSON.parse(localStorage.getItem('priority_lite_log') || '{}'),
+                    lite_cron_time: localStorage.getItem('lite_cron_time') || '00:00',
+                    lite_cron_action: localStorage.getItem('lite_cron_action') || 'fail'
                 };
 
                 try {
-                    await supabaseClient.from('users')
-                    .update({ 
-                    app_data: appState,
-                    last_active_at: new Date().toISOString() 
-                })
-                    .eq('username', username);
-                    console.log('☁️ Config synced to cloud');
-                } catch (err) { console.error('Cloud sync failed', err); }
+                    await supabaseClient.from('users').update({ app_data: appState, last_active_at: new Date().toISOString() }).eq('username', username);
+                } catch (err) {}
             };
         
-            if (immediate) {
-                clearTimeout(cloudSyncTimeout);
-                performSync(); // Отправляем мгновенно
-            } else {
-                clearTimeout(cloudSyncTimeout);
-                cloudSyncTimeout = setTimeout(performSync, 1500); // Ждем 1.5 сек
-            }
+            if (immediate) { clearTimeout(cloudSyncTimeout); performSync(); } 
+            else { clearTimeout(cloudSyncTimeout); cloudSyncTimeout = setTimeout(performSync, 1500); }
         }
 
         function saveScopesData() { 
             localStorage.setItem('priority_scopes', JSON.stringify(scopes)); 
             renderScopes(); 
-            syncStateToCloud(true); // <-- Теперь изменения сфер летят прямо в облако!
+            syncStateToCloud(true);
         }
 
-        // --- PREMIUM & FUNDING ---
         function renderPremiumState() {
             const banner = document.getElementById('proBanner');
             const refContainer = document.getElementById('referralContainer');
@@ -952,10 +833,7 @@
                         <p data-i18n="cfg_pro_desc_active" class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 leading-relaxed">${t('cfg_pro_desc_active')}</p>
                     </div>
                 `;
-                document.querySelectorAll('.premium-locked').forEach(el => {
-                    el.classList.remove('premium-locked');
-                });
-                
+                document.querySelectorAll('.premium-locked').forEach(el => el.classList.remove('premium-locked'));
                 refContainer.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-2">
@@ -966,7 +844,6 @@
                     </div>
                     <button onclick="generateReferralLink()" class="w-full mt-auto btn-press bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all shadow-sm">${t('btn_ref')}</button>
                 `;
-
             } else {
                 banner.innerHTML = `
                     <div class="absolute -right-10 -top-10 opacity-10"><svg class="w-32 h-32 text-white dark:text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
@@ -977,7 +854,6 @@
                         <button onclick="upgradeToPro()" data-i18n="btn_upgrade" class="btn-press w-full bg-brand-light dark:bg-brand-dark text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(6,182,212,0.3)]">${t('btn_upgrade')}</button>
                     </div>
                 `;
-
                 refContainer.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-2">
@@ -991,105 +867,59 @@
             }
         }
 
-        async function upgradeToPro() { 
-            const username = localStorage.getItem('priority_user');
-            if (!username) return;
-                
-            showToast('SYSTEM', 'Verifying license...', 'info');
-                
-            try {
-                // Запрашиваем статус прямо из Supabase
-                const { data, error } = await supabaseClient
-                    .from('users')
-                    .select('is_pro')
-                    .eq('username', username)
-                    .single();
-            
-                if (data && data.is_pro) {
-                    // Если админ дал PRO - применяем!
-                    isPro = true;
-                    localStorage.setItem('priority_is_pro', 'true');
-                    renderPremiumState(); 
-                    applyCursor(); 
-                    applyAppTheme(); 
-                    showToast('SYSTEM UPGRADE', 'PRO License Activated!', 'success');
-                    syncStateToCloud(); // Синхронизируем свежий стейт
-                } else {
-                    // Если PRO всё еще нет - показываем ошибку
-                    showToast('ACCESS DENIED', 'Для активации PRO статуса обратитесь к администратору системы.', 'error');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('ERROR', 'Verification failed', 'error');
-            }
-        }
-
+        function upgradeToPro() { showToast('ACCESS DENIED', 'Для активации PRO статуса обратитесь к администратору системы.', 'error'); }
         function openDonateModal() { document.getElementById('donateModal').classList.remove('hidden'); setTimeout(() => document.getElementById('donateModal').classList.remove('opacity-0'), 10); }
         function closeDonateModal() { document.getElementById('donateModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('donateModal').classList.add('hidden'), 300); }
         function copyToClipboard(text) { navigator.clipboard.writeText(text); showToast(t('toast_clip'), t('toast_copied'), 'success'); }
         function generateReferralLink() {
             const code = 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            const link = `https://prioritys.ru/invite?code=${code}`;
-            const promo = t('ref_promo_text') + "\n" + link;
-            navigator.clipboard.writeText(promo);
+            navigator.clipboard.writeText(t('ref_promo_text') + "\n" + `https://prioritys.ru/invite?code=${code}`);
             showToast(t('toast_ref_link'), t('toast_ref_copied'), 'success');
         }
 
-        // --- SAFE INITIALIZATION ---
         function loadDataFromStorage() {
             document.getElementById('userGreeting').innerText = "" + (localStorage.getItem('priority_user') || 'UNKNOWN');
-
             let storedScopes = localStorage.getItem('priority_scopes');
-            if (!storedScopes) {
-                scopes = ['СТУДИЯ', 'АВИТО', '3Д_ПЕЧАТЬ', 'ВУЗ', 'МАСТЕРСКАЯ', 'ADAMA-ART', 'МЕДИЦИНА'];
-                localStorage.setItem('priority_scopes', JSON.stringify(scopes));
-            } else {
-                scopes = JSON.parse(storedScopes) || [];
-            }
+            if (!storedScopes) { scopes = ['СТУДИЯ', 'АВИТО', '3Д_ПЕЧАТЬ', 'ВУЗ', 'МАСТЕРСКАЯ', 'ADAMA-ART', 'МЕДИЦИНА']; localStorage.setItem('priority_scopes', JSON.stringify(scopes)); } 
+            else { scopes = JSON.parse(storedScopes) || []; }
             isPro = localStorage.getItem('priority_is_pro') === 'true';
         }
 
         async function syncFromCloud() {
             const username = localStorage.getItem('priority_user');
             if (!username) return;
-
             try {
                 const { data } = await supabaseClient.from('users').select('app_data, is_pro').eq('username', username).single();
                 if (data && data.app_data && Object.keys(data.app_data).length > 0) {
                     const cloudData = data.app_data;
-                
-                    // Восстанавливаем НАСТРОЙКИ
                     if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
                     if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
                     if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
                     if (cloudData.shop_module) localStorage.setItem('priority_shop_module', cloudData.shop_module);
                     if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
-                    if (cloudData.scale) {
-                        localStorage.setItem('priority_scale', cloudData.scale);
-                        document.documentElement.style.setProperty('--system-scale', cloudData.scale);
-                    }
-                
-                    // PRO статус
+                    if (cloudData.scale) { localStorage.setItem('priority_scale', cloudData.scale); document.documentElement.style.setProperty('--system-scale', cloudData.scale); }
+                    
+                    if (cloudData.lite_tasks) localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
+                    if (cloudData.lite_log) localStorage.setItem('priority_lite_log', JSON.stringify(cloudData.lite_log));
+                    if (cloudData.lite_cron_time) localStorage.setItem('lite_cron_time', cloudData.lite_cron_time);
+                    if (cloudData.lite_cron_action) localStorage.setItem('lite_cron_action', cloudData.lite_cron_action);
+
                     isPro = data.is_pro || false;
                     localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
-                
-                    // Применяем визуал на лету
+                    
                     applyAppTheme();
                     applyCursor();
                     applyI18n();
                     renderShopUI();
                     renderPremiumState();
                     renderThemesMarketplace();
-
-                    console.log('☁️ Preferences synchronized from cloud');
                 }
-            } catch (e) { console.error('Cloud pull failed:', e); }
+            } catch (e) {}
         }
 
         function toggleFilterMode() {
             const current = localStorage.getItem('priority_filter_multi') === 'true';
-            const next = !current;
-            localStorage.setItem('priority_filter_multi', next);
+            localStorage.setItem('priority_filter_multi', !current);
             renderFilterModeUI();
             showToast(t('toast_sys'), 'Logic Updated', 'info');
         }
@@ -1099,22 +929,14 @@
             const btn = document.getElementById('filterModeBtn');
             if (btn) {
                 btn.innerText = isMulti ? t('cfg_filter_multi') : t('cfg_filter_single');
-                
-                if (isMulti) {
-                    btn.className = "w-full py-2.5 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark border-brand-light/50 dark:border-brand-dark/50 font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press shadow-[0_0_15px_rgba(6,182,212,0.1)]";
-                } else {
-                    btn.className = "w-full py-2.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border-borderline-light dark:border-borderline-dark font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press hover:bg-zinc-200 dark:hover:bg-zinc-800";
-                }
+                if (isMulti) btn.className = "w-full py-2.5 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark border-brand-light/50 dark:border-brand-dark/50 font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press shadow-[0_0_15px_rgba(6,182,212,0.1)]";
+                else btn.className = "w-full py-2.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border-borderline-light dark:border-borderline-dark font-bold rounded border text-[10px] uppercase tracking-[0.15em] transition-all btn-press hover:bg-zinc-200 dark:hover:bg-zinc-800";
             }
         }
 
-        // EXPORT / IMPORT LOGIC
         function exportData(mode) {
             const data = {
-                version: "9.0",
-                timestamp: new Date().toISOString(),
-                mode: mode,
-                // Сразу парсим строки в массивы перед экспортом!
+                version: "9.0", timestamp: new Date().toISOString(), mode: mode,
                 scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                 templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
                 theme: localStorage.getItem('priority_theme'),
@@ -1123,19 +945,15 @@
                 shop_module: localStorage.getItem('priority_shop_module'),
                 currency: localStorage.getItem('priority_currency')
             };
-
             if (mode === 'full') {
                 data.tasks = JSON.parse(localStorage.getItem('priority_tasks') || '[]');
                 data.macros = JSON.parse(localStorage.getItem('priority_macros') || '[]');
                 data.badges = JSON.parse(localStorage.getItem('priority_badges') || '[]');
             }
-
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `priority_${mode}_${getDateStr()}.json`;
-            a.click();
+            a.href = url; a.download = `priority_${mode}_${getDateStr()}.json`; a.click();
             URL.revokeObjectURL(url);
             showToast(t('toast_sys'), t('toast_port_exp'), 'success');
         }
@@ -1143,57 +961,32 @@
         async function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             showToast('SYSTEM', 'Processing Neural Upload...', 'info');
-
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
                     const username = localStorage.getItem('priority_user');
-
-                    // Умный парсер: лечит старые "строковые" массивы из бэкапа
-                    const parseIfString = (val) => {
-                        if (typeof val === 'string') {
-                            try { return JSON.parse(val); } catch(err) { return val; }
-                        }
-                        return val || [];
-                    };
-                
-                    const cleanState = {
-                        scopes: parseIfString(data.scopes),
-                        tasks: parseIfString(data.tasks),
-                        macros: parseIfString(data.macros),
-                        templates: parseIfString(data.templates),
-                        badges: parseIfString(data.badges)
-                    };
-                
-                    // Применяем локальные настройки визуала
+                    const parseIfString = (val) => { if (typeof val === 'string') { try { return JSON.parse(val); } catch(err) { return val; } } return val || []; };
+                    const cleanState = { scopes: parseIfString(data.scopes), tasks: parseIfString(data.tasks), macros: parseIfString(data.macros), templates: parseIfString(data.templates), badges: parseIfString(data.badges) };
+                    
                     if (data.theme) localStorage.setItem('priority_theme', data.theme);
                     if (data.cursor) localStorage.setItem('priority_cursor', data.cursor);
                     if (data.shop_module) localStorage.setItem('priority_shop_module', data.shop_module);
                     if (data.currency) localStorage.setItem('priority_currency', data.currency);
 
-                    // Главное: заливаем вылеченный стейт прямо в Supabase
                     if (data.mode === 'full' && username) {
                         await supabaseClient.from('users').update({ app_data: cleanState }).eq('username', username);
-
-                        // Сохраняем локально, чтобы сразу отрисовать
                         localStorage.setItem('priority_scopes', JSON.stringify(cleanState.scopes));
                         localStorage.setItem('priority_tasks', JSON.stringify(cleanState.tasks));
                         localStorage.setItem('priority_macros', JSON.stringify(cleanState.macros));
                         localStorage.setItem('priority_templates', JSON.stringify(cleanState.templates));
                         localStorage.setItem('priority_badges', JSON.stringify(cleanState.badges));
-
-                        localStorage.setItem('priority_onboarded', 'true'); // Убиваем баг с онбордингом
+                        localStorage.setItem('priority_onboarded', 'true'); 
                     }
-                
                     showToast('SYSTEM', 'Upload Successful. Rebooting...', 'success');
                     setTimeout(() => window.location.reload(), 1500);
-                } catch (err) {
-                    console.error(err);
-                    showToast('ERROR', 'Invalid Core Data format', 'error');
-                }
+                } catch (err) { showToast('ERROR', 'Invalid Core Data format', 'error'); }
             };
             reader.readAsText(file);
         }
@@ -1202,51 +995,29 @@
             const logs = JSON.parse(localStorage.getItem('priority_sys_logs') || '[]');
             const container = document.getElementById('sysLogsContainer');
             if (!container) return;
-            
-            if (logs.length === 0) {
-                container.innerHTML = '<div class="text-xs text-zinc-500 italic">No logs recorded yet.</div>';
-                return;
-            }
-            
+            if (logs.length === 0) { container.innerHTML = '<div class="text-xs text-zinc-500 italic">No logs recorded yet.</div>'; return; }
             container.innerHTML = logs.slice().reverse().map(log => `
                 <div class="flex flex-col gap-1 border-b border-borderline-light dark:border-borderline-dark pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
-                    <div class="flex justify-between items-start">
-                        <span class="text-[9px] font-bold text-brand-light dark:text-brand-dark">[${log.action}]</span>
-                        <span class="text-[8px] text-zinc-400">${log.time}</span>
-                    </div>
+                    <div class="flex justify-between items-start"><span class="text-[9px] font-bold text-brand-light dark:text-brand-dark">[${log.action}]</span><span class="text-[8px] text-zinc-400">${log.time}</span></div>
                     <div class="text-xs text-zinc-700 dark:text-zinc-300 leading-tight">${log.details}</div>
                 </div>
             `).join('');
         }
 
-        // Заглушка для теста
-        if (!localStorage.getItem('priority_sys_logs')) {
-             localStorage.setItem('priority_sys_logs', JSON.stringify([
-                 { action: "SYS_BOOT", details: "Core systems initialized.", time: "Just now" }
-             ]));
-        }
+        if (!localStorage.getItem('priority_sys_logs')) localStorage.setItem('priority_sys_logs', JSON.stringify([{ action: "SYS_BOOT", details: "Core systems initialized.", time: "Just now" }]));
 
         function renderThemesMarketplace() {
             const grid = document.getElementById('themesGrid');
             if(!grid) return;
-            
             const activeTheme = localStorage.getItem('priority_theme') || 'cyber';
             const lang = localStorage.getItem('priority_lang') || 'en';
-            
             let html = '';
             Object.values(SYSTEM_THEMES).forEach(theme => {
                 const isLocked = theme.isPro && !isPro;
                 const isActive = activeTheme === theme.id;
                 const btnText = isActive ? t('btn_in_use') : (isLocked ? t('btn_unlock') : t('btn_activate'));
-                
-                const btnClass = isActive 
-                    ? 'bg-brand-light dark:bg-brand-dark text-white dark:text-black shadow-sm' 
-                    : 'bg-transparent border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:border-brand-light dark:hover:border-brand-dark hover:text-brand-light dark:hover:text-brand-dark hover:bg-brand-light/5 dark:hover:bg-brand-dark/5';
-                
-                const badgeHTML = isActive 
-                    ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black px-2 py-1 rounded font-mono-tech z-20">${t('theme_active')}</div>`
-                    : (isLocked ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold text-zinc-500 bg-zinc-200 dark:bg-zinc-800 px-2 py-1 rounded z-20 pro-badge font-mono-tech">🔒 PRO</div>` : '');
-
+                const btnClass = isActive ? 'bg-brand-light dark:bg-brand-dark text-white dark:text-black shadow-sm' : 'bg-transparent border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:border-brand-light dark:hover:border-brand-dark hover:text-brand-light dark:hover:text-brand-dark hover:bg-brand-light/5 dark:hover:bg-brand-dark/5';
+                const badgeHTML = isActive ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black px-2 py-1 rounded font-mono-tech z-20">${t('theme_active')}</div>` : (isLocked ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold text-zinc-500 bg-zinc-200 dark:bg-zinc-800 px-2 py-1 rounded z-20 pro-badge font-mono-tech">🔒 PRO</div>` : '');
                 html += `
                     <div id="theme-card-${theme.id}" class="theme-card ${isLocked ? 'premium-locked' : ''} border ${isActive ? 'border-brand-light dark:border-brand-dark' : 'border-borderline-light dark:border-borderline-dark'} rounded-md p-5 relative overflow-hidden bg-panel-light dark:bg-panel-dark group hover-magnet transition-all">
                         ${badgeHTML}
@@ -1256,8 +1027,6 @@
                     </div>
                 `;
             });
-            
-            // Добавляем карточку генератора AI в конец
             html += `
                 <div class="border border-dashed border-brand-light/50 dark:border-brand-dark/50 rounded-md p-5 relative bg-brand-light/5 dark:bg-brand-dark/5 flex flex-col items-center justify-center text-center font-mono-tech">
                     <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✨</div>
@@ -1269,11 +1038,6 @@
             grid.innerHTML = html;
         }
 
-        // Вызови её при загрузке:
-        document.addEventListener('DOMContentLoaded', () => {
-            renderThemesMarketplace();
-        });
-
         function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
 
         function loadLiteConfig() {
@@ -1283,35 +1047,35 @@
         function saveLiteConfig() {
             localStorage.setItem('lite_cron_time', document.getElementById('liteCronTime').value);
             localStorage.setItem('lite_cron_action', document.getElementById('liteCronAction').value);
+            syncStateToCloud(true);
         }
 
-                // BOOT SEQUENCE (Запускается мгновенно!)
-                const savedScale = localStorage.getItem('priority_scale') || 1;
-                document.documentElement.style.setProperty('--system-scale', savedScale);
-                const scaleSlider = document.getElementById('scaleSlider');
-                if (scaleSlider) {
-                    const currentScale = localStorage.getItem('priority_scale') || 1;
-                    scaleSlider.value = currentScale;
-                    if(document.getElementById('scaleValueDisplay')) {
-                        document.getElementById('scaleValueDisplay').innerText = Math.round(currentScale * 100) + '%';
-                    }
-                }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedScale = localStorage.getItem('priority_scale') || 1;
+            document.documentElement.style.setProperty('--system-scale', savedScale);
+            const scaleSlider = document.getElementById('scaleSlider');
+            if (scaleSlider) {
+                const currentScale = localStorage.getItem('priority_scale') || 1;
+                scaleSlider.value = currentScale;
+                if(document.getElementById('scaleValueDisplay')) document.getElementById('scaleValueDisplay').innerText = Math.round(currentScale * 100) + '%';
+            }
 
-                loadDataFromStorage();
-                renderFilterModeUI();
-                initThemeToggle();
-                applyAppTheme();
-                renderScopes();
-                renderPremiumState();
-                initCursorScroll();
-                applyCursor();
-                loadLiteConfig();
-                renderShopUI();
-                renderSysLogs();
-                renderThemesMarketplace();
-                syncFromCloud();
+            loadDataFromStorage();
+            renderFilterModeUI();
+            initThemeToggle();
+            applyAppTheme();
+            renderScopes();
+            renderPremiumState();
+            initCursorScroll();
+            applyCursor();
+            loadLiteConfig();
+            renderShopUI();
+            renderSysLogs();
+            renderThemesMarketplace();
+            syncFromCloud();
 
-                document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        });
     </script>
 </body>
 </html>
