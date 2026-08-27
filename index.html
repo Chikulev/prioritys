@@ -930,7 +930,7 @@
             }, 1500);
         }
         
-        // Фоновая загрузка при F5
+        // Фоновая загрузка при F5 (ОБЪЕДИНЕННАЯ ВЕРСИЯ)
         async function syncFromCloud() {
            const username = localStorage.getItem('priority_user');
            if (!username) return;
@@ -949,7 +949,7 @@
                    if (data.app_data && Object.keys(data.app_data).length > 0) {
                        const cloudData = data.app_data;
 
-                       // Восстанавливаем НАСТРОЙКИ
+                       // 1. ВОССТАНАВЛИВАЕМ НАСТРОЙКИ ВИЗУАЛА
                        if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
                        if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
                        if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
@@ -960,36 +960,41 @@
                            document.documentElement.style.setProperty('--system-scale', cloudData.scale);
                         }
 
-                        if (cloudData.lite_tasks) {
-                            localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
-                            liteTasks = cloudData.lite_tasks;
-                            renderDashLite();
-                        }
+                       // 2. ВОССТАНАВЛИВАЕМ LITE-БУФЕР И ЕГО НАСТРОЙКИ
+                       if (cloudData.lite_tasks) {
+                           localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
+                           liteTasks = cloudData.lite_tasks;
+                       }
+                       if (cloudData.lite_log) localStorage.setItem('priority_lite_log', JSON.stringify(cloudData.lite_log));
+                       if (cloudData.lite_cron_time) localStorage.setItem('lite_cron_time', cloudData.lite_cron_time);
+                       if (cloudData.lite_cron_action) localStorage.setItem('lite_cron_action', cloudData.lite_cron_action);
                    
-                       // Восстанавливаем ЯДРО
+                       // 3. ВОССТАНАВЛИВАЕМ ЯДРО (Матрицу)
                        localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes || []));
                        localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks || []));
                        localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros || []));
                        localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates || []));
                        localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges || []));
 
+                       // ОБНОВЛЯЕМ ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ
                        dynamicScopes = cloudData.scopes || [];
                        tasks = cloudData.tasks || [];
                        templates = cloudData.templates || [];
                        macros = cloudData.macros || [];
                        unlockedBadges = cloudData.badges || [];
 
-                       // Мягко перерисовываем интерфейс
+                       // 4. ПЕРЕРИСОВЫВАЕМ ВЕСЬ ИНТЕРФЕЙС
                        initDynamicScopes();
                        renderTasks();
                        renderMacros();
+                       renderDashLite();
 
-                       // Применяем визуал на лету
+                       // ПРИМЕНЯЕМ ВИЗУАЛ
                        applyAppTheme();
                        applyCursor();
                        applyI18n();
 
-                       console.log('☁️ Local state updated from cloud');
+                       console.log('☁️ Unified state updated from cloud successfully');
                    }
                }
            } catch (e) {
@@ -1285,52 +1290,6 @@
                 document.getElementById('dashLiteIcon').classList.add('rotate-180');
             }
             renderDashLite();
-        }
-
-        async function syncFromCloud() {
-           const username = localStorage.getItem('priority_user');
-           if (!username) return;
-                
-           try {
-               const { data, error } = await supabaseClient
-                   .from('users')
-                   .select('app_data, is_pro')
-                   .eq('username', username)
-                   .single();
-            
-               if (data) {
-                   // Обновляем PRO статус
-                   isPro = data.is_pro || false;
-                   localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
-                   
-                   // Если в облаке есть данные, распаковываем их
-                   if (data.app_data && Object.keys(data.app_data).length > 0) {
-                       const cloudData = data.app_data;
-                       
-                       localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes || []));
-                       localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks || []));
-                       localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros || []));
-                       localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates || []));
-                       localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges || []));
-                       
-                       // Обновляем переменные в памяти
-                       dynamicScopes = cloudData.scopes || [];
-                       tasks = cloudData.tasks || [];
-                       templates = cloudData.templates || [];
-                       macros = cloudData.macros || [];
-                       unlockedBadges = cloudData.badges || [];
-                       
-                       // Мягко перерисовываем интерфейс новыми данными
-                       initDynamicScopes();
-                       renderTasks();
-                       renderMacros();
-                       
-                       console.log('☁️ Local state updated from cloud');
-                   }
-               }
-           } catch (e) {
-               console.error('Cloud pull failed:', e);
-           }
         }
 
         function unlockAchievement(id) {
