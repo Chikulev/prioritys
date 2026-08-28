@@ -625,7 +625,6 @@
             renderTasks();
         }
 
-        // --- ЛОГИКА ФИЛЬТРАЦИИ ---
         function renderFilters() {
             const container = document.getElementById('scopeFilterContainer');
             if (!container) return;
@@ -633,12 +632,13 @@
             const activeTasks = tasks.filter(t => !t.completed);
             const counts = {};
             
-            // Виртуальный массив: твои сферы + системная
-            const virtualScopes = [...scopes, 'SYS_OTHER'];
+            // ---> ОБЪЕДИНЯЕМ ВСЕ СФЕРЫ (ЛИЧНЫЕ И ОБЩИЕ) БЕЗ ДУБЛИКАТОВ <---
+            const allScopeNames = Array.from(new Set([...scopes, ...sharedScopes.map(s => s.name)]));
+            const virtualScopes = [...allScopeNames, 'SYS_OTHER'];
 
             virtualScopes.forEach(s => {
                 if (s === 'SYS_OTHER') {
-                    counts[s] = activeTasks.filter(task => task.sphere === 'SYS_OTHER' || !scopes.includes(task.sphere)).length;
+                    counts[s] = activeTasks.filter(task => task.sphere === 'SYS_OTHER' || !allScopeNames.includes(task.sphere)).length;
                 } else {
                     counts[s] = activeTasks.filter(task => task.sphere === s).length;
                 }
@@ -646,7 +646,7 @@
 
             const sortedScopes = [...virtualScopes].sort((a, b) => counts[b] - counts[a]);
             const isAllActive = activeFilterScopes.length === 0 && !activeFilterPurchases;
-            
+                        
             let html = `
                 <button onclick="toggleFilter('ALL')" class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest border transition-all duration-200 btn-press rounded
                 ${isAllActive 
@@ -1656,7 +1656,10 @@
                             title: input.value,
                             creator_username: username,
                             assignee_username: finalAssignee,
-                            status: targetStatus,
+                            is_important: impVal,      // Сохраняем важность
+                            is_urgent: urgVal,         // Сохраняем спешность
+                            is_acknowledged: finalAssignee === username, // Если назначил себе - карантин не нужен
+                            status: 'active',
                             price: priceVal
                         }).select().single();
 
@@ -2134,10 +2137,39 @@
             const comp = document.getElementById('completedTasks');
             qLists.forEach(l => l.innerHTML = ''); mLists.forEach(l => l.innerHTML = ''); comp.innerHTML = '';
                 
-            const sortedTasks = [...tasks].sort((a, b) => {
+            // 1. АДАПТИРУЕМ ОБЩИЕ ЗАДАЧИ
+            const allScopeNames = Array.from(new Set([...scopes, ...sharedScopes.map(s => s.name)]));
+
+            const acceptedShared = sharedTasks.map(t => {
+                const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER';
+                return {
+                    id: t.id,
+                    title: t.title,
+                    sphere: scopeName,
+                    isImportant: t.is_important, // Берем квадрант из базы
+                    isUrgent: t.is_urgent,       // Берем квадрант из базы
+                    completed: t.status === 'completed',
+                    createdAt: new Date(t.created_at).toLocaleDateString('ru-RU'),
+                    completedAt: t.completed_at ? new Date(t.completed_at).toLocaleDateString('ru-RU') : null,
+                    comments: t.shared_comments ? t.shared_comments.map(c => ({ 
+                        id: c.id, text: c.text, author: c.author_username, createdAt: new Date(c.created_at).toLocaleString('ru-RU', {hour: '2-digit', minute:'2-digit'}) 
+                    })) : [],
+                    price: t.price,
+                    isShared: true,
+                    creator: t.creator_username,
+                    assignee: t.assignee_username,
+                    isAcknowledged: t.is_acknowledged
+                };
+            });
+
+            // 2. СЛИЯНИЕ ДАННЫХ
+            const allTasks = [...tasks, ...acceptedShared];
+
+            // 3. СОРТИРОВКА ОБЪЕДИНЕННОГО МАССИВА
+            const sortedTasks = allTasks.sort((a, b) => {
                 if (a.isGolden && !b.isGolden) return -1;
                 if (!a.isGolden && b.isGolden) return 1;
-                // Защита сортировки для строковых UUID и числовых ID
+                // Универсальная сортировка для строк и чисел
                 const timeA = typeof a.id === 'string' ? 0 : a.id; 
                 const timeB = typeof b.id === 'string' ? 0 : b.id;
                 return timeB - timeA; 
@@ -2149,7 +2181,7 @@
         
             sortedTasks.forEach(task => {
                 let effectiveSphere = task.sphere;
-                if (task.sphere === 'SYS_OTHER' || !scopes.includes(task.sphere)) {
+                if (task.sphere === 'SYS_OTHER' || !allScopeNames.includes(task.sphere)) {
                     effectiveSphere = 'SYS_OTHER';
                 }
             
@@ -2599,6 +2631,8 @@
                     showToast('ACCESS GRANTED', `Вы успешно присоединились к сфере "${scope.name}"`, 'success');
                 }
 
+                await loadSharedScopes();
+
                 // 4. Очищаем URL от токена, чтобы не было повторных срабатываний при F5
                 window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -3027,11 +3061,10 @@ YOUR OBJECTIVE (Answer in these steps):
             renderDashLite();
         }
 
-        // --- MULTIPLAYER: INBOX & DELEGATION ---
         function renderInbox() {
             const username = localStorage.getItem('priority_user');
-            // Фильтруем задачи, которые назначены на нас и лежат в статусе inbox
-            const inboxTasks = sharedTasks.filter(t => t.assignee_username === username && t.status === 'inbox');
+            // В карантин падают только задачи, назначенные на нас и еще не подтвержденные
+            const inboxTasks = sharedTasks.filter(t => t.assignee_username === username && t.is_acknowledged === false && t.status !== 'completed');
             const wrapper = document.getElementById('inboxWrapper');
             const container = document.getElementById('inboxTasksContainer');
 
@@ -3041,36 +3074,35 @@ YOUR OBJECTIVE (Answer in these steps):
             }
 
             wrapper.classList.remove('hidden');
-            container.innerHTML = inboxTasks.map(t => `
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-3 rounded shadow-sm hover-magnet">
+            container.innerHTML = inboxTasks.map(t => {
+                const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS';
+                return `
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-panel-light dark:bg-panel-dark border border-brand-light/30 dark:border-brand-dark/30 p-4 rounded shadow-sm hover-magnet">
                     <div>
-                        <div class="font-bold text-sm text-zinc-900 dark:text-zinc-100" style="font-family: var(--font-primary);">${t.title}</div>
-                        <div class="text-[10px] text-zinc-500 uppercase mt-1 tracking-widest">
-                            От: <span class="text-brand-light dark:text-brand-dark">${t.creator_username}</span>
+                        <div class="font-bold text-base text-zinc-900 dark:text-zinc-100" style="font-family: var(--font-primary);">${t.title}</div>
+                        <div class="text-[10px] text-zinc-500 uppercase mt-1 tracking-widest font-mono-tech flex items-center gap-2">
+                            <span class="bg-base-light dark:bg-base-dark px-2 py-0.5 rounded border border-borderline-light dark:border-borderline-dark">${scopeName}</span>
+                            <span>От: <span class="text-brand-light dark:text-brand-dark font-bold">${t.creator_username}</span></span>
                         </div>
                     </div>
-                    <div class="flex gap-2 shrink-0 flex-wrap">
-                        <button onclick="acceptInboxTask('${t.id}', 'q1')" class="px-3 py-2 bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-600 hover:text-white rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press">Q1 (Крит)</button>
-                        <button onclick="acceptInboxTask('${t.id}', 'q2')" class="px-3 py-2 bg-brand-light/10 text-brand-light dark:text-brand-dark hover:bg-brand-light hover:text-white dark:hover:text-black rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press">Q2 (Стратег)</button>
-                        <button onclick="acceptInboxTask('${t.id}', 'q3')" class="px-3 py-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 hover:bg-yellow-500 hover:text-black rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press">Q3 (Рутина)</button>
-                        <button onclick="acceptInboxTask('${t.id}', 'q4')" class="px-3 py-2 bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-500 hover:text-white rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press">Q4 (Бэклог)</button>
-                    </div>
+                    <button onclick="acceptInboxTask('${t.id}')" class="shrink-0 px-8 py-3 bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press shadow-md">
+                        Принять задачу
+                    </button>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
-        async function acceptInboxTask(taskId, targetQuad) {
-            // Мгновенная реакция UI (Optimistic UI)
-            sharedTasks = sharedTasks.filter(t => t.id !== taskId);
+        async function acceptInboxTask(taskId) {
+            // Мгновенная реакция UI
+            const t = sharedTasks.find(x => x.id === taskId);
+            if(t) t.is_acknowledged = true;
             renderInbox();
 
             try {
-                // Обновляем статус в Supabase
-                await supabaseClient.from('shared_tasks').update({ status: targetQuad }).eq('id', taskId);
-                showToast('SYSTEM', 'Задача принята и распределена', 'success');
-                syncFromCloud(); // Перезапрашиваем стейт, чтобы задача появилась в матрице
+                await supabaseClient.from('shared_tasks').update({ is_acknowledged: true }).eq('id', taskId);
+                showToast('SYSTEM', 'Задача принята в работу', 'success');
             } catch (err) {
-                showToast('ERROR', 'Ошибка принятия задачи', 'error');
+                showToast('ERROR', 'Ошибка подтверждения', 'error');
             }
         }
 
