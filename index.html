@@ -896,7 +896,12 @@
         
             clearTimeout(cloudSyncTimeout);
             cloudSyncTimeout = setTimeout(async () => {
+                // ГЕНЕРИРУЕМ УНИКАЛЬНЫЙ ЯРЛЫК ЭТОГО СОХРАНЕНИЯ
+                const mutationId = Date.now().toString() + Math.random().toString(36).substring(7);
+                localStorage.setItem('priority_last_mutation', mutationId);
+
                 const appState = {
+                    _mutation_id: mutationId, // <--- ТОТ САМЫЙ ЯРЛЫК
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
@@ -908,7 +913,6 @@
                     shop_module: localStorage.getItem('priority_shop_module') || 'false',
                     currency: localStorage.getItem('priority_currency') || '₽',
                     scale: localStorage.getItem('priority_scale') || '1',
-                    // ДОБАВЛЯЕМ LITE, чтобы не стереть:
                     lite_tasks: JSON.parse(localStorage.getItem('priority_lite_tasks') || '[]'),
                     lite_log: JSON.parse(localStorage.getItem('priority_lite_log') || '{}'),
                     lite_cron_time: localStorage.getItem('lite_cron_time') || '00:00',
@@ -923,7 +927,7 @@
                             last_active_at: new Date().toISOString() 
                         })
                         .eq('username', username);
-                    console.log('☁️ State seamlessly synced to cloud');
+                    console.log('☁️ State synced (Mutation: ' + mutationId + ')');
                 } catch (err) {
                     console.error('Cloud sync failed', err);
                 }
@@ -1000,6 +1004,56 @@
            } catch (e) {
                console.error('Cloud pull failed:', e);
            }
+        }
+
+        // --- ДВИЖОК SUPABASE REALTIME (WEBSOCKETS) ---
+        function initRealtimeSync() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+
+            supabaseClient
+                .channel('public:users')
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` },
+                    (payload) => {
+                        const cloudData = payload.new.app_data;
+                        if (!cloudData) return;
+
+                        // ЗАЩИТА ОТ ЭХА: Если это сохранили мы сами долю секунды назад - игнорируем!
+                        const lastMutation = localStorage.getItem('priority_last_mutation');
+                        if (cloudData._mutation_id && cloudData._mutation_id === lastMutation) return;
+
+                        console.log('🔄 Прилетели новые данные с другого устройства!');
+
+                        // 1. Обновляем кэш браузера
+                        if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
+                        if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
+                        if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
+                        if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
+                        if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
+                        if (cloudData.lite_tasks) localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
+
+                        // 2. Обновляем переменные в оперативной памяти страницы
+                        dynamicScopes = cloudData.scopes || [];
+                        scopes = cloudData.scopes || []; 
+                        tasks = cloudData.tasks || [];
+                        templates = cloudData.templates || [];
+                        macros = cloudData.macros || [];
+                        unlockedBadges = cloudData.badges || [];
+                        liteTasks = cloudData.lite_tasks || [];
+
+                        // 3. Мягко перерисовываем интерфейс (без перезагрузки!)
+                        initDynamicScopes();
+                        renderTasks();
+                        renderMacros();
+                        renderDashLite();
+
+                        // 4. Показываем красивое системное уведомление
+                        showToast('СИНХРОНИЗАЦИЯ', 'Данные обновлены с другого устройства', 'info', 4000);
+                    }
+                )
+                .subscribe();
         }
 
         // --- AUTH & ROUTING LOGIC ---
@@ -1285,6 +1339,9 @@
             // Запускаем подтягивание данных из облака
             syncFromCloud();
 
+            // ВКЛЮЧАЕМ РЕАЛТАЙМ-СЛУХАЧА:
+            initRealtimeSync();
+            
             if(localStorage.getItem('priority_dash_lite_open') === 'true') {
                 document.getElementById('dashLiteWrapper').classList.remove('hidden');
                 document.getElementById('dashLiteIcon').classList.add('rotate-180');
@@ -2600,8 +2657,8 @@ YOUR OBJECTIVE (Answer in these steps):
                 <div class="group flex items-center bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md overflow-hidden shadow-sm" style="${ageStyle}">
                     <span class="px-3 py-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-300">${t.text}</span>
                     <div class="flex opacity-0 group-hover:opacity-100 transition-opacity bg-base-light dark:bg-base-dark border-l border-borderline-light dark:border-borderline-dark">
+                        <button onclick="escalateLiteTask('${t.id}')" class="px-2.5 py-1.5 text-brand-light hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors btn-press" title="Convert to Matrix Task">➚</button>
                         <button onclick="completeDashLiteTask('${t.id}', this)" class="px-2.5 py-1.5 text-emerald-500 hover:bg-emerald-500/20 transition-colors btn-press" title="Complete">✓</button>
-                        <button onclick="escalateLiteTask('${t.id}')" class="px-2.5 py-1.5 text-brand-light hover:bg-brand-light/20 transition-colors btn-press" title="Convert to Matrix Task">➚</button>
                         <button onclick="deleteDashLite('${t.id}')" class="px-2.5 py-1.5 text-red-500 hover:bg-red-500/20 transition-colors btn-press" title="Delete">✕</button>
                     </div>
                 </div>
@@ -2610,7 +2667,6 @@ YOUR OBJECTIVE (Answer in these steps):
         }
 
         function completeDashLiteTask(id, btnEl) {
-            // Анимация мягкого скрытия перед удалением
             const el = btnEl.closest('.group');
             if (el) {
                 el.style.opacity = '0';
@@ -2624,17 +2680,15 @@ YOUR OBJECTIVE (Answer in these steps):
                     t.status = 'done';
                     t.completedAt = new Date().toISOString().split('T')[0];
                     
-                    // Обновляем статистику для хитмапа на странице LITE
                     let liteLog = JSON.parse(localStorage.getItem('priority_lite_log')) || {};
                     liteLog[t.completedAt] = (liteLog[t.completedAt] || 0) + 1;
                     localStorage.setItem('priority_lite_log', JSON.stringify(liteLog));
                     
-                    // Сохраняем и отправляем в облако
                     localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
-                    saveData('priority_tasks', tasks); // Этот вызов триггерит syncStateToCloud
+                    saveData('priority_tasks', tasks); // Отправляем в облако
                     renderDashLite();
                 }
-            }, 200); // Ждем завершения анимации
+            }, 200);
         }
 
         function escalateLiteTask(id) {

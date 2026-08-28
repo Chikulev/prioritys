@@ -786,7 +786,11 @@
             if (!username) return;
         
             const performSync = async () => {
+                const mutationId = Date.now().toString() + Math.random().toString(36).substring(7);
+                localStorage.setItem('priority_last_mutation', mutationId);
+
                 const appState = {
+                    _mutation_id: mutationId,
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
@@ -915,6 +919,33 @@
                     renderThemesMarketplace();
                 }
             } catch (e) {}
+        }
+
+        function initRealtimeSync() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+
+            supabaseClient
+                .channel('public:users_config')
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` },
+                    (payload) => {
+                        const cloudData = payload.new.app_data;
+                        if (!cloudData) return;
+
+                        const lastMutation = localStorage.getItem('priority_last_mutation');
+                        if (cloudData._mutation_id && cloudData._mutation_id === lastMutation) return;
+
+                        // Если на другом устройстве поменяли сферы, обновляем их тут
+                        if (cloudData.scopes) {
+                            localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
+                            scopes = cloudData.scopes;
+                            if (typeof renderScopes === 'function') renderScopes();
+                        }
+                    }
+                )
+                .subscribe();
         }
 
         function toggleFilterMode() {
@@ -1073,6 +1104,7 @@
             renderSysLogs();
             renderThemesMarketplace();
             syncFromCloud();
+            initRealtimeSync();
 
             document.getElementById('mainApp').classList.remove('hidden');
         });
