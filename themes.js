@@ -23,8 +23,8 @@ const SYSTEM_THEMES = {
         cssVars: { "--color-brand-light": "#8B0000", "--color-brand-dark": "#D4AF37", "--color-base-light": "#FDFBF7", "--color-base-dark": "#1A120B", "--color-panel-light": "#F5EEDB", "--color-panel-dark": "#2A1D12", "--color-border-light": "#D9CBB0", "--color-border-dark": "#3D2B1F" },
         customCss: `body { background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>'); }`,
         locales: {
-            en: { "dash_subtitle_main": "Kingdom Ledger v9.0", "btn_deploy": "Issue Decree", "task_ph": "Inscribe your quest...", "btn_logs": "Chronicles", "macro_title": "EPIC QUESTS", "quad_1": "DRAGON THREAT [SEV-0]", "quad_2": "KINGDOM CORE [SEV-1]", "quad_3": "PEASANT WORK [SEV-2]", "quad_4": "TAVERN RUMORS [SEV-3]", "archived": "Dusty Tomes", "empty_tasks": "The realm is peaceful", "lbl_macro": "Epic", "btn_init_macro": "Declare Campaign" },
-            ru: { "dash_subtitle_main": "Королевская Летопись v9.0", "btn_deploy": "Издать Указ", "task_ph": "Впишите деяние в пергамент...", "btn_logs": "Летопись", "macro_title": "ВЕЛИКИЕ СВЕРШЕНИЯ", "quad_1": "УГРОЗА ДРАКОНА [SEV-0]", "quad_2": "ФУНДАМЕНТ ЗАМКА [SEV-1]", "quad_3": "КРЕСТЬЯНСКИЙ ТРУД [SEV-2]", "quad_4": "СЛУХИ ИЗ ТРАКТИРА [SEV-3]", "archived": "Пыльные фолианты", "empty_tasks": "В королевстве штиль", "lbl_macro": "Эпос", "btn_init_macro": "Огласить Поход" }
+            en: { "dash_subtitle_main": "Kingdom Ledger", "btn_deploy": "Issue Decree", "task_ph": "Inscribe your quest...", "btn_logs": "Chronicles", "macro_title": "EPIC QUESTS", "quad_1": "DRAGON THREAT [SEV-0]", "quad_2": "KINGDOM CORE [SEV-1]", "quad_3": "PEASANT WORK [SEV-2]", "quad_4": "TAVERN RUMORS [SEV-3]", "archived": "Dusty Tomes", "empty_tasks": "The realm is peaceful", "lbl_macro": "Epic", "btn_init_macro": "Declare Campaign" },
+            ru: { "dash_subtitle_main": "Королевская Летопись", "btn_deploy": "Издать Указ", "task_ph": "Впишите деяние в пергамент...", "btn_logs": "Летопись", "macro_title": "ВЕЛИКИЕ СВЕРШЕНИЯ", "quad_1": "УГРОЗА ДРАКОНА [SEV-0]", "quad_2": "ФУНДАМЕНТ ЗАМКА [SEV-1]", "quad_3": "КРЕСТЬЯНСКИЙ ТРУД [SEV-2]", "quad_4": "СЛУХИ ИЗ ТРАКТИРА [SEV-3]", "archived": "Пыльные фолианты", "empty_tasks": "В королевстве штиль", "lbl_macro": "Эпос", "btn_init_macro": "Огласить Поход" }
         }
     },
     brutal: {
@@ -47,8 +47,8 @@ const SYSTEM_THEMES = {
             .slider, .slider:before { border-radius: 0 !important; }
         `,
         locales: {
-            en: { "dash_subtitle_main": "BRUTAL DASHBOARD V9.0", "btn_deploy": "EXECUTE", "task_ph": "What needs to be crushed?...", "btn_logs": "DUMP", "macro_title": "BIG MOVES", "quad_1": "DO IT NOW [0]", "quad_2": "LEVEL UP [1]", "quad_3": "GRIND [2]", "quad_4": "TRASH [3]", "archived": "GRAVEYARD", "empty_tasks": "NOTHING. GO TOUCH GRASS.", "lbl_macro": "GIGA", "btn_init_macro": "START BIG PROJECT" },
-            ru: { "dash_subtitle_main": "ЖЕСТКИЙ ДАШБОРД V9.0", "btn_deploy": "ЗАДЕПЛОИТЬ", "task_ph": "Что будем уничтожать?...", "btn_logs": "ДАМП", "macro_title": "БАЗА", "quad_1": "ГОРИТ [0]", "quad_2": "КАЧ [1]", "quad_3": "ГРИНД [2]", "quad_4": "МУСОРКА [3]", "archived": "КЛАДБИЩЕ", "empty_tasks": "ПУСТО. ИДИ ПОТРОГАЙ ТРАВУ.", "lbl_macro": "ГИГА", "btn_init_macro": "НОВЫЙ ГИГА-ПРОЕКТ" }
+            en: { "dash_subtitle_main": "BRUTAL DASHBOARD", "btn_deploy": "EXECUTE", "task_ph": "What needs to be crushed?...", "btn_logs": "DUMP", "macro_title": "BIG MOVES", "quad_1": "DO IT NOW [0]", "quad_2": "LEVEL UP [1]", "quad_3": "GRIND [2]", "quad_4": "TRASH [3]", "archived": "GRAVEYARD", "empty_tasks": "NOTHING. GO TOUCH GRASS.", "lbl_macro": "GIGA", "btn_init_macro": "START BIG PROJECT" },
+            ru: { "dash_subtitle_main": "ЖЕСТКИЙ ДАШБОРД", "btn_deploy": "ЗАДЕПЛОИТЬ", "task_ph": "Что будем уничтожать?...", "btn_logs": "ДАМП", "macro_title": "БАЗА", "quad_1": "ГОРИТ [0]", "quad_2": "КАЧ [1]", "quad_3": "ГРИНД [2]", "quad_4": "МУСОРКА [3]", "archived": "КЛАДБИЩЕ", "empty_tasks": "ПУСТО. ИДИ ПОТРОГАЙ ТРАВУ.", "lbl_macro": "ГИГА", "btn_init_macro": "НОВЫЙ ГИГА-ПРОЕКТ" }
         }
     },
     executive: {
@@ -92,17 +92,30 @@ const SYSTEM_THEMES = {
         desc: { en: "Earthy tones, soft greens, and natural tranquility.", ru: "Природные оттенки, мягкая зелень и абсолютное спокойствие." },
         icon: "🌿",
         isPro: true,
-        cssVars: { "--color-brand-light": "#2E7D32", "--color-brand-dark": "#81C784", "--color-base-light": "#F1F8E9", "--color-base-dark": "#1B2614", "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#25351D", "--color-border-light": "#DCEDC8", "--color-border-dark": "#334A27" },
+        cssVars: { 
+            "--color-brand-light": "#2E7D32", "--color-brand-dark": "#81C784", 
+            "--color-base-light": "#F1F8E9", "--color-base-dark": "#1B2614", 
+            "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#25351D", 
+            "--color-border-light": "#DCEDC8", "--color-border-dark": "#334A27" 
+        },
         customCss: `
-            body { background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M54.627 0l.83 22.09c-14.512.645-25.597 10.985-26.242 25.497L7.125 46.757C7.77 32.245 18.855 21.905 33.367 21.26L54.627 0z" fill="%2381C784" fill-opacity="0.05" fill-rule="evenodd"/></svg>'); }
-            .dark body { background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M54.627 0l.83 22.09c-14.512.645-25.597 10.985-26.242 25.497L7.125 46.757C7.77 32.245 18.855 21.905 33.367 21.26L54.627 0z" fill="%232E7D32" fill-opacity="0.1" fill-rule="evenodd"/></svg>'); }
+            /* Новый паттерн с веточками и листьями */
+            body { 
+                background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><path d="M30 60 L30 30" stroke="%2381C784" stroke-width="2" stroke-opacity="0.3" fill="none"/><path d="M30 45 C45 45 52 30 52 22 C37 22 30 30 30 45 Z" fill="%2381C784" fill-opacity="0.15"/><path d="M30 30 C15 30 8 15 8 7 C23 7 30 15 30 30 Z" fill="%2381C784" fill-opacity="0.15"/></svg>') !important; 
+            }
+            .dark body { 
+                background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><path d="M30 60 L30 30" stroke="%232E7D32" stroke-width="2" stroke-opacity="0.4" fill="none"/><path d="M30 45 C45 45 52 30 52 22 C37 22 30 30 30 45 Z" fill="%232E7D32" fill-opacity="0.2"/><path d="M30 30 C15 30 8 15 8 7 C23 7 30 15 30 30 Z" fill="%232E7D32" fill-opacity="0.2"/></svg>') !important; 
+            }
+            
             .rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: 20px !important; }
-            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: 0 10px 25px -5px rgba(46,125,50,0.1) !important; }
-            .dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5) !important; }
+            
+            /* Смягченные природные тени */
+            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: 0 12px 30px -5px rgba(46, 125, 50, 0.08) !important; }
+            .dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg { box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6) !important; }
         `,
         locales: {
-            en: { "dash_subtitle_main": "Greenhouse v9.0", "macro_title": "GROWTH SEEDS", "quad_1": "WATER NOW [Q1]", "quad_2": "PLANT SEEDS [Q2]", "quad_3": "PRUNE [Q3]", "quad_4": "COMPOST [Q4]", "empty_tasks": "The garden is peaceful.", "lbl_macro": "Seed", "btn_init_macro": "Plant New Idea", "archived": "Harvested" },
-            ru: { "dash_subtitle_main": "Оранжерея v9.0", "macro_title": "ТОЧКИ РОСТА", "quad_1": "ПОЛИТЬ СЕЙЧАС [Q1]", "quad_2": "ПОСАДИТЬ [Q2]", "quad_3": "ПОДРЕЗАТЬ [Q3]", "quad_4": "В КОМПОСТ [Q4]", "empty_tasks": "В саду порядок и покой.", "lbl_macro": "Росток", "btn_init_macro": "Посадить идею", "archived": "Собранный урожай" }
+            en: { "dash_subtitle_main": "Greenhouse", "macro_title": "GROWTH SEEDS", "quad_1": "WATER NOW [Q1]", "quad_2": "PLANT SEEDS [Q2]", "quad_3": "PRUNE [Q3]", "quad_4": "COMPOST [Q4]", "empty_tasks": "The garden is peaceful.", "lbl_macro": "Seed", "btn_init_macro": "Plant New Idea", "archived": "Harvested" },
+            ru: { "dash_subtitle_main": "Оранжерея", "macro_title": "ТОЧКИ РОСТА", "quad_1": "ПОЛИТЬ СЕЙЧАС [Q1]", "quad_2": "ПОСАДИТЬ [Q2]", "quad_3": "ПОДРЕЗАТЬ [Q3]", "quad_4": "В КОМПОСТ [Q4]", "empty_tasks": "В саду порядок и покой.", "lbl_macro": "Росток", "btn_init_macro": "Посадить идею", "archived": "Собранный урожай" }
         }
     },
     neon: {
@@ -125,8 +138,8 @@ const SYSTEM_THEMES = {
             h1, h2, h3 { text-transform: uppercase !important; font-style: italic; }
         `,
         locales: {
-            en: { "dash_subtitle_main": "NEON RUSH V9.0", "macro_title": "LEVEL UP", "quad_1": "HOT 🔥 [Q1]", "quad_2": "COOL 🧊 [Q2]", "quad_3": "MEH 🥱 [Q3]", "quad_4": "TRASH 🗑️ [Q4]", "empty_tasks": "NOTHING HERE. BOOOORING.", "lbl_macro": "VIBE", "btn_init_macro": "NEW VIBE", "archived": "HALL OF FAME" },
-            ru: { "dash_subtitle_main": "NEON RUSH V9.0", "macro_title": "ПРОКАЧКА", "quad_1": "ГОРИТ 🔥 [Q1]", "quad_2": "НА ЧИЛЛЕ 🧊 [Q2]", "quad_3": "СУЕТА 🥱 [Q3]", "quad_4": "МУСОР 🗑️ [Q4]", "empty_tasks": "ПУСТО. СКУУУЧНО.", "lbl_macro": "ВАЙБ", "btn_init_macro": "НОВЫЙ ВАЙБ", "archived": "ЗАЛ СЛАВЫ" }
+            en: { "dash_subtitle_main": "NEON RUSH", "macro_title": "LEVEL UP", "quad_1": "HOT 🔥 [Q1]", "quad_2": "COOL 🧊 [Q2]", "quad_3": "MEH 🥱 [Q3]", "quad_4": "TRASH 🗑️ [Q4]", "empty_tasks": "NOTHING HERE. BOOOORING.", "lbl_macro": "VIBE", "btn_init_macro": "NEW VIBE", "archived": "HALL OF FAME" },
+            ru: { "dash_subtitle_main": "NEON RUSH", "macro_title": "ПРОКАЧКА", "quad_1": "ГОРИТ 🔥 [Q1]", "quad_2": "НА ЧИЛЛЕ 🧊 [Q2]", "quad_3": "СУЕТА 🥱 [Q3]", "quad_4": "МУСОР 🗑️ [Q4]", "empty_tasks": "ПУСТО. СКУУУЧНО.", "lbl_macro": "ВАЙБ", "btn_init_macro": "НОВЫЙ ВАЙБ", "archived": "ЗАЛ СЛАВЫ" }
         }
     },
     paper: {
@@ -340,8 +353,8 @@ const SYSTEM_THEMES = {
             h1, h2, h3 { font-weight: 800 !important; letter-spacing: -0.01em !important; }
         `,
         locales: {
-            en: { "dash_subtitle_main": "FLIGHT CONTROL ☁️", "macro_title": "CONSTELLATIONS", "quad_1": "STORM WARNING ⛈️ [Q1]", "quad_2": "CLEAR SKY 🌤️ [Q2]", "quad_3": "TURBULENCE 💨 [Q3]", "quad_4": "DROP OVERBOARD 🪂 [Q4]", "empty_tasks": "The sky is clear! 🕊️", "lbl_macro": "Star", "btn_init_macro": "Launch", "archived": "Landed" },
-            ru: { "dash_subtitle_main": "ЦЕНТР ПОЛЕТОВ ☁️", "macro_title": "СОЗВЕЗДИЯ ЦЕЛЕЙ", "quad_1": "ШТОРМОВОЕ ПРЕДУПРЕЖДЕНИЕ ⛈️ [Q1]", "quad_2": "ЧИСТОЕ НЕБО 🌤️ [Q2]", "quad_3": "ТУРБУЛЕНТНОСТЬ 💨 [Q3]", "quad_4": "СБРОСИТЬ ЗА БОРТ 🪂 [Q4]", "empty_tasks": "Небо абсолютно чистое! 🕊️", "lbl_macro": "Звезда", "btn_init_macro": "Запуск", "archived": "Приземлились" }
+            en: { "dash_subtitle_main": "FLIGHT CONTROL", "macro_title": "CONSTELLATIONS", "quad_1": "STORM WARNING ⛈️ [Q1]", "quad_2": "CLEAR SKY 🌤️ [Q2]", "quad_3": "TURBULENCE 💨 [Q3]", "quad_4": "DROP OVERBOARD 🪂 [Q4]", "empty_tasks": "The sky is clear! 🕊️", "lbl_macro": "Star", "btn_init_macro": "Launch", "archived": "Landed" },
+            ru: { "dash_subtitle_main": "ЦЕНТР ПОЛЕТОВ", "macro_title": "СОЗВЕЗДИЯ ЦЕЛЕЙ", "quad_1": "ШТОРМОВОЕ ПРЕДУПРЕЖДЕНИЕ ⛈️ [Q1]", "quad_2": "ЧИСТОЕ НЕБО 🌤️ [Q2]", "quad_3": "ТУРБУЛЕНТНОСТЬ 💨 [Q3]", "quad_4": "СБРОСИТЬ ЗА БОРТ 🪂 [Q4]", "empty_tasks": "Небо абсолютно чистое! 🕊️", "lbl_macro": "Звезда", "btn_init_macro": "Запуск", "archived": "Приземлились" }
         }
     },
     library: {
