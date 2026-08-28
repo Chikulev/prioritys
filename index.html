@@ -1685,7 +1685,7 @@
                                         action: 'notify_delegation', 
                                         assignee: finalAssignee,
                                         creator: username,
-                                        taskTitle: input.value,
+                                        taskTitle: tempTask.title,
                                         scope: sphereVal
                                     })
                                 }).catch(err => console.error('Push notification failed:', err));
