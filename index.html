@@ -1047,47 +1047,39 @@
 
             supabaseClient
                 .channel('public:users')
-                .on(
-                    'postgres_changes',
-                    { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` },
-                    (payload) => {
-                        const cloudData = payload.new.app_data;
-                        if (!cloudData) return;
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` }, (payload) => {
+                    const cloudData = payload.new.app_data;
+                    if (!cloudData) return;
+                    const lastMutation = localStorage.getItem('priority_last_mutation');
+                    if (cloudData._mutation_id && cloudData._mutation_id === lastMutation) return;
 
-                        // ЗАЩИТА ОТ ЭХА: Если это сохранили мы сами долю секунды назад - игнорируем!
-                        const lastMutation = localStorage.getItem('priority_last_mutation');
-                        if (cloudData._mutation_id && cloudData._mutation_id === lastMutation) return;
+                    if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
+                    if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
+                    if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
+                    if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
+                    if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
+                    if (cloudData.lite_tasks) localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
 
-                        console.log('🔄 Прилетели новые данные с другого устройства!');
+                    dynamicScopes = cloudData.scopes || []; scopes = cloudData.scopes || []; 
+                    tasks = cloudData.tasks || []; templates = cloudData.templates || [];
+                    macros = cloudData.macros || []; unlockedBadges = cloudData.badges || [];
+                    liteTasks = cloudData.lite_tasks || [];
 
-                        // 1. Обновляем кэш браузера
-                        if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
-                        if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
-                        if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
-                        if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
-                        if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
-                        if (cloudData.lite_tasks) localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
+                    initDynamicScopes(); renderTasks(); renderMacros(); renderDashLite();
+                }).subscribe();
 
-                        // 2. Обновляем переменные в оперативной памяти страницы
-                        dynamicScopes = cloudData.scopes || [];
-                        scopes = cloudData.scopes || []; 
-                        tasks = cloudData.tasks || [];
-                        templates = cloudData.templates || [];
-                        macros = cloudData.macros || [];
-                        unlockedBadges = cloudData.badges || [];
-                        liteTasks = cloudData.lite_tasks || [];
+            // ВАЖНО: Слушаем общие задачи и чаты!
+            supabaseClient.channel('public:shared_tasks')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_tasks' }, (payload) => {
+                    console.log('🔄 Командная задача обновлена', payload);
+                    loadSharedScopes(); // Автоматически скачает и перерисует без F5
+                }).subscribe();
 
-                        // 3. Мягко перерисовываем интерфейс (без перезагрузки!)
-                        initDynamicScopes();
-                        renderTasks();
-                        renderMacros();
-                        renderDashLite();
-
-                        // 4. Показываем красивое системное уведомление
-                        showToast('СИНХРОНИЗАЦИЯ', 'Данные обновлены с другого устройства', 'info', 4000);
-                    }
-                )
-                .subscribe();
+            supabaseClient.channel('public:shared_comments')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_comments' }, (payload) => {
+                    console.log('🔄 Новый комментарий в чате', payload);
+                    loadSharedScopes(); // Автоматически скачает и перерисует без F5
+                }).subscribe();
         }
 
         // --- AUTH & ROUTING LOGIC ---
@@ -1623,8 +1615,8 @@
             const username = localStorage.getItem('priority_user');
 
             if (editTaskId) {
-                // Логика редактирования
-                const taskObj = tasks.find(x => x.id === editTaskId);
+                const numericId = Number(editTaskId);
+                const taskObj = tasks.find(x => x.id === numericId);
                 if (taskObj) {
                     taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
                     if(priceVal !== null) taskObj.price = priceVal; else delete taskObj.price;
@@ -1637,19 +1629,10 @@
                 }
             } else {
                 if (sharedScope) {
-                    // --- ОПТИМИСТИЧНЫЙ UI ДЛЯ B2B (СКОРОСТЬ 0 МС) ---
+                    // --- ОПТИМИСТИЧНЫЙ UI (0 МС) + ПРАВИЛЬНЫЕ ФЛАГИ ---
                     const assignee = document.getElementById('taskAssignee').value || username;
                     const finalAssignee = (assignee === 'me' || assignee === '@me') ? username : assignee;
 
-                    let targetStatus = 'inbox';
-                    if (finalAssignee === username) {
-                        if (impVal && urgVal) targetStatus = 'q1';
-                        else if (impVal && !urgVal) targetStatus = 'q2';
-                        else if (!impVal && urgVal) targetStatus = 'q3';
-                        else targetStatus = 'q4';
-                    }
-
-                    // 1. Создаем задачу мгновенно в памяти
                     const tempId = 'temp_' + Date.now();
                     const tempTask = {
                         id: tempId,
@@ -1659,15 +1642,14 @@
                         assignee_username: finalAssignee,
                         is_important: impVal,
                         is_urgent: urgVal,
-                        is_acknowledged: finalAssignee === username,
-                        status: targetStatus,
+                        is_acknowledged: finalAssignee === username, // Себе не нужен карантин
+                        status: 'active',
                         price: priceVal,
                         created_at: new Date().toISOString()
                     };
 
                     sharedTasks.push(tempTask);
 
-                    // 2. Мгновенно очищаем интерфейс и рисуем (исключает двойной клик)
                     input.value = '';
                     if(isPurchase) { document.getElementById('isPurchaseCheckbox').checked = false; togglePriceInput(); }
                     if(macroSel) macroSel.value = '';
@@ -1675,7 +1657,6 @@
                     if (typeof renderInbox === 'function') renderInbox();
                     renderTasks();
 
-                    // 3. Отправляем в фоне в Supabase
                     supabaseClient.from('shared_tasks').insert({
                         scope_id: sharedScope.id,
                         title: tempTask.title,
@@ -1689,25 +1670,20 @@
                     }).select().single().then(({ data, error }) => {
                         if (error) {
                             showToast('ERROR', 'Ошибка сети при создании задачи', 'error');
-                            sharedTasks = sharedTasks.filter(t => t.id !== tempId); // Откат при сбое
+                            sharedTasks = sharedTasks.filter(t => t.id !== tempId);
                             renderTasks();
                         } else if (data) {
-                            // Незаметно подменяем временный ID на настоящий из базы
                             const idx = sharedTasks.findIndex(t => t.id === tempId);
-                            if (idx > -1) {
-                                sharedTasks[idx] = data;
-                                // Перерисовывать не обязательно, чтобы не дергать экран
-                            }
+                            if (idx > -1) sharedTasks[idx] = data; // Подменяем временный ID на настоящий
                         }
                     });
 
                 } else {
-                    // ЛОГИКА LOCAL-FIRST (Личные задачи)
+                    // ЛОКАЛЬНЫЕ ЗАДАЧИ
                     const newTask = {
                         id: Date.now(), title: input.value, sphere: sphereVal, isImportant: impVal, isUrgent: urgVal,
                         completed: false, createdAt: getDateStr(), completedAt: null, comments: []
                     };
-
                     if(priceVal !== null) newTask.price = priceVal;
                     if(macroId) newTask.macroId = parseInt(macroId);
 
@@ -1721,7 +1697,6 @@
                     renderMacros();
                 }
 
-                // Эскалация LITE
                 if (typeof escalatedLiteTaskId !== 'undefined' && escalatedLiteTaskId && !editTaskId) {
                     liteTasks = liteTasks.filter(x => x.id !== escalatedLiteTaskId);
                     localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
@@ -1912,146 +1887,97 @@
         // --- TASK CREATION & EDITING ---
 
         // --- ЗАВЕРШЕНИЕ ЗАДАЧИ ---
-        async function toggleTask(id) {
-            // Защита: если пытаемся кликнуть по задаче, которая еще летит в базу
-            if (typeof id === 'string' && id.startsWith('temp_')) {
-                showToast('СИНХРОНИЗАЦИЯ', 'Задача сохраняется в облако... Попробуйте через секунду.', 'info');
-                return;
-            }
+        // Общая проверка: UUID из базы содержит дефисы, временные начинаются на temp_
+        const isSharedId = (id) => String(id).includes('-') || String(id).startsWith('temp_');
 
-            if (typeof id === 'string') { 
+        async function toggleTask(id) {
+            if (isSharedId(id)) { 
+                if (String(id).startsWith('temp_')) return showToast('INFO', 'Синхронизация, подождите...', 'info');
                 const task = sharedTasks.find(t => t.id === id);
                 if (!task) return;
                 const newStatus = task.status === 'completed' ? 'active' : 'completed';
                 const completedTime = newStatus === 'completed' ? new Date().toISOString() : null;
                 try {
-                    task.status = newStatus; 
-                    task.completed_at = completedTime;
+                    task.status = newStatus; task.completed_at = completedTime;
                     renderTasks(); 
                     await supabaseClient.from('shared_tasks').update({ status: newStatus, completed_at: completedTime }).eq('id', id);
-                } catch(e) { 
-                    showToast('ERROR', 'Сбой сети при обновлении статуса', 'error'); 
-                }
+                } catch(e) { showToast('ERROR', 'Сбой сети', 'error'); }
                 return;
             }
             
-            const task = tasks.find(t => t.id === id);
-            
+            const numericId = Number(id);
+            const task = tasks.find(t => t.id === numericId);
             if(!task.completed) {
-                task.completedAt = getDateTimeStr();
-                task.completed = true;
+                task.completedAt = getDateTimeStr(); task.completed = true;
                 pushSysLog('TASK_DONE', `Completed task: ${task.title}`);
-                
-                const taskCard = document.getElementById(`task-${id}`);
+                const taskCard = document.getElementById(`task-${numericId}`);
                 const archiveList = document.getElementById('completedTasks');
                 if (taskCard && archiveList) {
                     const titleEl = taskCard.querySelector('.text-base');
                     if(titleEl) titleEl.classList.add('strike-through', 'text-zinc-500');
-                    
                     const metaContainer = taskCard.querySelector('.flex-wrap');
-                    if(metaContainer) {
-                        metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">DONE: ${task.completedAt}</span>`);
-                    }
-                    
+                    if(metaContainer) metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">DONE: ${task.completedAt}</span>`);
                     const actionsBlock = taskCard.querySelector('.peer-checked\\:max-w-\\[200px\\]');
                     if(actionsBlock) actionsBlock.remove();
-                    
                     archiveList.prepend(taskCard);
-                } else {
-                    renderTasks(); 
-                }
+                } else renderTasks(); 
             } else {
                 pushSysLog('TASK_RESTORE', `Restored task: ${task.title}`);
-                task.completed = false;
-                renderTasks();
+                task.completed = false; renderTasks();
             }
-            
-            saveData('priority_tasks', tasks);
-            renderMacros(); 
+            saveData('priority_tasks', tasks); renderMacros(); 
         }
 
-        // --- УДАЛЕНИЕ ЗАДАЧИ ---
         async function deleteTask(id) {
-            if (typeof id === 'string' && id.startsWith('temp_')) return; // Защита от удаления в момент отправки
-
-            if (typeof id === 'string') { 
+            if (isSharedId(id)) { 
+                if (String(id).startsWith('temp_')) return;
                 try {
                     sharedTasks = sharedTasks.filter(t => t.id !== id);
                     renderTasks();
                     await supabaseClient.from('shared_tasks').delete().eq('id', id);
                     showToast('SYSTEM', 'Общая задача удалена', 'info');
-                } catch(e) {
-                    showToast('ERROR', 'Сбой при удалении', 'error');
-                }
+                } catch(e) { showToast('ERROR', 'Сбой при удалении', 'error'); }
                 return;
             }
 
-            const taskIndex = tasks.findIndex(t => t.id === id);
+            const numericId = Number(id);
+            const taskIndex = tasks.findIndex(t => t.id === numericId);
             if (taskIndex > -1) {
                 lastDeletedTask = { ...tasks[taskIndex], originalIndex: taskIndex };
                 tasks.splice(taskIndex, 1);
-                
-                saveData('priority_tasks', tasks);
-                renderTasks();
-                renderMacros();
+                saveData('priority_tasks', tasks); renderTasks(); renderMacros();
 
                 const container = document.getElementById('toastContainer');
                 if(!container) return;
-                
                 const toast = document.createElement('div');
                 toast.className = `bg-panel-light dark:bg-panel-dark border border-red-500 p-4 rounded shadow-2xl flex items-center justify-between gap-6 toast-enter pointer-events-auto font-mono-tech z-[999]`;
                 toast.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="text-2xl">🗑️</div>
-                        <div>
-                            <div class="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-1">TASK DELETED</div>
-                            <div class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate w-32 md:w-48">${lastDeletedTask.title}</div>
-                        </div>
-                    </div>
-                    <button onclick="undoDeleteTask(this)" class="shrink-0 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-500 dark:hover:text-black border border-red-200 dark:border-red-900/50 text-xs font-bold rounded uppercase tracking-widest transition-colors btn-press">UNDO</button>
-                `;
+                    <div class="flex items-center gap-3"><div class="text-2xl">🗑️</div><div><div class="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-1">TASK DELETED</div><div class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate w-32 md:w-48">${lastDeletedTask.title}</div></div></div>
+                    <button onclick="undoDeleteTask(this)" class="shrink-0 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-500 dark:hover:text-black border border-red-200 dark:border-red-900/50 text-xs font-bold rounded uppercase tracking-widest transition-colors btn-press">UNDO</button>`;
                 container.appendChild(toast);
-                
                 clearTimeout(undoTimeout);
                 undoTimeout = setTimeout(() => {
-                    if(toast.parentElement) {
-                        toast.classList.replace('toast-enter', 'toast-leave');
-                        setTimeout(() => toast.remove(), 400);
-                    }
+                    if(toast.parentElement) { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }
                     lastDeletedTask = null;
                 }, 5000); 
             }
         }
 
-        // --- ВЫДЕЛЕНИЕ ЗАДАЧИ (GOLDEN) ---
         function toggleGolden(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.isGolden = !task.isGolden;
-                saveData('priority_tasks', tasks);
-                renderTasks();
-            }
+            const numericId = Number(id);
+            const task = tasks.find(t => t.id === numericId);
+            if (task) { task.isGolden = !task.isGolden; saveData('priority_tasks', tasks); renderTasks(); }
         }
 
-        // Функция восстановления задачи
         function undoDeleteTask(btnEl) {
             if(lastDeletedTask) {
-                // Возвращаем задачу на её законное место
                 tasks.splice(lastDeletedTask.originalIndex, 0, lastDeletedTask);
-                delete lastDeletedTask.originalIndex; // Убираем техническое поле
-                
-                saveData('priority_tasks', tasks);
-                renderTasks();
-                renderMacros();
+                delete lastDeletedTask.originalIndex;
+                saveData('priority_tasks', tasks); renderTasks(); renderMacros();
                 lastDeletedTask = null;
-                
-                // Прячем toast
                 const toast = btnEl.closest('.toast-enter');
-                if(toast) {
-                    toast.classList.replace('toast-enter', 'toast-leave');
-                    setTimeout(() => toast.remove(), 400);
-                }
-                showToast(t('toast_sys'), 'Task restored successfully', 'success');
+                if(toast) { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 400); }
+                showToast(t('toast_sys') || 'SYS', 'Task restored successfully', 'success');
             }
         }
 
@@ -2061,37 +1987,31 @@
             else { box.classList.add('hidden'); openCommentsSet.delete(id); }
         }
 
-        // 3. ДОБАВЛЕНИЕ КОММЕНТАРИЯ (ПОЛНОЦЕННЫЙ ЧАТ)
         async function addComment(id) {
             const input = document.getElementById(`comment-input-${id}`);
             if(!input || input.value.trim() === '') return;
             const text = input.value.trim();
             
-            if (typeof id === 'string') { // SQL Роутинг
+            if (isSharedId(id)) { 
                 const username = localStorage.getItem('priority_user');
                 try {
-                    const { data } = await supabaseClient.from('shared_comments').insert({
-                        task_id: id, author_username: username, text: text
-                    }).select().single();
-                    
+                    const { data } = await supabaseClient.from('shared_comments').insert({ task_id: id, author_username: username, text: text }).select().single();
                     const tObj = sharedTasks.find(t => t.id === id);
                     if (!tObj.shared_comments) tObj.shared_comments = [];
                     tObj.shared_comments.push(data);
-                    
                     input.value = ''; renderTasks();
                     setTimeout(() => toggleComments(id), 50);
                 } catch(e) { showToast('ERROR', 'Ошибка отправки', 'error'); }
                 return;
             }
-            // Локальный JSONB
-            tasks.find(tObj => tObj.id === id).comments.push({ text: text, createdAt: getDateTimeStr() });
+            const numericId = Number(id);
+            tasks.find(tObj => tObj.id === numericId).comments.push({ text: text, createdAt: getDateTimeStr() });
             saveData('priority_tasks', tasks); renderTasks();
-            setTimeout(() => document.getElementById(`comment-input-${id}`).focus(), 50);
+            setTimeout(() => document.getElementById(`comment-input-${numericId}`).focus(), 50);
         }
 
-        // 4. УДАЛЕНИЕ КОММЕНТАРИЯ
         async function deleteComment(taskId, idx, commentId) {
-            if (typeof taskId === 'string') { // SQL Роутинг
+            if (isSharedId(taskId)) { 
                 try {
                     await supabaseClient.from('shared_comments').delete().eq('id', commentId);
                     const tObj = sharedTasks.find(t => t.id === taskId);
@@ -2100,8 +2020,8 @@
                 } catch(e) {}
                 return;
             }
-            // Локальный JSONB
-            tasks.find(tObj => tObj.id === taskId).comments.splice(idx, 1);
+            const numericId = Number(taskId);
+            tasks.find(tObj => tObj.id === numericId).comments.splice(idx, 1);
             saveData('priority_tasks', tasks); renderTasks();
         }
 
@@ -2143,27 +2063,29 @@
             // 1. АДАПТИРУЕМ ОБЩИЕ ЗАДАЧИ
             const allScopeNames = Array.from(new Set([...scopes, ...sharedScopes.map(s => s.name)]));
 
-            const acceptedShared = sharedTasks.map(t => {
-                const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER';
-                return {
-                    id: t.id,
-                    title: t.title,
-                    sphere: scopeName,
-                    isImportant: t.is_important, // Берем квадрант из базы
-                    isUrgent: t.is_urgent,       // Берем квадрант из базы
-                    completed: t.status === 'completed',
-                    createdAt: new Date(t.created_at).toLocaleDateString('ru-RU'),
-                    completedAt: t.completed_at ? new Date(t.completed_at).toLocaleDateString('ru-RU') : null,
-                    comments: t.shared_comments ? t.shared_comments.map(c => ({ 
-                        id: c.id, text: c.text, author: c.author_username, createdAt: new Date(c.created_at).toLocaleString('ru-RU', {hour: '2-digit', minute:'2-digit'}) 
-                    })) : [],
-                    price: t.price,
-                    isShared: true,
-                    creator: t.creator_username,
-                    assignee: t.assignee_username,
-                    isAcknowledged: t.is_acknowledged
-                };
-            });
+            const acceptedShared = sharedTasks
+                .filter(t => !(t.assignee_username === username && t.is_acknowledged === false)) // СКРЫВАЕМ ИЗ МАТРИЦЫ ТО, ЧТО В ИНБОКСЕ
+                .map(t => {
+                    const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER';
+                    return {
+                        id: t.id,
+                        title: t.title,
+                        sphere: scopeName,
+                        isImportant: t.is_important,
+                        isUrgent: t.is_urgent,
+                        completed: t.status === 'completed',
+                        createdAt: new Date(t.created_at).toLocaleDateString('ru-RU'),
+                        completedAt: t.completed_at ? new Date(t.completed_at).toLocaleDateString('ru-RU') : null,
+                        comments: t.shared_comments ? t.shared_comments.map(c => ({ 
+                            id: c.id, text: c.text, author: c.author_username, createdAt: new Date(c.created_at).toLocaleString('ru-RU', {hour: '2-digit', minute:'2-digit'}) 
+                        })) : [],
+                        price: t.price,
+                        isShared: true,
+                        creator: t.creator_username,
+                        assignee: t.assignee_username,
+                        isAcknowledged: t.is_acknowledged
+                    };
+                });
 
             // 2. СЛИЯНИЕ ДАННЫХ
             const allTasks = [...tasks, ...acceptedShared];
@@ -2200,8 +2122,9 @@
                 const linkedMacro = task.macroId ? macros.find(m => m.id === task.macroId) : null;
                 const macroTag = linkedMacro ? `<button type="button" onclick="unlinkTask('${task.id}')" class="px-2 py-0.5 bg-brand-light/10 text-brand-light dark:text-brand-dark border border-brand-light/30 rounded text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30" title="Click to Unlink">${t('lbl_linked_to')} ${linkedMacro.title} ✕</button>` : '';
                 
-                const sharedBadge = task.isShared ? `<span class="px-2 py-0.5 bg-brand-light/10 text-brand-light border border-brand-light/30 rounded text-[9px] font-bold uppercase tracking-widest ml-1" title="Создал: ${task.creator}">👤 ${task.assignee === username ? 'МНЕ' : task.assignee}</span>` : '';
-            
+                const assigneeName = task.assignee === username ? 'МНЕ' : task.assignee;
+                const sharedBadge = task.isShared ? `<span class="px-2 py-0.5 bg-brand-light/10 text-brand-light border border-brand-light/30 rounded text-[9px] font-bold uppercase tracking-widest ml-1" title="Создал: ${task.creator}">👤 ${assigneeName} от ${task.creator}</span>` : '';
+                
                 const commentsHTML = `
                     <div id="comments-${task.id}" class="mt-4 border-t border-borderline-light dark:border-borderline-dark pt-4 ${isCommentsOpen ? '' : 'hidden'} comments-section transition-colors">
                         <div class="space-y-3 mb-4 pr-1 font-mono-tech">
@@ -3078,12 +3001,20 @@ YOUR OBJECTIVE (Answer in these steps):
             wrapper.classList.remove('hidden');
             container.innerHTML = inboxTasks.map(t => {
                 const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS';
+                
+                let quadLabel = '';
+                if (t.is_important && t.is_urgent) quadLabel = 'Q1 (Критично)';
+                else if (t.is_important && !t.is_urgent) quadLabel = 'Q2 (Стратегия)';
+                else if (!t.is_important && t.is_urgent) quadLabel = 'Q3 (Рутина)';
+                else quadLabel = 'Q4 (Бэклог)';
+
                 return `
                 <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-panel-light dark:bg-panel-dark border border-brand-light/30 dark:border-brand-dark/30 p-4 rounded shadow-sm hover-magnet">
                     <div>
                         <div class="font-bold text-base text-zinc-900 dark:text-zinc-100" style="font-family: var(--font-primary);">${t.title}</div>
                         <div class="text-[10px] text-zinc-500 uppercase mt-1 tracking-widest font-mono-tech flex items-center gap-2">
                             <span class="bg-base-light dark:bg-base-dark px-2 py-0.5 rounded border border-borderline-light dark:border-borderline-dark">${scopeName}</span>
+                            <span class="bg-red-500/10 text-red-500 px-2 py-0.5 rounded border border-red-500/20">${quadLabel}</span>
                             <span>От: <span class="text-brand-light dark:text-brand-dark font-bold">${t.creator_username}</span></span>
                         </div>
                     </div>
@@ -3099,7 +3030,7 @@ YOUR OBJECTIVE (Answer in these steps):
             if(t) t.is_acknowledged = true;
             
             renderInbox(); 
-            renderTasks(); // ОБЯЗАТЕЛЬНО ОБНОВЛЯЕМ МАТРИЦУ
+            renderTasks();
 
             try {
                 await supabaseClient.from('shared_tasks').update({ is_acknowledged: true }).eq('id', taskId);
