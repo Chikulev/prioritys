@@ -278,8 +278,11 @@
                 <span data-i18n="ui_config" class="text-[10px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-1 rounded font-mono-tech">UI CONFIG</span>
             </div>
             
-            <!-- Сетка изменена на lg:grid-cols-4 чтобы равномерно заполнить ширину -->
+            <!-- Сетка: 4 колонки (максимум 8 тем = 2 строки) -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="themesGrid"></div>
+            
+            <!-- ПАГИНАЦИЯ -->
+            <div id="themesPagination" class="flex justify-center items-center mt-6 gap-3 hidden font-mono-tech"></div>
         </div>
 
         <!-- БЛОК 3: НИЖНЯЯ СЕКЦИЯ (CRON, Курсоры, Поддержка, Сброс) -->
@@ -374,14 +377,30 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-                        <div class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-5 rounded-md flex flex-col justify-between hover-magnet transition-all">
-                            <div>
-                                <h3 data-i18n="fund_direct" class="font-bold text-sm mb-2">Direct Funding</h3>
-                                <p data-i18n="fund_desc" class="text-[11px] text-zinc-500 mb-2 leading-relaxed">Support the continuous development...</p>
-                                <!-- СТРОКА С ТЕЛЕГРАМОМ -->
-                                <p class="text-[10px] text-brand-light dark:text-brand-dark font-bold mb-4 uppercase tracking-widest leading-relaxed">Для покупки PRO лицензии пишите в телеграм <a href="https://t.me/Chikulev" target="_blank" class="underline">@Chikulev</a></p>
+                        <div class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-5 rounded-md flex flex-col justify-between hover-magnet transition-all relative overflow-hidden">
+                            <div class="absolute -right-10 -top-10 opacity-5 pointer-events-none">
+                                <svg class="w-32 h-32 text-brand-light dark:text-brand-dark" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                             </div>
-                            <button onclick="openDonateModal()" data-i18n="btn_crypto" class="w-full mt-auto btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all">Crypto / Card</button>
+                            <div class="relative z-10 mb-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100">PRO License</h3>
+                                    <span class="text-[8px] bg-brand-light/10 text-brand-light dark:text-brand-dark px-1.5 py-0.5 rounded font-bold uppercase tracking-widest">LIFETIME</span>
+                                </div>
+                                <p class="text-[10px] text-zinc-500 mb-4 leading-relaxed">
+                                    Поддержите проект единовременным донатом на любую сумму и получите вечный доступ ко всем премиум-темам и функциям.
+                                </p>
+                                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded p-3 font-mono-tech">
+                                    <div class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Алгоритм активации:</div>
+                                    <ol class="text-[10px] text-zinc-600 dark:text-zinc-300 space-y-1.5 pl-3 list-decimal marker:text-brand-light dark:marker:text-brand-dark">
+                                        <li>Переведите любую сумму по реквизитам.</li>
+                                        <li>Отправьте скрин и ваш логин в Telegram <a href="https://t.me/Chikulev" target="_blank" class="text-brand-light dark:text-brand-dark hover:underline font-bold">@Chikulev</a>.</li>
+                                        <li>Получите PRO-статус в течение дня.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <button onclick="openDonateModal()" class="w-full mt-auto btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all shadow-sm relative z-10">
+                                Реквизиты (Crypto / Card)
+                            </button>
                         </div>
                         
                         <div class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-5 rounded-md flex flex-col justify-between hover-magnet transition-all" id="referralContainer">
@@ -392,13 +411,43 @@
 
             <!-- СБРОС СИСТЕМЫ (Справа, Финал) -->
             <div class="lg:col-span-1">
-                <div class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md p-6 shadow-sm font-mono-tech h-full flex flex-col justify-center">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-6 h-6 shrink-0 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-500 flex items-center justify-center rounded font-bold text-xs">!</div>
-                        <h2 data-i18n="cfg_reset" class="text-lg font-bold text-red-600 dark:text-red-500 uppercase tracking-widest">Factory Reset</h2>
+                <div class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md p-6 shadow-sm font-mono-tech h-full flex flex-col justify-between relative overflow-hidden transition-all hover-magnet group">
+                    
+                    <!-- Матричный фон (JS анимирует нули и единицы) -->
+                    <div id="matrixBg" class="absolute inset-0 text-red-600/15 dark:text-red-500/15 font-black text-[10px] leading-none tracking-widest overflow-hidden pointer-events-none break-all z-0 flex flex-wrap content-start select-none"></div>
+                    
+                    <!-- Равномерный полупрозрачный слой для читаемости текста поверх матрицы -->
+                    <div class="absolute inset-0 bg-red-50/70 dark:bg-red-950/70 z-0 pointer-events-none"></div>
+
+                    <div class="relative z-10 mb-4 flex flex-col h-full">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-6 h-6 shrink-0 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-500 flex items-center justify-center rounded font-bold text-xs">!</div>
+                            <h3 data-i18n="cfg_reset" class="font-bold text-base text-red-600 dark:text-red-500 uppercase tracking-widest">СБРОС СИСТЕМЫ</h3>
+                        </div>
+                        
+                        <div class="flex-1 flex flex-col gap-3 pr-2">
+                            <p class="text-[11px] text-red-900 dark:text-red-300 leading-relaxed font-bold">
+                                Это действие безвозвратно отформатирует ваше рабочее пространство. Вы начнете с чистого листа.
+                            </p>
+                            
+                            <!-- Протокол уничтожения (заполняем пустоту стильным списком) -->
+                            <div class="bg-red-100/50 dark:bg-red-900/40 border border-red-200 dark:border-red-800/50 rounded p-3 backdrop-blur-sm mt-1">
+                                <div class="text-[9px] font-bold text-red-700 dark:text-red-400 uppercase tracking-widest mb-2 border-b border-red-200 dark:border-red-800/50 pb-1.5">ПРОТОКОЛ УНИЧТОЖЕНИЯ:</div>
+                                <ul class="text-[10px] text-red-900/80 dark:text-red-300/80 space-y-2 list-none font-medium">
+                                    <li class="flex items-center gap-2"><span class="text-red-500 text-sm leading-none">×</span> Локальная Матрица (все задачи)</li>
+                                    <li class="flex items-center gap-2"><span class="text-red-500 text-sm leading-none">×</span> Макро-цели и системные логи</li>
+                                    <li class="flex items-center gap-2"><span class="text-red-500 text-sm leading-none">×</span> Оперативная память (LITE_BUFFER)</li>
+                                    <li class="flex items-center gap-2"><span class="text-red-500 text-sm leading-none">×</span> Настройки UI и шаблоны</li>
+                                </ul>
+                            </div>
+
+                            <p class="text-[9px] text-red-800/70 dark:text-red-400/70 mt-auto pt-2 italic">
+                                * Рекомендуется сделать Export Backup перед полным стиранием нейронных связей.
+                            </p>
+                        </div>
                     </div>
-                    <p data-i18n="reset_desc" class="text-xs text-red-800 dark:text-red-400 mb-6 leading-relaxed flex-1">Внимание: Это удалит все задачи...</p>
-                    <button onclick="askFactoryReset()" data-i18n="btn_reset" class="btn-press w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Начать новую жизнь</button>
+                    
+                    <button onclick="askFactoryReset()" data-i18n="btn_reset" class="mt-4 btn-press w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded text-[10px] uppercase tracking-widest transition-colors shadow-sm relative z-10">Начать новую жизнь</button>
                 </div>
             </div>
 
@@ -411,18 +460,18 @@
             <h3 data-i18n="donate_title" class="font-bold text-xl mb-6 uppercase tracking-widest text-center">FUNDING_PORTAL</h3>
             <div class="space-y-4">
                 <div class="border border-borderline-light dark:border-borderline-dark p-4 rounded bg-base-light dark:bg-base-dark">
-                    <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">USDT (TRC20)</div>
+                    <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">BTC (TG)</div>
                     <div class="flex items-center gap-2">
-                        <input type="text" readonly value="TNoG3y...CryptoAddress" class="flex-1 bg-transparent border-none text-sm text-zinc-900 dark:text-zinc-100 outline-none font-bold">
-                        <button onclick="copyToClipboard('TNoG3y...CryptoAddress')" class="text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded hover:bg-brand-light hover:text-white dark:hover:bg-brand-dark dark:hover:text-black transition-colors btn-press">COPY</button>
+                        <input type="text" readonly value="bc1qy6f...CryptoAddress" class="flex-1 bg-transparent border-none text-sm text-zinc-900 dark:text-zinc-100 outline-none font-bold">
+                        <button onclick="copyToClipboard('bc1qy6f2mc6dh6sjfg9hk8q2lukcfg2qlvwjs2me4y')" class="text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded hover:bg-brand-light hover:text-white dark:hover:bg-brand-dark dark:hover:text-black transition-colors btn-press">COPY</button>
                     </div>
                 </div>
                 
                 <div class="border border-borderline-light dark:border-borderline-dark p-4 rounded bg-base-light dark:bg-base-dark">
-                    <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">BANK CARD (RU/WORLD)</div>
+                    <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">BANK CARD (RU)</div>
                     <div class="flex items-center gap-2">
-                        <input type="text" readonly value="4276 1234 5678 9012" class="flex-1 bg-transparent border-none text-sm text-zinc-900 dark:text-zinc-100 outline-none font-bold font-mono">
-                        <button onclick="copyToClipboard('4276123456789012')" class="text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded hover:bg-brand-light hover:text-white dark:hover:bg-brand-dark dark:hover:text-black transition-colors btn-press">COPY</button>
+                        <input type="text" readonly value="2200 1546 1551 3545" class="flex-1 bg-transparent border-none text-sm text-zinc-900 dark:text-zinc-100 outline-none font-bold font-mono">
+                        <button onclick="copyToClipboard('2200154615513545')" class="text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded hover:bg-brand-light hover:text-white dark:hover:bg-brand-dark dark:hover:text-black transition-colors btn-press">COPY</button>
                     </div>
                 </div>
             </div>
@@ -439,7 +488,10 @@
             <h3 class="font-bold text-lg mb-1 uppercase tracking-widest text-brand-light dark:text-brand-dark">SHARE_SCOPE // Доступ</h3>
             <p id="shareScopeName" class="text-[11px] font-bold text-zinc-500 mb-6 uppercase">Сфера: ---</p>
             
-            <button onclick="generateScopeInvite()" class="w-full bg-brand-light/10 text-brand-light dark:text-brand-dark hover:bg-brand-light hover:text-white dark:hover:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-all btn-press shadow-sm mb-6 border border-brand-light/30">Сгенерировать Invite-ссылку</button>
+            <!-- ДИНАМИЧЕСКИЙ БЛОК КНОПОК -->
+            <div id="shareActionBtnContainer" class="mb-6">
+                <button onclick="generateScopeInvite()" class="w-full bg-brand-light/10 text-brand-light dark:text-brand-dark hover:bg-brand-light hover:text-white dark:hover:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-all btn-press shadow-sm border border-brand-light/30">Сгенерировать Invite-ссылку</button>
+            </div>
             
             <div class="border-t border-borderline-light dark:border-borderline-dark pt-4">
                 <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Команда (Members)</h4>
@@ -448,6 +500,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script src="themes.js"></script>
@@ -862,58 +915,78 @@
             const banner = document.getElementById('proBanner');
             const refContainer = document.getElementById('referralContainer');
             if(!banner || !refContainer) return;
+
+            refContainer.classList.add('relative', 'overflow-hidden');
+            
+            const refHtml = `
+                <div class="absolute -right-8 -bottom-8 opacity-5 pointer-events-none">
+                    <svg class="w-32 h-32 text-brand-light dark:text-brand-dark" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                </div>
+                <div class="relative z-10 mb-4 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-sm text-zinc-900 dark:text-zinc-100">${isPro ? t('ref_title_pro') || 'Протокол Сообщества' : t('fund_ref') || 'Протокол Сообщества'}</h3>
+                        <span class="text-[8px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-1.5 py-0.5 rounded uppercase tracking-widest">${isPro ? t('ref_badge_pro') || 'СИНХРОНИЗАЦИЯ' : t('ref_reward') || 'СИНХРОНИЗАЦИЯ'}</span>
+                    </div>
+                    
+                    <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 italic">
+                        "Ваше окружение определяет ваш масштаб."
+                    </div>
+                    
+                    <p class="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed mb-3">
+                        Кнопка ниже сгенерирует текст-приглашение прямо в ваш буфер обмена. Отправьте его своему корешу или коллеге, чтобы объединить фокус.
+                    </p>
+                    
+                    <div class="bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded p-3 mt-auto relative overflow-hidden group/preview backdrop-blur-sm">
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-light dark:bg-brand-dark opacity-50"></div>
+                        <div class="text-[8px] font-bold text-zinc-400 uppercase tracking-widest mb-1 pl-2">PREVIEW // БУФЕР ОБМЕНА</div>
+                        <div class="text-[10px] text-zinc-700 dark:text-zinc-300 italic pl-2 leading-relaxed">
+                            «Салют! Я настроил систему в PRIORITYS. Залетай по инвайту, будем закрывать задачи в одном ритме: prioritys.ru/invite...»
+                        </div>
+                    </div>
+                </div>
+                <button onclick="generateReferralLink()" class="w-full mt-3 btn-press bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all shadow-sm relative z-10">${t('btn_ref') || 'СГЕНЕРИРОВАТЬ ИНВАЙТ'}</button>
+            `;
             
             if(isPro) {
                 banner.innerHTML = `
                     <div class="absolute -right-10 -top-10 opacity-10"><svg class="w-32 h-32 text-white dark:text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
                     <div class="relative z-10">
-                        <div class="flex items-center gap-2 text-[10px] font-bold text-brand-light dark:text-brand-dark uppercase tracking-widest mb-2"><span class="w-2 h-2 bg-brand-light dark:bg-brand-dark rounded-full animate-pulse"></span> <span data-i18n="cfg_lic_status">${t('cfg_lic_status')}</span></div>
-                        <h2 data-i18n="cfg_tier_pro" class="text-2xl font-bold text-white dark:text-black mb-4">${t('cfg_tier_pro')}</h2>
-                        <p data-i18n="cfg_pro_desc_active" class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 leading-relaxed">${t('cfg_pro_desc_active')}</p>
+                        <div class="flex items-center gap-2 text-[10px] font-bold text-brand-light dark:text-brand-dark uppercase tracking-widest mb-2"><span class="w-2 h-2 bg-brand-light dark:bg-brand-dark rounded-full animate-pulse"></span> <span data-i18n="cfg_lic_status">${t('cfg_lic_status') || 'СИСТЕМНЫЙ СТАТУС'}</span></div>
+                        <h2 data-i18n="cfg_tier_pro" class="text-2xl font-bold text-white dark:text-black mb-4">${t('cfg_tier_pro') || 'PRO ЛИЦЕНЗИЯ'}</h2>
+                        <p data-i18n="cfg_pro_desc_active" class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 leading-relaxed">${t('cfg_pro_desc_active') || 'Все премиум-функции активны.'}</p>
                     </div>
                 `;
                 document.querySelectorAll('.premium-locked').forEach(el => el.classList.remove('premium-locked'));
-                refContainer.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-sm">${t('ref_title_pro')}</h3>
-                            <span class="text-[9px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-0.5 rounded uppercase">${t('ref_badge_pro')}</span>
-                        </div>
-                        <p class="text-[11px] text-zinc-500 mb-4 leading-relaxed">${t('ref_desc_pro')}</p>
-                    </div>
-                    <button onclick="generateReferralLink()" class="w-full mt-auto btn-press bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all shadow-sm">${t('btn_ref')}</button>
-                `;
+                refContainer.innerHTML = refHtml;
             } else {
                 banner.innerHTML = `
                     <div class="absolute -right-10 -top-10 opacity-10"><svg class="w-32 h-32 text-white dark:text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
                     <div class="relative z-10">
-                        <div data-i18n="cfg_lic_status" class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">${t('cfg_lic_status')}</div>
-                        <h2 data-i18n="cfg_tier_basic" class="text-2xl font-bold text-white dark:text-black mb-4">${t('cfg_tier_basic')}</h2>
-                        <p data-i18n="cfg_pro_desc" class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 leading-relaxed">${t('cfg_pro_desc')}</p>
-                        <button onclick="upgradeToPro()" data-i18n="btn_upgrade" class="btn-press w-full bg-brand-light dark:bg-brand-dark text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(6,182,212,0.3)]">${t('btn_upgrade')}</button>
+                        <div data-i18n="cfg_lic_status" class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">${t('cfg_lic_status') || 'СИСТЕМНЫЙ СТАТУС'}</div>
+                        <h2 data-i18n="cfg_tier_basic" class="text-2xl font-bold text-white dark:text-black mb-4">${t('cfg_tier_basic') || 'БАЗОВАЯ ВЕРСИЯ'}</h2>
+                        <p data-i18n="cfg_pro_desc" class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 leading-relaxed">${t('cfg_pro_desc') || 'Получите полный контроль с PRO.'}</p>
+                        <button onclick="upgradeToPro()" data-i18n="btn_upgrade" class="btn-press w-full bg-brand-light dark:bg-brand-dark text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(6,182,212,0.3)]">${t('btn_upgrade') || 'АПГРЕЙД ДО PRO'}</button>
                     </div>
                 `;
-                refContainer.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-sm">${t('fund_ref')}</h3>
-                            <span class="text-[9px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-0.5 rounded uppercase">${t('ref_reward')}</span>
-                        </div>
-                        <p class="text-[11px] text-zinc-500 mb-4 leading-relaxed">${t('ref_desc_basic')}</p>
-                    </div>
-                    <button onclick="generateReferralLink()" class="w-full mt-auto btn-press bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all shadow-sm">${t('btn_ref')}</button>
-                `;
+                refContainer.innerHTML = refHtml;
             }
         }
 
-        function upgradeToPro() { showToast('ACCESS DENIED', 'Для активации PRO статуса обратитесь к администратору системы.', 'error'); }
+        function upgradeToPro() { 
+            // Открываем модалку с реквизитами и подсказываем, что делать
+            openDonateModal();
+            showToast('UPGRADE TO PRO', 'Отправьте донат на любую сумму и напишите администратору для активации.', 'info', 8000); 
+        }
+
         function openDonateModal() { document.getElementById('donateModal').classList.remove('hidden'); setTimeout(() => document.getElementById('donateModal').classList.remove('opacity-0'), 10); }
         function closeDonateModal() { document.getElementById('donateModal').classList.add('opacity-0'); setTimeout(() => document.getElementById('donateModal').classList.add('hidden'), 300); }
         function copyToClipboard(text) { navigator.clipboard.writeText(text); showToast(t('toast_clip'), t('toast_copied'), 'success'); }
+        
         function generateReferralLink() {
             const code = 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            navigator.clipboard.writeText(t('ref_promo_text') + "\n" + `https://prioritys.ru/invite?code=${code}`);
-            showToast(t('toast_ref_link'), t('toast_ref_copied'), 'success');
+            const inviteText = `Салют! Я настроил систему в PRIORITYS. Залетай по инвайту, будем закрывать задачи в одном ритме:\n\nhttps://prioritys.ru/invite?code=${code}`;
+            navigator.clipboard.writeText(inviteText);
+            showToast('SECURE LINK', 'Текст-приглашение скопирован в буфер обмена!', 'success');
         }
 
         function loadDataFromStorage() {
@@ -1065,7 +1138,8 @@
             document.getElementById('shareScopeName').innerText = `Сфера: ${scopeName}`;
             
             const membersList = document.getElementById('scopeMembersList');
-            // Ставим анимацию загрузки, пока идем в БД
+            const actionContainer = document.getElementById('shareActionBtnContainer');
+            
             membersList.innerHTML = '<div class="text-xs text-zinc-500 font-bold uppercase tracking-widest animate-pulse">Загрузка команды...</div>';
 
             const modal = document.getElementById('shareModal');
@@ -1083,13 +1157,13 @@
                 // Ищем эту сферу в общих (SQL)
                 const { data: scope } = await supabaseClient
                     .from('shared_scopes')
-                    .select('id')
+                    .select('*')
                     .eq('name', scopeName)
                     .eq('owner_username', username)
                     .single();
 
                 if (scope) {
-                    // Если сфера уже расшарена, грузим реальных участников
+                    // СФЕРА УЖЕ ОБЩАЯ: Грузим участников и даем опцию закрыть доступ
                     const { data: members } = await supabaseClient
                         .from('scope_members')
                         .select('*')
@@ -1101,14 +1175,24 @@
                             <span class="text-[9px] ${m.role === 'admin' ? 'bg-brand-light' : 'bg-zinc-500'} text-white px-2 py-0.5 rounded font-bold uppercase tracking-widest shadow-sm">${m.role}</span>
                         </div>
                     `).join('');
+
+                    // Рисуем кнопки: Копировать линк + Сделать приватной
+                    actionContainer.innerHTML = `
+                        <button onclick="navigator.clipboard.writeText('https://prioritys.ru/?invite=${scope.invite_token}'); showToast('SECURE LINK', 'Invite-ссылка скопирована!', 'success');" class="w-full bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-all btn-press shadow-sm mb-3">Копировать ссылку</button>
+                        <button onclick="unshareScope()" class="w-full bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-600 hover:text-white font-bold py-3 rounded text-xs uppercase tracking-widest transition-all btn-press border border-red-500/30">Сделать приватной</button>
+                    `;
                 } else {
-                    // Если сфера пока личная (локальная JSONB)
+                    // СФЕРА ПРИВАТНАЯ: Предлагаем создать ссылку
                     membersList.innerHTML = `
                         <div class="flex justify-between items-center bg-base-light dark:bg-base-dark p-2 rounded border border-borderline-light dark:border-borderline-dark opacity-50">
                             <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">${username}</span>
                             <span class="text-[9px] bg-zinc-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-widest">Creator</span>
                         </div>
                         <div class="text-[9px] font-bold text-zinc-500 mt-3 text-center uppercase tracking-widest">Сфера пока приватная.<br>Сгенерируйте ссылку, чтобы пригласить команду.</div>
+                    `;
+
+                    actionContainer.innerHTML = `
+                        <button onclick="generateScopeInvite()" class="w-full bg-brand-light/10 text-brand-light dark:text-brand-dark hover:bg-brand-light hover:text-white dark:hover:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-all btn-press shadow-sm border border-brand-light/30">Сгенерировать Invite-ссылку</button>
                     `;
                 }
             } catch (err) {
@@ -1124,6 +1208,69 @@
             inner.classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 200);
             currentShareScope = null;
+        }
+
+        // --- НОВАЯ ФУНКЦИЯ: ВОЗВРАТ СФЕРЫ В ПРИВАТНЫЙ РЕЖИМ ---
+        async function unshareScope() {
+            const username = localStorage.getItem('priority_user');
+            if (!currentShareScope || !username) return;
+
+            showToast('SYSTEM', 'Отключение доступа и перенос задач...', 'info');
+
+            try {
+                // Ищем сферу
+                const { data: scope } = await supabaseClient
+                    .from('shared_scopes')
+                    .select('id')
+                    .eq('name', currentShareScope)
+                    .eq('owner_username', username)
+                    .single();
+
+                if (!scope) return;
+
+                // 1. Спасаем задачи (возвращаем их в локальное хранилище)
+                const { data: sqlTasks } = await supabaseClient
+                    .from('shared_tasks')
+                    .select('*')
+                    .eq('scope_id', scope.id);
+
+                if (sqlTasks && sqlTasks.length > 0) {
+                    const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
+                    
+                    const restoredTasks = sqlTasks.map(t => ({
+                        id: Date.now() + Math.floor(Math.random() * 10000), // генерим безопасный локальный ID
+                        title: t.title,
+                        sphere: currentShareScope,
+                        isImportant: t.is_important,
+                        isUrgent: t.is_urgent,
+                        completed: t.status === 'completed',
+                        createdAt: new Date(t.created_at).toLocaleDateString('ru-RU'),
+                        completedAt: t.completed_at ? new Date(t.completed_at).toLocaleDateString('ru-RU') : null,
+                        comments: [], // Чат сгорает при отвязке
+                        price: t.price
+                    }));
+                    
+                    const mergedTasks = [...restoredTasks, ...allTasks];
+                    localStorage.setItem('priority_tasks', JSON.stringify(mergedTasks));
+                    
+                    // Сохраняем в облако (JSONB)
+                    if (typeof syncStateToCloud === 'function') syncStateToCloud(true);
+                }
+
+                // 2. Уничтожаем сферу в SQL
+                await supabaseClient.from('shared_tasks').delete().eq('scope_id', scope.id);
+                await supabaseClient.from('scope_members').delete().eq('scope_id', scope.id);
+                await supabaseClient.from('shared_scopes').delete().eq('id', scope.id);
+
+                showToast('SUCCESS', 'Сфера снова стала приватной. Задачи сохранены локально.', 'success');
+                
+                closeShareModal();
+                renderScopes(); // Обновляем список сфер (уйдет значок 👥)
+
+            } catch (err) {
+                console.error(err);
+                showToast('ERROR', 'Ошибка при закрытии доступа', 'error');
+            }
         }
 
         async function generateScopeInvite() {
@@ -1193,36 +1340,101 @@
 
         if (!localStorage.getItem('priority_sys_logs')) localStorage.setItem('priority_sys_logs', JSON.stringify([{ action: "SYS_BOOT", details: "Core systems initialized.", time: "Just now" }]));
 
+        // --- ПАГИНАЦИЯ ВИТРИНЫ ТЕМ ---
+        let currentThemePage = 1;
+        const THEMES_PER_PAGE = 8; // По 4 в ряд = ровно 2 строки
+
+        function changeThemePage(dir) {
+            currentThemePage += dir;
+            renderThemesMarketplace();
+        }
+
         function renderThemesMarketplace() {
             const grid = document.getElementById('themesGrid');
+            const paginationContainer = document.getElementById('themesPagination');
             if(!grid) return;
+            
             const activeTheme = localStorage.getItem('priority_theme') || 'cyber';
             const lang = localStorage.getItem('priority_lang') || 'en';
+            
+            // 1. Собираем массив всех тем из движка
+            const themesArray = Object.values(SYSTEM_THEMES);
+            
+            // 2. Добавляем AI-карточку как виртуальную тему в самый конец списка
+            themesArray.push({ isAiCard: true });
+
+            // 3. Высчитываем страницы
+            const totalPages = Math.ceil(themesArray.length / THEMES_PER_PAGE);
+            if (currentThemePage > totalPages) currentThemePage = totalPages;
+            if (currentThemePage < 1) currentThemePage = 1;
+
+            const startIndex = (currentThemePage - 1) * THEMES_PER_PAGE;
+            const currentThemes = themesArray.slice(startIndex, startIndex + THEMES_PER_PAGE);
+            
             let html = '';
-            Object.values(SYSTEM_THEMES).forEach(theme => {
+            currentThemes.forEach(theme => {
+                // Отрисовка AI-заглушки
+                if (theme.isAiCard) {
+                    html += `
+                        <div class="border border-dashed border-brand-light/50 dark:border-brand-dark/50 rounded-md p-5 relative bg-brand-light/5 dark:bg-brand-dark/5 flex flex-col items-center justify-center text-center font-mono-tech min-h-[160px]">
+                            <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✨</div>
+                            <h3 class="font-bold text-sm mb-1 text-brand-light dark:text-brand-dark">${t('ai_theme') || 'AI THEME'}</h3>
+                            <p class="text-[10px] text-zinc-500 mb-4 px-4">${t('ai_desc') || 'Coming soon'}</p>
+                            <button class="w-full py-2 bg-zinc-200 dark:bg-zinc-800 text-zinc-500 text-xs font-bold rounded cursor-not-allowed transition-colors mt-auto">${t('btn_soon') || 'SOON'}</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Отрисовка обычной темы
                 const isLocked = theme.isPro && !isPro;
                 const isActive = activeTheme === theme.id;
-                const btnText = isActive ? t('btn_in_use') : (isLocked ? t('btn_unlock') : t('btn_activate'));
-                const btnClass = isActive ? 'bg-brand-light dark:bg-brand-dark text-white dark:text-black shadow-sm' : 'bg-transparent border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:border-brand-light dark:hover:border-brand-dark hover:text-brand-light dark:hover:text-brand-dark hover:bg-brand-light/5 dark:hover:bg-brand-dark/5';
-                const badgeHTML = isActive ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black px-2 py-1 rounded font-mono-tech z-20">${t('theme_active')}</div>` : (isLocked ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold text-zinc-500 bg-zinc-200 dark:bg-zinc-800 px-2 py-1 rounded z-20 pro-badge font-mono-tech">🔒 PRO</div>` : '');
+                const btnText = isActive ? (t('btn_in_use') || 'ACTIVE') : (isLocked ? (t('btn_unlock') || 'UNLOCK') : (t('btn_activate') || 'ACTIVATE'));
+                
+                const btnClass = isActive 
+                    ? 'bg-brand-light dark:bg-brand-dark text-white dark:text-black shadow-sm' 
+                    : 'bg-transparent border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:border-brand-light dark:hover:border-brand-dark hover:text-brand-light dark:hover:text-brand-dark hover:bg-brand-light/5 dark:hover:bg-brand-dark/5';
+                
+                const badgeHTML = isActive 
+                    ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black px-2 py-1 rounded font-mono-tech z-20">${t('theme_active') || 'ACTIVE'}</div>`
+                    : (isLocked ? `<div class="theme-status-badge absolute top-3 right-3 text-[9px] font-bold text-zinc-500 bg-zinc-200 dark:bg-zinc-800 px-2 py-1 rounded z-20 pro-badge font-mono-tech">🔒 PRO</div>` : '');
+
                 html += `
-                    <div id="theme-card-${theme.id}" class="theme-card ${isLocked ? 'premium-locked' : ''} border ${isActive ? 'border-brand-light dark:border-brand-dark' : 'border-borderline-light dark:border-borderline-dark'} rounded-md p-5 relative overflow-hidden bg-panel-light dark:bg-panel-dark group hover-magnet transition-all">
+                    <div id="theme-card-${theme.id}" class="theme-card ${isLocked ? 'premium-locked' : ''} border ${isActive ? 'border-brand-light dark:border-brand-dark' : 'border-borderline-light dark:border-borderline-dark'} rounded-md p-5 relative overflow-hidden bg-panel-light dark:bg-panel-dark group hover-magnet transition-all flex flex-col min-h-[160px]">
                         ${badgeHTML}
                         <h3 class="font-bold text-lg mb-1" style="font-family: ${theme.fontPrimary}; color: var(--color-brand-light);">${theme.icon} ${theme.name}</h3>
-                        <p class="text-[11px] text-zinc-500 mb-4" style="font-family: ${theme.fontPrimary};">${theme.desc[lang] || theme.desc.en}</p>
-                        <button onclick="activateTheme('${theme.id}')" class="theme-btn relative z-20 w-full py-2 ${btnClass} text-xs font-bold rounded transition-colors btn-press font-mono-tech">${btnText}</button>
+                        <p class="text-[11px] text-zinc-500 mb-4 flex-1" style="font-family: ${theme.fontPrimary};">${theme.desc[lang] || theme.desc.en}</p>
+                        <button onclick="activateTheme('${theme.id}')" class="theme-btn relative z-20 w-full py-2 ${btnClass} text-xs font-bold rounded transition-colors btn-press font-mono-tech mt-auto">${btnText}</button>
                     </div>
                 `;
             });
-            html += `
-                <div class="border border-dashed border-brand-light/50 dark:border-brand-dark/50 rounded-md p-5 relative bg-brand-light/5 dark:bg-brand-dark/5 flex flex-col items-center justify-center text-center font-mono-tech">
-                    <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✨</div>
-                    <h3 class="font-bold text-sm mb-1 text-brand-light dark:text-brand-dark">${t('ai_theme')}</h3>
-                    <p class="text-[10px] text-zinc-500 mb-4 px-4">${t('ai_desc')}</p>
-                    <button class="w-full py-2 bg-zinc-200 dark:bg-zinc-800 text-zinc-500 text-xs font-bold rounded cursor-not-allowed transition-colors">${t('btn_soon')}</button>
-                </div>
-            `;
+
+            // ---> НОВОЕ: ЗАПОЛНЯЕМ ПУСТЫЕ СЛОТЫ ЭЛЕГАНТНЫМИ СКЕЛЕТОНАМИ <---
+            const emptySlots = THEMES_PER_PAGE - currentThemes.length;
+            for (let i = 0; i < emptySlots; i++) {
+                html += `
+                    <div class="border border-dashed border-borderline-light dark:border-borderline-dark rounded-md p-5 bg-transparent flex flex-col items-center justify-center opacity-40 min-h-[160px] pointer-events-none">
+                        <div class="w-8 h-8 rounded-full border-2 border-borderline-light dark:border-borderline-dark mb-4 opacity-50"></div>
+                        <div class="h-1.5 w-16 bg-borderline-light dark:bg-borderline-dark rounded mb-2 opacity-50"></div>
+                        <div class="h-1.5 w-24 bg-borderline-light dark:bg-borderline-dark rounded opacity-50"></div>
+                    </div>
+                `;
+            }
+            // ---------------------------------------------------------------
+            
             grid.innerHTML = html;
+
+            // 4. Отрисовка кнопок пагинации
+            if (totalPages > 1 && paginationContainer) {
+                paginationContainer.innerHTML = `
+                    <button onclick="changeThemePage(-1)" ${currentThemePage === 1 ? 'disabled' : ''} class="px-4 py-2 rounded border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark text-zinc-500 disabled:opacity-30 hover:text-brand-light dark:hover:text-brand-dark hover:border-brand-light/50 transition-colors btn-press font-bold text-xs">◀</button>
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-4 py-2">Page ${currentThemePage} / ${totalPages}</span>
+                    <button onclick="changeThemePage(1)" ${currentThemePage === totalPages ? 'disabled' : ''} class="px-4 py-2 rounded border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark text-zinc-500 disabled:opacity-30 hover:text-brand-light dark:hover:text-brand-dark hover:border-brand-light/50 transition-colors btn-press font-bold text-xs">▶</button>
+                `;
+                paginationContainer.classList.remove('hidden');
+            } else if (paginationContainer) {
+                paginationContainer.classList.add('hidden');
+            }
         }
 
         function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
@@ -1245,6 +1457,18 @@
                 const currentScale = localStorage.getItem('priority_scale') || 1;
                 scaleSlider.value = currentScale;
                 if(document.getElementById('scaleValueDisplay')) document.getElementById('scaleValueDisplay').innerText = Math.round(currentScale * 100) + '%';
+            }
+
+            // Анимация Матрицы для блока сброса
+            const matrixEl = document.getElementById('matrixBg');
+            if (matrixEl) {
+                const generateMatrix = () => {
+                    let str = '';
+                    for(let i=0; i<1300; i++) str += Math.random() > 0.5 ? '1 ' : '0 ';
+                    matrixEl.innerText = str;
+                };
+                generateMatrix();
+                setInterval(generateMatrix, 150);
             }
 
             loadDataFromStorage();
