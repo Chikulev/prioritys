@@ -145,10 +145,14 @@
         function syncStateToCloud() {
             const username = localStorage.getItem('priority_user');
             if (!username) return;
-        
+
             clearTimeout(cloudSyncTimeout);
             cloudSyncTimeout = setTimeout(async () => {
+                const mutationId = Date.now().toString() + Math.random().toString(36).substring(7);
+                localStorage.setItem('priority_last_mutation', mutationId);
+            
                 const appState = {
+                    _mutation_id: mutationId,
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
@@ -165,7 +169,7 @@
                     lite_cron_time: localStorage.getItem('lite_cron_time') || '00:00',
                     lite_cron_action: localStorage.getItem('lite_cron_action') || 'fail'
                 };
-
+            
                 try {
                     await supabaseClient.from('users').update({ app_data: appState, last_active_at: new Date().toISOString() }).eq('username', username);
                 } catch (err) {}
@@ -197,6 +201,38 @@
                     renderHeatmap();
                 }
             } catch (e) {}
+        }
+
+        function initRealtimeSync() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+
+            supabaseClient
+                .channel('public:users_lite')
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` },
+                    (payload) => {
+                        const cloudData = payload.new.app_data;
+                        if (!cloudData) return;
+                    
+                        const lastMutation = localStorage.getItem('priority_last_mutation');
+                        if (cloudData._mutation_id && cloudData._mutation_id === lastMutation) return;
+                    
+                        if (cloudData.lite_tasks) {
+                            localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
+                            liteTasks = cloudData.lite_tasks;
+                        }
+                        if (cloudData.lite_log) {
+                            localStorage.setItem('priority_lite_log', JSON.stringify(cloudData.lite_log));
+                            completedLog = cloudData.lite_log;
+                        }
+                    
+                        renderLite();
+                        renderStats();
+                        renderHeatmap();
+                    }
+                ).subscribe();
         }
 
         function toggleLang() {
@@ -387,6 +423,7 @@
             applyI18n();
             saveAndRender();
             syncFromCloud();
+            initRealtimeSync();
             document.getElementById('mainApp').classList.remove('hidden');
         });
     </script>

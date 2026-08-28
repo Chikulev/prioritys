@@ -418,6 +418,24 @@
         </div>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО ШЕРИНГА СФЕРЫ -->
+    <div id="shareModal" class="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm z-[300] flex items-center justify-center hidden opacity-0 transition-opacity font-mono-tech">
+        <div class="bg-panel-light dark:bg-panel-dark border border-brand-light dark:border-brand-dark p-8 rounded-lg w-full max-w-md shadow-2xl relative transform scale-95 transition-transform duration-200" id="shareModalInner">
+            <button onclick="closeShareModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-red-500 font-bold text-xl btn-press">✕</button>
+            <h3 class="font-bold text-lg mb-1 uppercase tracking-widest text-brand-light dark:text-brand-dark">SHARE_SCOPE // Доступ</h3>
+            <p id="shareScopeName" class="text-[11px] font-bold text-zinc-500 mb-6 uppercase">Сфера: ---</p>
+            
+            <button onclick="generateScopeInvite()" class="w-full bg-brand-light/10 text-brand-light dark:text-brand-dark hover:bg-brand-light hover:text-white dark:hover:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-all btn-press shadow-sm mb-6 border border-brand-light/30">Сгенерировать Invite-ссылку</button>
+            
+            <div class="border-t border-borderline-light dark:border-borderline-dark pt-4">
+                <h4 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Команда (Members)</h4>
+                <div id="scopeMembersList" class="space-y-2 max-h-40 overflow-y-auto">
+                    <!-- Участники будут генерироваться здесь -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="themes.js"></script>
     <script src="locales.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -656,6 +674,9 @@
                             <span class="px-1.5 py-0.5 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 rounded text-[9px] font-bold shrink-0">${count}</span>
                         </div>
                         <div class="flex gap-1 opacity-50 group-hover:opacity-100 transition-opacity shrink-0 items-center">
+                            <!-- Кнопка Шеринга -->
+                            <button onclick="openShareModal('${s}')" class="text-brand-light dark:text-brand-dark hover:text-brand-light px-2 py-1.5 rounded transition-colors btn-press text-sm" title="Share Scope">👥</button>
+                            
                             <div class="flex items-center gap-1 mr-2 pr-2 border-r border-borderline-light dark:border-borderline-dark">
                                 <button onclick="moveScopeUp(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === 0 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg></button>
                                 <button onclick="moveScopeDown(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === scopes.length - 1 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button>
@@ -1020,6 +1041,127 @@
                 } catch (err) { showToast('ERROR', 'Invalid Core Data format', 'error'); }
             };
             reader.readAsText(file);
+        }
+
+        // --- БОЕВАЯ ЛОГИКА ШЕРИНГА СФЕР (SUPABASE) ---
+        let currentShareScope = null;
+
+        async function openShareModal(scopeName) {
+            currentShareScope = scopeName;
+            document.getElementById('shareScopeName').innerText = `Сфера: ${scopeName}`;
+            
+            const membersList = document.getElementById('scopeMembersList');
+            // Ставим анимацию загрузки, пока идем в БД
+            membersList.innerHTML = '<div class="text-xs text-zinc-500 font-bold uppercase tracking-widest animate-pulse">Загрузка команды...</div>';
+
+            const modal = document.getElementById('shareModal');
+            const inner = document.getElementById('shareModalInner');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                inner.classList.remove('scale-95');
+                inner.classList.add('scale-100');
+            }, 10);
+
+            const username = localStorage.getItem('priority_user');
+
+            try {
+                // Ищем эту сферу в общих (SQL)
+                const { data: scope } = await supabaseClient
+                    .from('shared_scopes')
+                    .select('id')
+                    .eq('name', scopeName)
+                    .eq('owner_username', username)
+                    .single();
+
+                if (scope) {
+                    // Если сфера уже расшарена, грузим реальных участников
+                    const { data: members } = await supabaseClient
+                        .from('scope_members')
+                        .select('*')
+                        .eq('scope_id', scope.id);
+
+                    membersList.innerHTML = members.map(m => `
+                        <div class="flex justify-between items-center bg-base-light dark:bg-base-dark p-2 rounded border border-borderline-light dark:border-borderline-dark hover-magnet transition-all">
+                            <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">${m.username}</span>
+                            <span class="text-[9px] ${m.role === 'admin' ? 'bg-brand-light' : 'bg-zinc-500'} text-white px-2 py-0.5 rounded font-bold uppercase tracking-widest shadow-sm">${m.role}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    // Если сфера пока личная (локальная JSONB)
+                    membersList.innerHTML = `
+                        <div class="flex justify-between items-center bg-base-light dark:bg-base-dark p-2 rounded border border-borderline-light dark:border-borderline-dark opacity-50">
+                            <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">${username}</span>
+                            <span class="text-[9px] bg-zinc-500 text-white px-2 py-0.5 rounded font-bold uppercase tracking-widest">Creator</span>
+                        </div>
+                        <div class="text-[9px] font-bold text-zinc-500 mt-3 text-center uppercase tracking-widest">Сфера пока приватная.<br>Сгенерируйте ссылку, чтобы пригласить команду.</div>
+                    `;
+                }
+            } catch (err) {
+                membersList.innerHTML = '<div class="text-xs text-red-500 font-bold uppercase">Ошибка синхронизации</div>';
+            }
+        }
+
+        function closeShareModal() {
+            const modal = document.getElementById('shareModal');
+            const inner = document.getElementById('shareModalInner');
+            modal.classList.add('opacity-0');
+            inner.classList.remove('scale-100');
+            inner.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+            currentShareScope = null;
+        }
+
+        async function generateScopeInvite() {
+            const username = localStorage.getItem('priority_user');
+            if (!currentShareScope || !username) return;
+
+            showToast('SYSTEM', 'Генерация защищенного токена...', 'info');
+
+            try {
+                // 1. Проверяем, расшарена ли уже эта сфера
+                let { data: existingScope } = await supabaseClient
+                    .from('shared_scopes')
+                    .select('*')
+                    .eq('name', currentShareScope)
+                    .eq('owner_username', username)
+                    .single();
+
+                let token;
+
+                if (existingScope) {
+                    // Если уже расшарена, просто берем ее токен
+                    token = existingScope.invite_token;
+                } else {
+                    // 2. Если нет, апгрейдим сферу до "Общей" (записываем в SQL)
+                    const { data: newScope, error: scopeErr } = await supabaseClient
+                        .from('shared_scopes')
+                        .insert({ name: currentShareScope, owner_username: username })
+                        .select()
+                        .single();
+
+                    if (scopeErr) throw scopeErr;
+                    token = newScope.invite_token;
+
+                    // 3. Записываем себя как админа в SQL
+                    await supabaseClient
+                        .from('scope_members')
+                        .insert({ scope_id: newScope.id, username: username, role: 'admin' });
+                    
+                    // Перерисовываем модалку, чтобы показать себя как Admin
+                    openShareModal(currentShareScope);
+                }
+
+                // 4. Формируем инвайт-ссылку (позже мы напишем приемник для неё в index.html)
+                const link = `https://prioritys.ru/?invite=${token}`;
+                navigator.clipboard.writeText(link);
+                
+                showToast('SECURE LINK', 'Invite-ссылка скопирована! Отправьте её коллеге.', 'success');
+
+            } catch (err) {
+                console.error(err);
+                showToast('ERROR', 'Ошибка создания ссылки', 'error');
+            }
         }
 
         function renderSysLogs() {

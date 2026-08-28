@@ -260,8 +260,7 @@
         <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-6 md:p-8 mb-8 border-l-4 border-l-brand-light dark:border-l-brand-dark rounded-md shadow-sm transition-colors relative z-20 hover-magnet">
             <div class="flex flex-wrap md:flex-nowrap items-center gap-4 mb-6 border-b border-borderline-light dark:border-borderline-dark pb-6 transition-all relative">
                 <span class="text-brand-light dark:text-brand-dark font-bold text-2xl font-mono-tech">></span>
-                <input type="text" id="taskInput" data-i18n-ph="task_ph" class="flex-1 text-2xl font-medium text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 border-none focus:ring-0 bg-transparent outline-none min-w-0" style="font-family: var(--font-primary);">
-                
+                <input type="text" id="taskInput" data-i18n-ph="task_ph" onkeypress="if(event.key==='Enter') deployOrUpdateTask()" class="flex-1 text-2xl font-medium text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 border-none focus:ring-0 bg-transparent outline-none min-w-0" style="font-family: var(--font-primary);">                
                 
 
                 <div class="relative font-mono-tech">
@@ -312,6 +311,13 @@
                         </div>
                     </div>
 
+                    <div id="assigneeBlock" class="hidden flex-col">
+                        <span data-i18n="lbl_assignee" class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Assignee</span>
+                        <select id="taskAssignee" class="bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-1.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none h-full transition-colors min-w-[120px]">
+                            <option value="me">@me</option>
+                        </select>
+                    </div>
+
                     <div id="shopFeatureBlock" class="hidden flex-col">
                         <span data-i18n="lbl_is_purchase" class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Purchase</span>
                         <div class="flex items-center gap-2 bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors h-full">
@@ -353,6 +359,15 @@
                 </div>
                 <div id="dashLiteContainer" class="flex flex-wrap gap-2"></div>
             </div>
+        </div>
+
+        <!-- INBOX / КАРАНТИН ДЕЛЕГИРОВАННЫХ ЗАДАЧ -->
+        <div id="inboxWrapper" class="hidden mb-6 bg-brand-light/5 border border-brand-light/50 dark:border-brand-dark/50 p-4 rounded-md shadow-sm relative font-mono-tech">
+            <h3 class="text-[11px] font-bold text-brand-light dark:text-brand-dark uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span class="w-2 h-2 bg-brand-light dark:bg-brand-dark rounded-full animate-pulse"></span>
+                INBOX // Требует распределения
+            </h3>
+            <div id="inboxTasksContainer" class="space-y-2"></div>
         </div>
 
         <div class="flex flex-wrap justify-between items-center mb-6 gap-4 font-mono-tech">
@@ -593,6 +608,9 @@
         let activeFilterPurchases = false; // Глобальный триггер для фильтра покупок
 
         let liteTasks = JSON.parse(localStorage.getItem('priority_lite_tasks')) || [];
+
+        let sharedScopes = [];
+        let sharedTasks = [];
 
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
@@ -993,6 +1011,19 @@
                        renderMacros();
                        renderDashLite();
 
+                       // ---> ДОБАВИТЬ ЭТОТ БЛОК: ЗАГРУЗКА INBOX <---
+                       const { data: inboxData } = await supabaseClient
+                           .from('shared_tasks')
+                           .select('*')
+                           .eq('assignee_username', username)
+                           .eq('status', 'inbox');
+
+                       if (inboxData) {
+                           sharedTasks = inboxData;
+                           if (typeof renderInbox === 'function') renderInbox();
+                       }
+                       // ---------------------------------------------
+
                        // ПРИМЕНЯЕМ ВИЗУАЛ
                        applyAppTheme();
                        applyCursor();
@@ -1341,6 +1372,9 @@
 
             // ВКЛЮЧАЕМ РЕАЛТАЙМ-СЛУХАЧА:
             initRealtimeSync();
+
+            // Запускаем перехват инвайт-ссылок
+            processInviteLink();
             
             if(localStorage.getItem('priority_dash_lite_open') === 'true') {
                 document.getElementById('dashLiteWrapper').classList.remove('hidden');
@@ -2347,6 +2381,59 @@
             `}).join('');
         }
 
+        // --- ПРИЕМНИК ИНВАЙТ-ССЫЛОК ---
+        async function processInviteLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('invite');
+            const username = localStorage.getItem('priority_user');
+
+            if (!token || !username) return;
+
+            showToast('SYSTEM', 'Анализ инвайт-токена...', 'info');
+
+            try {
+                // 1. Ищем сферу по токену
+                const { data: scope, error: scopeErr } = await supabaseClient
+                    .from('shared_scopes')
+                    .select('*')
+                    .eq('invite_token', token)
+                    .single();
+
+                if (scopeErr || !scope) throw new Error('Сфера не найдена');
+
+                // 2. Записываем юзера в участники (по умолчанию 'editor')
+                const { error: insertErr } = await supabaseClient
+                    .from('scope_members')
+                    .insert({ scope_id: scope.id, username: username, role: 'editor' });
+
+                // Код 23505 означает нарушение уникальности (юзер уже в сфере)
+                if (insertErr && insertErr.code !== '23505') throw insertErr; 
+
+                // 3. Добавляем сферу локально, если её еще нет
+                if (!scopes.includes(scope.name)) {
+                    scopes.unshift(scope.name);
+                    dynamicScopes = [...scopes];
+                    saveData('priority_scopes', scopes); // Автоматически улетит в облако
+                    initDynamicScopes();
+                    renderFilters();
+                }
+
+                if (insertErr && insertErr.code === '23505') {
+                    showToast('INFO', `Вы уже состоите в сфере "${scope.name}"`, 'info');
+                } else {
+                    showToast('ACCESS GRANTED', `Вы успешно присоединились к сфере "${scope.name}"`, 'success');
+                }
+
+                // 4. Очищаем URL от токена, чтобы не было повторных срабатываний при F5
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+            } catch (err) {
+                console.error(err);
+                showToast('ERROR', 'Инвайт-токен недействителен или устарел', 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
         function toggleBlueprint(id) {
             const isActive = tasks.some(t => t.presetId === id);
 
@@ -2720,6 +2807,53 @@ YOUR OBJECTIVE (Answer in these steps):
             localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
             saveData('priority_tasks', tasks);
             renderDashLite();
+        }
+
+        // --- MULTIPLAYER: INBOX & DELEGATION ---
+        function renderInbox() {
+            const username = localStorage.getItem('priority_user');
+            // Фильтруем задачи, которые назначены на нас и лежат в статусе inbox
+            const inboxTasks = sharedTasks.filter(t => t.assignee_username === username && t.status === 'inbox');
+            const wrapper = document.getElementById('inboxWrapper');
+            const container = document.getElementById('inboxTasksContainer');
+
+            if(inboxTasks.length === 0) {
+                wrapper.classList.add('hidden');
+                return;
+            }
+
+            wrapper.classList.remove('hidden');
+            container.innerHTML = inboxTasks.map(t => `
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-3 rounded shadow-sm hover-magnet">
+                    <div>
+                        <div class="font-bold text-sm text-zinc-900 dark:text-zinc-100" style="font-family: var(--font-primary);">${t.title}</div>
+                        <div class="text-[10px] text-zinc-500 uppercase mt-1 tracking-widest">
+                            От: <span class="text-brand-light dark:text-brand-dark">${t.creator_username}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 shrink-0 flex-wrap">
+                        <button onclick="acceptInboxTask('${t.id}', 'q1')" class="px-3 py-2 bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-600 hover:text-white rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press">Q1 (Крит)</button>
+                        <button onclick="acceptInboxTask('${t.id}', 'q2')" class="px-3 py-2 bg-brand-light/10 text-brand-light dark:text-brand-dark hover:bg-brand-light hover:text-white dark:hover:text-black rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press">Q2 (Стратег)</button>
+                        <button onclick="acceptInboxTask('${t.id}', 'q3')" class="px-3 py-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 hover:bg-yellow-500 hover:text-black rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press">Q3 (Рутина)</button>
+                        <button onclick="acceptInboxTask('${t.id}', 'q4')" class="px-3 py-2 bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-500 hover:text-white rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press">Q4 (Бэклог)</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function acceptInboxTask(taskId, targetQuad) {
+            // Мгновенная реакция UI (Optimistic UI)
+            sharedTasks = sharedTasks.filter(t => t.id !== taskId);
+            renderInbox();
+
+            try {
+                // Обновляем статус в Supabase
+                await supabaseClient.from('shared_tasks').update({ status: targetQuad }).eq('id', taskId);
+                showToast('SYSTEM', 'Задача принята и распределена', 'success');
+                syncFromCloud(); // Перезапрашиваем стейт, чтобы задача появилась в матрице
+            } catch (err) {
+                showToast('ERROR', 'Ошибка принятия задачи', 'error');
+            }
         }
 
         // BOOT SEQUENCE (Запускается мгновенно!)
