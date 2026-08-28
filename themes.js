@@ -1,7 +1,7 @@
 const SYSTEM_THEMES = {
     cyber: {
         id: 'cyber',
-        name: 'Cyber-Industrial',
+        name: 'Cyber',
         fontPrimary: "'JetBrains Mono', monospace",
         desc: { en: "Default developer pro aesthetics.", ru: "Базовый стиль для разработчиков." },
         icon: "💻",
@@ -15,7 +15,7 @@ const SYSTEM_THEMES = {
     },
     royal: {
         id: 'royal',
-        name: 'Royal Fantasy',
+        name: 'Royal',
         fontPrimary: "'Georgia', serif",
         desc: { en: "Medieval parchment, wax seals, and epic quests.", ru: "Средневековые пергаменты, сургучные печати и эпичные квесты." },
         icon: "👑",
@@ -29,7 +29,7 @@ const SYSTEM_THEMES = {
     },
     brutal: {
         id: 'brutal',
-        name: 'Neo-Brutalism',
+        name: 'NeoBrutal',
         fontPrimary: "'Inter', sans-serif",
         desc: { en: "High contrast, sharp edges, pure aggressive action.", ru: "Высокий контраст, острые углы, агрессивное действие." },
         icon: "💥",
@@ -53,7 +53,7 @@ const SYSTEM_THEMES = {
     },
     executive: {
         id: 'executive',
-        name: 'Executive Glass',
+        name: 'Glass',
         fontPrimary: "'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
         desc: { en: "Aurora gradients, frosted glass panels, and absolute minimalism.", ru: "Мягкие цветовые ауры, матовое стекло и абсолютный минимализм." },
         icon: "🧊",
@@ -87,7 +87,7 @@ const SYSTEM_THEMES = {
     },
     botanical: {
         id: 'botanical',
-        name: 'Botanical Garden',
+        name: 'Botanical',
         fontPrimary: "'Georgia', serif",
         desc: { en: "Earthy tones, soft greens, and natural tranquility.", ru: "Природные оттенки, мягкая зелень и абсолютное спокойствие." },
         icon: "🌿",
@@ -107,7 +107,7 @@ const SYSTEM_THEMES = {
     },
     neon: {
         id: 'neon',
-        name: 'Neon Pop-Art',
+        name: 'NeonPop',
         fontPrimary: "'Arial Black', 'Inter', sans-serif",
         desc: { en: "Acid colors, heavy shadows, and pure dopamine.", ru: "Кислотные цвета, жесткие тени и чистый дофамин." },
         icon: "🍭",
@@ -131,7 +131,7 @@ const SYSTEM_THEMES = {
     },
     paper: {
         id: 'paper',
-        name: 'E-Ink Paper',
+        name: 'E-Ink',
         fontPrimary: "'Courier New', Courier, monospace",
         desc: { en: "Pure monochrome focus. High contrast, paper-like texture.", ru: "Чистый монохромный фокус. Высокий контраст, текстура бумаги." },
         icon: "📰",
@@ -152,7 +152,7 @@ const SYSTEM_THEMES = {
     },
     terminal: {
         id: 'terminal',
-        name: 'Terminal CRT',
+        name: 'Terminal',
         fontPrimary: "'JetBrains Mono', 'Courier New', monospace",
         desc: { en: "Retro green phosphor CRT monitor aesthetics.", ru: "Эстетика ретро-терминала: зеленый фосфор, моношрифт и чистый хакинг." },
         icon: "📟",
@@ -182,7 +182,7 @@ const SYSTEM_THEMES = {
     },
     sakura: {
         id: 'sakura',
-        name: 'Sakura Blossom',
+        name: 'Sakura',
         fontPrimary: "'Nunito', 'Segoe UI', sans-serif",
         desc: { en: "Soft pastel pinks, delicate aesthetics and pure harmony.", ru: "Нежные пастельные тона, матовое стекло и эстетика гармонии." },
         icon: "🌸",
@@ -228,7 +228,7 @@ const SYSTEM_THEMES = {
     },
     industrial: {
         id: 'industrial',
-        name: 'Heavy Industry',
+        name: 'Industry',
         fontPrimary: "'Impact', 'Arial Black', sans-serif",
         desc: { en: "Concrete, frosted glass, and heavy machinery.", ru: "Индустриальный блюр, бетон и тяжелое машиностроение." },
         icon: "🏭",
@@ -284,51 +284,69 @@ const SYSTEM_THEMES = {
             ru: { "dash_subtitle_main": "ГЛАВНЫЙ ЦЕХ", "macro_title": "ПРОИЗВОДСТВО", "quad_1": "АВАРИЯ 🔥 [Q1]", "quad_2": "ФУНДАМЕНТ 🏗️ [Q2]", "quad_3": "КОНВЕЙЕР ⚙️ [Q3]", "quad_4": "В УТИЛЬ 🗑️ [Q4]", "empty_tasks": "СТАНКИ ПРОСТАИВАЮТ.", "lbl_macro": "ЦЕХ", "btn_init_macro": "ЗАПУСТИТЬ ЛИНИЮ", "archived": "ОТГРУЖЕНО" }
         }
     },
-    kawaii: {
-        id: 'kawaii',
-        name: 'Kawaii Bubblegum',
+    heaven: {
+        id: 'heaven',
+        name: 'Heavenly',
         fontPrimary: "'Nunito', 'Segoe UI', sans-serif",
-        desc: { en: "Fluffy, pink, and absolutely adorable.", ru: "Зефирно, розово и абсолютно очаровательно." },
-        icon: "🎀",
+        desc: { en: "Soft clouds, endless sky, and absolute serenity.", ru: "Мягкие облака, бескрайнее небо и абсолютное спокойствие." },
+        icon: "☁️",
         isPro: true,
         cssVars: {
-            "--color-brand-light": "#F472B6", "--color-brand-dark": "#EC4899",
-            "--color-base-light": "#FDF2F8", "--color-base-dark": "#4A1D38",
-            "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#5D2446",
-            "--color-border-light": "#FBCFE8", "--color-border-dark": "#831843"
+            /* Небесно-голубые и воздушные оттенки */
+            "--color-brand-light": "#38BDF8", "--color-brand-dark": "#0EA5E9",
+            "--color-base-light": "#F0F9FF", "--color-base-dark": "#082F49",
+            "--color-panel-light": "rgba(255, 255, 255, 0.75)", "--color-panel-dark": "rgba(12, 74, 110, 0.65)",
+            "--color-border-light": "#E0F2FE", "--color-border-dark": "#0369A1"
         },
         customCss: `
-            body { background: radial-gradient(circle at top right, #FDF2F8, #FCE7F3, #FBCFE8) !important; background-attachment: fixed !important; }
-            .dark body { background: radial-gradient(circle at top right, #4A1D38, #3A142A, #2A0E1D) !important; background-attachment: fixed !important; }
+            /* Градиенты ясного неба и глубокой ночи */
+            body { 
+                background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #BAE6FD 100%) !important; 
+                background-attachment: fixed !important; 
+            }
+            .dark body { 
+                background: linear-gradient(135deg, #082F49 0%, #0C4A6E 50%, #075985 100%) !important; 
+                background-attachment: fixed !important; 
+            }
             
-            /* Максимально круглые, пухлые элементы */
-            .rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: 32px !important; }
-            .border, .border-2 { border-width: 3px !important; border-color: var(--color-border-light) !important; }
+            /* Воздушные, обтекаемые формы панелей с эффектом стекла */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+            }
+
+            .rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: 24px !important; }
+            .border, .border-2 { border-width: 2px !important; border-color: var(--color-border-light) !important; }
             .dark .border, .dark .border-2 { border-color: var(--color-border-dark) !important; }
             
-            /* Мягкие, цветные тени */
-            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: 0 12px 30px rgba(244, 114, 182, 0.25) !important; }
-            .dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4) !important; }
+            /* Очень мягкие, рассеянные тени для эффекта парения */
+            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: 0 20px 50px rgba(56, 189, 248, 0.15) !important; }
+            .dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important; }
             
-            .btn-press { border-radius: 9999px !important; font-weight: 900 !important; } 
+            .btn-press { border-radius: 9999px !important; font-weight: 800 !important; } 
             
-            /* Пухлые инпуты */
+            /* Полупрозрачные инпуты-облачка */
             input[type="text"], input[type="time"], select { 
-                border-radius: 24px !important; 
+                border-radius: 20px !important; 
                 padding: 0.8rem 1.5rem !important; 
-                background: rgba(255,255,255,0.6) !important; 
+                background: rgba(255,255,255,0.7) !important; 
+                box-shadow: inset 0 2px 10px rgba(56, 189, 248, 0.05) !important;
             }
-            .dark input[type="text"], .dark input[type="time"], .dark select { background: rgba(0,0,0,0.2) !important; }
-            h1, h2, h3 { font-weight: 900 !important; letter-spacing: -0.02em !important; }
+            .dark input[type="text"], .dark input[type="time"], .dark select { 
+                background: rgba(0,0,0,0.2) !important; 
+                box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+            }
+            
+            h1, h2, h3 { font-weight: 800 !important; letter-spacing: -0.01em !important; }
         `,
         locales: {
-            en: { "dash_subtitle_main": "MAGIC DASHBOARD 💖", "macro_title": "DREAMS", "quad_1": "DO IT NOW! 🚨 [Q1]", "quad_2": "CUTE IDEAS 🌸 [Q2]", "quad_3": "BORING STUFF 🥱 [Q3]", "quad_4": "IGNORE 🗑️ [Q4]", "empty_tasks": "You are amazing! ✨", "lbl_macro": "Dream", "btn_init_macro": "Make a Wish", "archived": "Sweet Memories" },
-            ru: { "dash_subtitle_main": "ВОЛШЕБНАЯ ПАНЕЛЬ 💖", "macro_title": "МЕЧТЫ И ЦЕЛИ", "quad_1": "ОЧЕНЬ ВАЖНО 🚨 [Q1]", "quad_2": "ВДОХНОВЕНИЕ 🌸 [Q2]", "quad_3": "СКУЧНАЯ РУТИНА 🥱 [Q3]", "quad_4": "В МУСОРКУ 🗑️ [Q4]", "empty_tasks": "Ты просто супер! ✨", "lbl_macro": "Мечта", "btn_init_macro": "Загадать желание", "archived": "Сладкие воспоминания" }
+            en: { "dash_subtitle_main": "FLIGHT CONTROL ☁️", "macro_title": "CONSTELLATIONS", "quad_1": "STORM WARNING ⛈️ [Q1]", "quad_2": "CLEAR SKY 🌤️ [Q2]", "quad_3": "TURBULENCE 💨 [Q3]", "quad_4": "DROP OVERBOARD 🪂 [Q4]", "empty_tasks": "The sky is clear! 🕊️", "lbl_macro": "Star", "btn_init_macro": "Launch", "archived": "Landed" },
+            ru: { "dash_subtitle_main": "ЦЕНТР ПОЛЕТОВ ☁️", "macro_title": "СОЗВЕЗДИЯ ЦЕЛЕЙ", "quad_1": "ШТОРМОВОЕ ПРЕДУПРЕЖДЕНИЕ ⛈️ [Q1]", "quad_2": "ЧИСТОЕ НЕБО 🌤️ [Q2]", "quad_3": "ТУРБУЛЕНТНОСТЬ 💨 [Q3]", "quad_4": "СБРОСИТЬ ЗА БОРТ 🪂 [Q4]", "empty_tasks": "Небо абсолютно чистое! 🕊️", "lbl_macro": "Звезда", "btn_init_macro": "Запуск", "archived": "Приземлились" }
         }
     },
     library: {
         id: 'library',
-        name: 'Grand Library',
+        name: 'Library',
         fontPrimary: "'Merriweather', 'Times New Roman', serif",
         desc: { en: "Warm wood, dusty pages, and academic focus.", ru: "Академический фокус. Теплое дерево, старая бумага и классика." },
         icon: "📚",

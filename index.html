@@ -1675,6 +1675,23 @@
                         } else if (data) {
                             const idx = sharedTasks.findIndex(t => t.id === tempId);
                             if (idx > -1) sharedTasks[idx] = data; // Подменяем временный ID на настоящий
+
+                            // ---> ДОБАВЛЯЕМ ОТПРАВКУ ПУШ-УВЕДОМЛЕНИЯ ЗДЕСЬ <---
+                            if (finalAssignee !== username) {
+                                fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                        action: 'notify_delegation', 
+                                        assignee: finalAssignee,
+                                        creator: username,
+                                        taskTitle: input.value,
+                                        scope: sphereVal
+                                    })
+                                }).catch(err => console.error('Push notification failed:', err));
+                            }
+                            // --------------------------------------------------
+                            
                         }
                     });
 
@@ -1901,6 +1918,25 @@
                     task.status = newStatus; task.completed_at = completedTime;
                     renderTasks(); 
                     await supabaseClient.from('shared_tasks').update({ status: newStatus, completed_at: completedTime }).eq('id', id);
+
+                    // ---> ДОБАВЛЯЕМ УВЕДОМЛЕНИЕ О ЗАВЕРШЕНИИ <---
+                    if (newStatus === 'completed') {
+                        const targetUser = task.creator_username === username ? task.assignee_username : task.creator_username;
+                        if (targetUser && targetUser !== username) {
+                            fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                    action: 'notify_completion', 
+                                    target: targetUser,
+                                    actor: username,
+                                    taskTitle: task.title
+                                })
+                            }).catch(()=>{});
+                        }
+                    }
+                    // ---------------------------------------------
+                    
                 } catch(e) { showToast('ERROR', 'Сбой сети', 'error'); }
                 return;
             }
@@ -1999,6 +2035,24 @@
                     const tObj = sharedTasks.find(t => t.id === id);
                     if (!tObj.shared_comments) tObj.shared_comments = [];
                     tObj.shared_comments.push(data);
+
+                    // ---> ДОБАВЛЯЕМ УВЕДОМЛЕНИЕ О КОММЕНТАРИИ <---
+                    const targetUser = tObj.creator_username === username ? tObj.assignee_username : tObj.creator_username;
+                    if (targetUser && targetUser !== username) {
+                        fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                action: 'notify_comment', 
+                                target: targetUser,
+                                actor: username,
+                                taskTitle: tObj.title,
+                                commentText: text
+                            })
+                        }).catch(()=>{});
+                    }
+                    // ---------------------------------------------
+
                     input.value = ''; renderTasks();
                     setTimeout(() => toggleComments(id), 50);
                 } catch(e) { showToast('ERROR', 'Ошибка отправки', 'error'); }

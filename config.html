@@ -137,13 +137,17 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- БЛОК 1: ВЕРХНЯЯ СЕКЦИЯ (Логи и Бэкап слева, Параметры и Сферы справа) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             
+            <!-- ЛЕВАЯ КОЛОНКА (Узкая) -->
             <div class="space-y-6 lg:col-span-1">
+                <!-- ПРО БАННЕР -->
                 <div id="proBanner" class="bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-zinc-100 dark:to-white p-6 rounded-md shadow-sm border border-zinc-700 dark:border-zinc-200 relative overflow-hidden font-mono-tech hover-magnet transition-all">
                 </div>
 
-                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech mt-6">
+                <!-- ЛОГИ -->
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech">
                     <div class="flex items-center gap-2 mb-4 border-b border-borderline-light dark:border-borderline-dark pb-4">
                         <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">📡</div>
                         <h2 data-i18n="cfg_activity" class="text-lg font-bold uppercase tracking-widest">Sys.Logs // Activity</h2>
@@ -153,6 +157,7 @@
                     </div>
                 </div>
 
+                <!-- ПОРТАТИВНОСТЬ (Бэкапы) -->
                 <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech">
                     <div class="flex items-center gap-2 mb-4 border-b border-borderline-light dark:border-borderline-dark pb-4">
                         <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">💾</div>
@@ -162,44 +167,20 @@
                     
                     <div class="space-y-3">
                         <button onclick="exportData('full')" data-i18n="port_export_full" class="btn-press w-full bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark hover:border-brand-light dark:hover:border-brand-dark text-zinc-900 dark:text-zinc-100 font-bold py-3 rounded text-[10px] uppercase tracking-widest transition-colors shadow-sm">Export Full Backup</button>
-                        
                         <button onclick="exportData('workspace')" data-i18n="port_export_work" class="btn-press w-full bg-brand-light/10 dark:bg-brand-dark/10 border border-brand-light/30 dark:border-brand-dark/30 text-brand-light dark:text-brand-dark hover:bg-brand-light hover:text-white dark:hover:bg-brand-dark dark:hover:text-black font-bold py-3 rounded text-[10px] uppercase tracking-widest transition-colors shadow-sm">Export Workspace</button>
-                        
                         <div class="relative w-full mt-4 border-t border-borderline-light dark:border-borderline-dark pt-4">
                             <input type="file" id="importFile" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="importData(event)">
                             <button data-i18n="port_import" class="btn-press w-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Import (.json)</button>
                         </div>
                     </div>
                 </div>
-
-                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm">
-                    <div class="flex items-center gap-2 mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
-                        <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs font-mono-tech">#</div>
-                        <h2 data-i18n="cfg_scopes" class="text-lg font-bold uppercase tracking-widest font-mono-tech">Scopes</h2>
-                    </div>
-                    
-                    <div class="flex gap-2 mb-6">
-                        <input type="text" id="newScopeInput" data-i18n-ph="scope_ph" onkeypress="if(event.key==='Enter') addScope()" class="flex-1 min-w-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-light dark:focus:border-brand-dark transition-colors placeholder-zinc-400 dark:placeholder-zinc-600 font-mono-tech" placeholder="New Scope Name...">
-                        <button onclick="addScope()" data-i18n="btn_add" class="shrink-0 btn-press bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black px-4 rounded font-bold text-xs uppercase transition-colors font-mono-tech">ADD</button>
-                    </div>
-                    <div id="scopesList" class="space-y-2 max-h-[300px] overflow-y-auto pr-2 font-mono-tech"></div>
-                </div>
-
-                <div class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md p-6 shadow-sm font-mono-tech">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-6 h-6 shrink-0 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-500 flex items-center justify-center rounded font-bold text-xs">!</div>
-                        <h2 data-i18n="cfg_reset" class="text-lg font-bold text-red-600 dark:text-red-500 uppercase tracking-widest">Factory Reset</h2>
-                    </div>
-                    <p data-i18n="reset_desc" class="text-xs text-red-800 dark:text-red-400 mb-6 leading-relaxed">Внимание: Это удалит все задачи...</p>
-                    <button onclick="askFactoryReset()" data-i18n="btn_reset" class="btn-press w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Начать новую жизнь</button>
-                </div>
-
             </div>
 
-            <div class="space-y-6 lg:col-span-2">
+            <!-- ПРАВАЯ КОЛОНКА (Широкая) -->
+            <div class="flex flex-col gap-6 lg:col-span-2">
                 
-                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden transition-colors">
-    
+                <!-- ПАРАМЕТРЫ ЯДРА -->
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden transition-colors shrink-0">
                     <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
                         <div class="flex items-center gap-3">
                             <div class="w-3 h-3 bg-brand-light dark:bg-brand-dark rounded-sm animate-pulse shadow-[0_0_10px_var(--color-brand-dark)]"></div>
@@ -209,7 +190,6 @@
                     </div>
 
                     <div class="divide-y divide-borderline-light dark:divide-borderline-dark">
-                        
                         <div class="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-1.5">
@@ -271,90 +251,56 @@
                     </div>
                 </div>
 
-                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm">
-                    <div class="flex items-center justify-between mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
-                        <div class="flex items-center gap-2 font-mono-tech">
-                            <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">🎨</div>
-                            <h2 data-i18n="cfg_themes" class="text-lg font-bold uppercase tracking-widest">Theme Marketplace</h2>
-                        </div>
-                        <span data-i18n="ui_config" class="text-[10px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-1 rounded font-mono-tech">UI CONFIG</span>
+                <!-- СФЕРЫ (Идеальный скролл без наложения) -->
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm flex flex-col flex-1 min-h-[350px]">
+                    <div class="flex items-center gap-2 mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4 shrink-0">
+                        <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs font-mono-tech">#</div>
+                        <h2 data-i18n="cfg_scopes" class="text-lg font-bold uppercase tracking-widest font-mono-tech">Scopes</h2>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="themesGrid"></div>
+                    
+                    <div class="flex gap-2 mb-6 shrink-0">
+                        <input type="text" id="newScopeInput" data-i18n-ph="scope_ph" onkeypress="if(event.key==='Enter') addScope()" class="flex-1 min-w-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-light dark:focus:border-brand-dark transition-colors placeholder-zinc-400 dark:placeholder-zinc-600 font-mono-tech" placeholder="New Scope Name...">
+                        <button onclick="addScope()" data-i18n="btn_add" class="shrink-0 btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black px-5 rounded font-bold text-xs uppercase transition-colors shadow-sm font-mono-tech">ADD</button>
+                    </div>
+                    
+                    <div id="scopesList" class="space-y-2 overflow-y-auto pr-2 font-mono-tech flex-1 min-h-0"></div>
                 </div>
+            </div>
+        </div>
 
-                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden transition-colors">
-    
-                    <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-2 h-6 bg-brand-light dark:bg-brand-dark rounded-full shadow-[0_0_10px_var(--color-brand-dark)]"></div>
-                            <h2 data-i18n="cfg_cursors" class="text-sm font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">Interface Cursors</h2>
-                        </div>
-                        <div class="text-[8px] font-bold text-zinc-500 uppercase tracking-widest px-2 py-1 bg-white dark:bg-black rounded border border-zinc-200 dark:border-zinc-800">HAPTIC_ENGINE_v3</div>
-                    </div>
-                
-                    <div class="p-6 border-b border-borderline-light dark:border-borderline-dark">
-                        <div data-i18n="cfg_cursor_scroll" class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Presets (scroll to explore)</div>
-
-                        <div id="cursorScrollContainer" class="flex gap-4 overflow-x-auto py-4 px-2 scrollbar-hide snap-x cursor-grab active:cursor-grabbing select-none" style="scroll-behavior: smooth;">
-
-                            <div onclick="setCursor('default', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet active" id="cursor-default">
-                                <div class="text-3xl mb-2">👆</div>
-                                <div data-i18n="cursor_def" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">System</div>
-                            </div>
-                        
-                            <div onclick="setCursor('cursor-tech', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-tech">
-                                <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✛</div>
-                                <div data-i18n="cursor_tech" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Tech</div>
-                            </div>
-                        
-                            <div onclick="setCursor('cursor-royal', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-royal">
-                                <div class="text-3xl mb-2">🖋</div>
-                                <div data-i18n="cursor_roy" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Royal</div>
-                            </div>
-                        
-                            <div onclick="setCursor('cursor-sword', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-sword">
-                                <div class="text-3xl mb-2">🗡️</div>
-                                <div class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Warrior</div>
-                            </div>
-                        
-                            <div onclick="setCursor('cursor-wand', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-wand">
-                                <div class="text-3xl mb-2">🪄</div>
-                                <div class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Wizard</div>
-                            </div>
-
-                        </div>
-                    </div>
-                
-                    <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
-                        <div class="flex-1">
-                            <h3 data-i18n="cursor_custom" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest mb-1">Personal Identifier</h3>
-                            <p class="text-[10px] text-zinc-500 uppercase">Input any emoji to generate a haptic cursor.</p>
-                        </div>
-                        <div class="w-full md:w-36 shrink-0 flex justify-end">
-                            <div class="cursor-box border-2 border-dashed border-brand-light/30 dark:border-brand-dark/30 bg-brand-light/5 dark:bg-brand-dark/5 p-2 rounded-lg transition-all" id="cursor-custom">
-                                <input type="text" id="customEmojiInput" maxlength="2" 
-                                    oninput="setCustomEmojiCursor(this.value)" 
-                                    class="w-14 h-14 bg-panel-light dark:bg-panel-dark border-2 border-brand-light dark:border-brand-dark rounded-lg text-center text-2xl focus:outline-none focus:ring-4 focus:ring-brand-light/20 transition-all shadow-lg placeholder-zinc-400 dark:placeholder-zinc-600" 
-                                    placeholder="?">
-                            </div>
-                        </div>
-                    </div>
+        <!-- БЛОК 2: ВИТРИНА ТЕМ (На всю ширину экрана) -->
+        <div class="mb-6 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
+                <div class="flex items-center gap-2 font-mono-tech">
+                    <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">🎨</div>
+                    <h2 data-i18n="cfg_themes" class="text-lg font-bold uppercase tracking-widest">Theme Marketplace</h2>
                 </div>
+                <span data-i18n="ui_config" class="text-[10px] font-bold bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark px-2 py-1 rounded font-mono-tech">UI CONFIG</span>
+            </div>
+            
+            <!-- Сетка изменена на lg:grid-cols-4 чтобы равномерно заполнить ширину -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="themesGrid"></div>
+        </div>
 
-                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden mb-6">
+        <!-- БЛОК 3: НИЖНЯЯ СЕКЦИЯ (CRON, Курсоры, Поддержка, Сброс) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- CRON LITE (Слева) -->
+            <div class="lg:col-span-1 h-full">
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden h-full flex flex-col transition-colors">
                     <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-6 bg-yellow-400 dark:bg-yellow-500 rounded-full shadow-[0_0_10px_var(--color-yellow-500)]"></div>
                             <h2 data-i18n="cfg_lite_title" class="text-sm font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">CRON: LITE Auto-Clear</h2>
                         </div>
                     </div>
-                    <div class="p-6 flex flex-col md:flex-row gap-6">
-                        <div class="flex-1">
+                    <!-- Блоки теперь идут друг под другом (flex-col), так как места по ширине стало меньше -->
+                    <div class="p-6 flex flex-col gap-5 flex-1 justify-center">
+                        <div>
                             <label data-i18n="cfg_lite_time" class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Trigger Time</label>
                             <input type="time" id="liteCronTime" onchange="saveLiteConfig()" class="w-full bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded-lg p-3 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all">
                         </div>
-                        <div class="flex-1">
+                        <div>
                             <label data-i18n="cfg_lite_action" class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Uncompleted Action</label>
                             <select id="liteCronAction" onchange="saveLiteConfig()" class="w-full bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded-lg p-3 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all">
                                 <option value="delete" data-i18n="cfg_lite_act_del">Delete Permanently</option>
@@ -365,29 +311,97 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech">
+            <!-- КАСТОМНЫЕ КУРСОРЫ (Справа) -->
+            <div class="lg:col-span-2">
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-xl shadow-lg font-mono-tech overflow-hidden transition-colors h-full flex flex-col">
+                    <div class="bg-base-light/50 dark:bg-base-dark/50 border-b border-borderline-light dark:border-borderline-dark p-5 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-6 bg-brand-light dark:bg-brand-dark rounded-full shadow-[0_0_10px_var(--color-brand-dark)]"></div>
+                            <h2 data-i18n="cfg_cursors" class="text-sm font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-100">Interface Cursors</h2>
+                        </div>
+                        <div class="text-[8px] font-bold text-zinc-500 uppercase tracking-widest px-2 py-1 bg-white dark:bg-black rounded border border-zinc-200 dark:border-zinc-800">HAPTIC_ENGINE_v3</div>
+                    </div>
+                
+                    <div class="p-6 border-b border-borderline-light dark:border-borderline-dark flex-1">
+                        <div data-i18n="cfg_cursor_scroll" class="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Presets (scroll to explore)</div>
+                        <div id="cursorScrollContainer" class="flex gap-4 overflow-x-auto py-4 px-2 scrollbar-hide snap-x cursor-grab active:cursor-grabbing select-none" style="scroll-behavior: smooth;">
+                            <div onclick="setCursor('default', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet active" id="cursor-default">
+                                <div class="text-3xl mb-2">👆</div>
+                                <div data-i18n="cursor_def" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">System</div>
+                            </div>
+                            <div onclick="setCursor('cursor-tech', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-tech">
+                                <div class="text-3xl mb-2 text-brand-light dark:text-brand-dark">✛</div>
+                                <div data-i18n="cursor_tech" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Tech</div>
+                            </div>
+                            <div onclick="setCursor('cursor-royal', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-royal">
+                                <div class="text-3xl mb-2">🖋</div>
+                                <div data-i18n="cursor_roy" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Royal</div>
+                            </div>
+                            <div onclick="setCursor('cursor-sword', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-sword">
+                                <div class="text-3xl mb-2">🗡️</div>
+                                <div class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Warrior</div>
+                            </div>
+                            <div onclick="setCursor('cursor-wand', this)" class="cursor-box snap-center shrink-0 w-36 border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-6 rounded-lg text-center cursor-pointer transition-all hover-magnet" id="cursor-wand">
+                                <div class="text-3xl mb-2">🪄</div>
+                                <div class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Wizard</div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-base-light/30 dark:hover:bg-base-dark/30 transition-colors group">
+                        <div class="flex-1">
+                            <h3 data-i18n="cursor_custom" class="font-bold text-xs text-zinc-900 dark:text-zinc-100 uppercase tracking-widest mb-1">Personal Identifier</h3>
+                            <p class="text-[10px] text-zinc-500 uppercase">Input any emoji to generate a haptic cursor.</p>
+                        </div>
+                        <div class="w-full md:w-36 shrink-0 flex justify-end">
+                            <div class="cursor-box border-2 border-dashed border-brand-light/30 dark:border-brand-dark/30 bg-brand-light/5 dark:bg-brand-dark/5 p-2 rounded-lg transition-all" id="cursor-custom">
+                                <input type="text" id="customEmojiInput" maxlength="2" oninput="setCustomEmojiCursor(this.value)" class="w-14 h-14 bg-panel-light dark:bg-panel-dark border-2 border-brand-light dark:border-brand-dark rounded-lg text-center text-2xl focus:outline-none focus:ring-4 focus:ring-brand-light/20 transition-all shadow-lg placeholder-zinc-400 dark:placeholder-zinc-600" placeholder="?">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ПОДДЕРЖКА (Слева) -->
+            <div class="lg:col-span-2">
+                <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md p-6 shadow-sm font-mono-tech h-full flex flex-col">
                     <div class="flex items-center justify-between mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4">
                         <div class="flex items-center gap-2">
                             <div class="w-6 h-6 shrink-0 bg-brand-light/10 dark:bg-brand-dark/10 text-brand-light dark:text-brand-dark flex items-center justify-center rounded font-bold text-xs">☕</div>
                             <h2 data-i18n="cfg_fund" class="text-lg font-bold uppercase tracking-widest">SYS.FUNDING // Support</h2>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
                         <div class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-5 rounded-md flex flex-col justify-between hover-magnet transition-all">
                             <div>
                                 <h3 data-i18n="fund_direct" class="font-bold text-sm mb-2">Direct Funding</h3>
-                                <p data-i18n="fund_desc" class="text-[11px] text-zinc-500 mb-4 leading-relaxed">Support the continuous development...</p>
+                                <p data-i18n="fund_desc" class="text-[11px] text-zinc-500 mb-2 leading-relaxed">Support the continuous development...</p>
+                                <!-- СТРОКА С ТЕЛЕГРАМОМ -->
+                                <p class="text-[10px] text-brand-light dark:text-brand-dark font-bold mb-4 uppercase tracking-widest leading-relaxed">Для покупки PRO лицензии пишите в телеграм <a href="https://t.me/Chikulev" target="_blank" class="underline">@Chikulev</a></p>
                             </div>
                             <button onclick="openDonateModal()" data-i18n="btn_crypto" class="w-full mt-auto btn-press bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-bold py-2.5 rounded text-[10px] uppercase tracking-widest transition-all">Crypto / Card</button>
                         </div>
                         
                         <div class="border border-borderline-light dark:border-borderline-dark bg-base-light dark:bg-base-dark p-5 rounded-md flex flex-col justify-between hover-magnet transition-all" id="referralContainer">
-                            </div>
+                        </div>
                     </div>
                 </div>
-
             </div>
+
+            <!-- СБРОС СИСТЕМЫ (Справа, Финал) -->
+            <div class="lg:col-span-1">
+                <div class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-md p-6 shadow-sm font-mono-tech h-full flex flex-col justify-center">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 shrink-0 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-500 flex items-center justify-center rounded font-bold text-xs">!</div>
+                        <h2 data-i18n="cfg_reset" class="text-lg font-bold text-red-600 dark:text-red-500 uppercase tracking-widest">Factory Reset</h2>
+                    </div>
+                    <p data-i18n="reset_desc" class="text-xs text-red-800 dark:text-red-400 mb-6 leading-relaxed flex-1">Внимание: Это удалит все задачи...</p>
+                    <button onclick="askFactoryReset()" data-i18n="btn_reset" class="btn-press w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded text-xs uppercase tracking-widest transition-colors shadow-md">Начать новую жизнь</button>
+                </div>
+            </div>
+
         </div>
     </div>
 

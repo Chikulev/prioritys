@@ -84,7 +84,7 @@ const translations = {
         "stat_arima_wait": "COLLECTING TELEMETRY...", 
         "stat_arima_desc": "Not enough data to form a forecast. We are developing and testing this function.",
         
-        "dash_subtitle_main": "System Dashboard v8.2",
+        "dash_subtitle_main": "System Dashboard",
         "task_ph": "Enter task designation...",
         "btn_templates": "Templates",
         "btn_save_template": "+ Save as template",
@@ -286,21 +286,19 @@ const translations = {
         "ach_matrix_neo_desc": "Switched to the Matrix view mode. You see the code now.",
 
         // --- ACADEMY & QUIZ ---
-        "guide_nav_1": "01. SYSTEM",
-        "guide_nav_2": "02. MATRIX",
-        "guide_nav_3": "03. TOOLS",
-        "btn_next": "NEXT",
-        "btn_prev": "BACK",
-        "test_calibrated": "SYSTEM CALIBRATED",
-        "test_passed": "Knowledge verified. Full access granted.",
-        "btn_complete_setup": "Complete Initialization",
-
-        "guide_ch1_title": "PRIORITYS: Focus Management",
-        "guide_ch1_text": "<b>Prioritys.ru</b> is the command center for your attention. We don't just store tasks; we calibrate your focus. The system is built on separating the signal from the noise. <br><br><b>Your goal:</b> is not to close as many tasks as possible, but to guarantee the execution of <b>Important</b> (Golden) goals without getting distracted by fake work.",
-        "guide_ch2_title": "Matrix: Evaluating Tasks",
-        "guide_ch2_text": "At the core lies the Eisenhower Matrix, reimagined for the cyber-era. We evaluate tasks on two axes:<br><br>🔥 <b>Impact:</b> How much will this change your life? <br>⚡ <b>Urgency (SLA):</b> How fast must it be done?<br><br><b>Q1 (Fire):</b> Impact + Urgent. Do it now.<br><b>Q2 (Strategy):</b> Impact + NOT Urgent. Your future capital.<br><b>Q3 (Routine):</b> NO Impact + Urgent. Illusion of work.<br><b>Q4 (Trash):</b> NO Impact + NOT Urgent. Hidden procrastination.",
-        "guide_ch3_title": "Features & Tools",
-        "guide_ch3_text": "• <b>Teleport:</b> System physics allow changing priority with a single click on the card.<br>• <b>AI-Audit (✨):</b> Forms a secure data packet in your <b>clipboard</b>. We store nothing on servers — you feed the data to any AI yourself to get coaching.<br>• <b>Multi-Filter:</b> Allows combining contexts (Scopes) for complex projects.<br>• <b>Shop-Module:</b> Turns the tracker into a financial plan with budgets and currencies.",
+        
+        "guide_nav_1": "01. CORE & MATRIX",
+        "guide_nav_2": "02. ECOSYSTEM",
+        "guide_nav_3": "03. MULTIPLAYER",
+        
+        "guide_ch1_title": "PRIORITYS: Focus & Matrix",
+        "guide_ch1_text": "<b>Prioritys.ru</b> is your attention command center. Your goal: guarantee execution of Important goals without getting distracted by fake work.<br><br>The core is the Eisenhower Matrix, evaluating tasks on two axes:<br>🔥 <b>Impact:</b> How much will this change your life?<br>⚡ <b>Urgency (SLA):</b> How fast must it be done?<br><br><b>Q1 (Critical):</b> Impact + Urgent. Do it now.<br><b>Q2 (Core):</b> Impact + NOT Urgent. Your future capital.<br><b>Q3 (Routine):</b> NO Impact + Urgent. Illusion of work.<br><b>Q4 (Backlog):</b> NO Impact + NOT Urgent. Hidden procrastination.",
+        
+        "guide_ch2_title": "ECOSYSTEM: Tools & Workflow",
+        "guide_ch2_text": "Maximize your operational speed:<br><br>• <b>Task Deploy & Templates:</b> Use the smart top panel to log tasks. Save recurring routines as Templates for instant deployment.<br>• <b>Teleport:</b> Shift task priorities instantly with a single click on the card.<br>• <b>LITE_BUFFER:</b> A RAM module on the dashboard with a Heatmap. Capture fleeting thoughts without cluttering the matrix.<br>• <b>Telegram Quick Capture:</b> Send text to the bot to log ideas on the go. Type <i>/tasks</i> to pull your matrix.<br>• <b>Shopping Module:</b> Toggle 'Buy' in the deploy panel to track budgets and currencies.<br>• <b>AI-Audit (✨):</b> Click the icon to generate a coaching prompt in your clipboard for ChatGPT/Claude.<br>• <b>Dynamic UI:</b> Gamify your workflow with 12+ themes and custom cursors in Config.",
+        
+        "guide_ch3_title": "B2B: Multiplayer & Collab",
+        "guide_ch3_text": "Transform your personal notepad into a team platform:<br><br>• <b>Shared Scopes & Assignees:</b> Generate invite links in Config. When creating a task, assign it directly to teammates using the @ selector.<br>• <b>Inbox (Quarantine):</b> Delegated tasks land in a dedicated dashboard drawer. They won't distract you or enter your workflow until you click 'Accept'.<br>• <b>Built-in Chats:</b> Task logs act as full-fledged comment threads with @usernames, keeping all work context perfectly organized inside the task.",
 
         // 20 QUESTIONS
         "q1_t": "Raking fallen leaves in the yard 'just to make it look nice'.", "q1_a": "Q4 (Trash)",
@@ -453,7 +451,7 @@ const translations = {
         "stat_arima_wait": "СБОР ТЕЛЕМЕТРИИ...", 
         "stat_arima_desc": "Недостаточно данных для прогноза. Мы ведем разработку и тестирование этой функции.",
 
-        "dash_subtitle_main": "Системный Дашборд v8.2",
+        "dash_subtitle_main": "Системный Дашборд",
         "task_ph": "Обозначьте новую задачу...",
         "btn_templates": "Шаблоны",
         "btn_save_template": "+ В шаблон",
@@ -656,23 +654,19 @@ const translations = {
         "ach_matrix_neo_title": "Избранный",
         "ach_matrix_neo_desc": "Переключился в режим отображения Матрицы. Видишь систему насквозь.",
 
-        // --- ACADEMY & QUIZ ---
-        "guide_nav_1": "01. СИСТЕМА",
-        "guide_nav_2": "02. МАТРИЦА",
-        "guide_nav_3": "03. ИНСТРУМЕНТЫ",
-        "btn_next": "ДАЛЕЕ",
-        "btn_prev": "НАЗАД",
-        "test_calibrated": "СИСТЕМА ОТКАЛИБРОВАНА",
-        "test_passed": "Доступ к полному функционалу разрешен.",
-        "btn_complete_setup": "Завершить инициализацию",
+        "guide_nav_1": "01. БАЗА И МАТРИЦА",
+        "guide_nav_2": "02. ИНСТРУМЕНТЫ",
+        "guide_nav_3": "03. МУЛЬТИПЛЕЕР",
             
-        "guide_ch1_title": "PRIORITYS: Управление фокусом",
-        "guide_ch1_text": "<b>Prioritys.ru</b> — это командный центр вашего внимания. Мы не просто храним список дел, мы калибруем ваш фокус. Система построена на принципе отделения сигнала от шума. <br><br><b>Ваша цель:</b> не закрыть как можно больше задач, а гарантировать выполнение <b>Важных</b> (Золотых) целей, не отвлекаясь на имитацию бурной деятельности.",
-        "guide_ch2_title": "Матрица: Как оценивать задачи",
-        "guide_ch2_text": "В основе лежит Матрица Эйзенхауэра, переосмысленная для кибер-эпохи. Мы оцениваем задачи по двум осям:<br><br>🔥 <b>Значимость (Impact):</b> Насколько это изменит вашу жизнь? <br>⚡ <b>Спешность (SLA):</b> Как быстро это нужно сделать?<br><br><b>Q1 (Пожар):</b> Значимо + Спешно. Делать сейчас.<br><b>Q2 (Стратегия):</b> Значимо + НЕ Спешно. Ваш капитал будущего.<br><b>Q3 (Суета):</b> НЕ Значимо + Спешно. Иллюзия работы.<br><b>Q4 (Мусор):</b> НЕ Значимо + НЕ Спешно. Скрытая прокрастинация.",
-        "guide_ch3_title": "Функционал и Инструменты",
-        "guide_ch3_text": "• <b>Teleport:</b> Физика системы позволяет менять приоритет кликом по карточке.<br>• <b>AI-Audit (✨):</b> Формирует защищенный пакет данных в ваш <b>буфер обмена</b>. Мы ничего не храним на сервере — вы сами скармливаете данные любому ИИ для получения коучинга.<br>• <b>Multi-Filter:</b> Позволяет объединять контексты (Сферы) для работы над сложными проектами.<br>• <b>Shop-Module:</b> Превращает трекер в финансовый план с учетом валют и бюджета.",
-            
+        "guide_ch1_title": "PRIORITYS: Фокус и Матрица",
+        "guide_ch1_text": "<b>Prioritys.ru</b> — это командный центр вашего внимания. Ваша цель: гарантировать выполнение Важных целей, не отвлекаясь на шум.<br><br>В основе лежит Матрица Эйзенхауэра. Задачи оцениваются по 2 осям:<br>🔥 <b>Значимость:</b> Насколько это изменит жизнь?<br>⚡ <b>Спешность (SLA):</b> Как быстро это нужно сделать?<br><br><b>Q1 (Критично):</b> Значимо + Спешно. Делать сейчас.<br><b>Q2 (Фундамент):</b> Значимо + НЕ Спешно. Капитал будущего.<br><b>Q3 (Рутина):</b> НЕ Значимо + Спешно. Иллюзия работы.<br><b>Q4 (Бэклог):</b> НЕ Значимо + НЕ Спешно. Скрытая прокрастинация.",
+        
+        "guide_ch2_title": "ЭКОСИСТЕМА: Инструменты",
+        "guide_ch2_text": "Разгоняйте свою эффективность до предела:<br><br>• <b>Деплой и Шаблоны:</b> Создавайте задачи в умной панели сверху. Сохраняйте регулярную рутину в Шаблоны для мгновенного запуска.<br>• <b>Телепорт:</b> Смена приоритета в один клик по иконке на карточке задачи.<br>• <b>LITE_BUFFER:</b> Входящий буфер (оперативная память) с Heatmap-статистикой. Захватывайте мысли, не перегружая основную матрицу.<br>• <b>Telegram Quick Capture:</b> Пишите идеи боту, и они окажутся в LITE-буфере. Команда <i>/tasks</i> выгрузит матрицу прямо в чат.<br>• <b>Модуль покупок:</b> Чекбокс 'Покупка' при создании задачи превращает трекер в финансовый план.<br>• <b>AI-Аудит (✨):</b> Генерирует системный промпт в буфер обмена для коучинга в ChatGPT/Claude.<br>• <b>Динамический UI:</b> 12+ тем и генерация SVG-курсоров из эмодзи в Настройках.",
+        
+        "guide_ch3_title": "B2B: Мультиплеер",
+        "guide_ch3_text": "Трансформируйте персональный блокнот в коллаб-платформу:<br><br>• <b>Общие сферы и Делегирование:</b> Генерируйте инвайт-ссылки в Настройках. При создании или редактировании задачи назначайте исполнителей (@Assignee).<br>• <b>Inbox (Карантин):</b> Чужие делегированные задачи падают в отдельную шторку на дашборде. Ваш фокус в безопасности — они не попадут в работу, пока вы не нажмете «Принять задачу».<br>• <b>Встроенные чаты:</b> Логи задач превращены в систему комментариев с отображением никнеймов. Обсуждайте контекст прямо внутри карточки.",
+        
         // 20 ВОПРОСОВ
         "q1_t": "Уборка опавшей листвы во дворе 'просто чтобы было красиво'.", "q1_a": "Q4 (Мусор)",
         "q2_t": "Запись к стоматологу на плановый осмотр (ничего не болит).", "q2_a": "Q2 (Стратегия)",
