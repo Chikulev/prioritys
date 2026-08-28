@@ -1029,6 +1029,9 @@
                        applyCursor();
                        applyI18n();
 
+                       // Подтягиваем общие SQL-сферы
+                       loadSharedScopes();
+
                        console.log('☁️ Unified state updated from cloud successfully');
                    }
                }
@@ -1479,17 +1482,23 @@
 
         function initDynamicScopes() {
             const radioContainer = document.getElementById('scopeRadioContainer');
-            const renderScopes = [...dynamicScopes, 'SYS_OTHER'];
+            
+            // Склеиваем личные сферы из JSONB и общие сферы из SQL
+            const personalScopes = scopes.filter(s => !sharedScopes.find(ss => ss.name === s));
+            const renderScopes = [...personalScopes, ...sharedScopes.map(s => s.name), 'SYS_OTHER'];
 
             if(renderScopes.length === 0) {
                 radioContainer.innerHTML = '<span class="text-xs text-red-500 font-mono-tech">No scopes defined!</span>';
             } else {
-                radioContainer.innerHTML = renderScopes.map((scope, index) => {
-                    const displayName = scope === 'SYS_OTHER' ? t('scope_other') : scope;
+                radioContainer.innerHTML = renderScopes.map((scopeName, index) => {
+                    const displayName = scopeName === 'SYS_OTHER' ? t('scope_other') : scopeName;
+                    const isShared = sharedScopes.some(s => s.name === scopeName);
+                    const sharedIcon = isShared ? ' <span title="Shared Scope">👥</span>' : '';
+
                     return `
                     <label class="cursor-pointer">
-                        <input type="radio" name="sphere" value="${scope}" class="peer" ${index === 0 ? 'checked' : ''}>
-                        <div class="px-6 py-2 rounded-sm text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase font-mono-tech">${displayName}</div>
+                        <input type="radio" name="sphere" value="${scopeName}" onchange="handleScopeChange('${scopeName}')" class="peer" ${index === 0 ? 'checked' : ''}>
+                        <div class="px-6 py-2 rounded-sm text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase font-mono-tech">${displayName}${sharedIcon}</div>
                     </label>
                     `;
                 }).join('');
@@ -1497,6 +1506,40 @@
             
             checkShopModule();
             renderFilters();
+
+            // Искусственно вызываем обработчик для первой выбранной сферы при загрузке
+            const checkedInput = document.querySelector('input[name="sphere"]:checked');
+            if(checkedInput) handleScopeChange(checkedInput.value);
+        }
+
+        async function handleScopeChange(scopeName) {
+            const assigneeBlock = document.getElementById('assigneeBlock');
+            const assigneeSelect = document.getElementById('taskAssignee');
+            const sharedScope = sharedScopes.find(s => s.name === scopeName);
+
+            if (sharedScope) {
+                // Показываем селектор, если сфера общая
+                assigneeBlock.classList.remove('hidden');
+                assigneeBlock.classList.add('flex');
+                assigneeSelect.innerHTML = '<option value="">Загрузка...</option>';
+
+                // Загружаем участников именно этой сферы
+                const { data: members } = await supabaseClient
+                    .from('scope_members')
+                    .select('username')
+                    .eq('scope_id', sharedScope.id);
+
+                if (members) {
+                    assigneeSelect.innerHTML = members.map(m => 
+                        `<option value="${m.username}">${m.username === localStorage.getItem('priority_user') ? '@me' : m.username}</option>`
+                    ).join('');
+                }
+            } else {
+                // Прячем селектор для личных сфер
+                assigneeBlock.classList.add('hidden');
+                assigneeBlock.classList.remove('flex');
+                assigneeSelect.innerHTML = '<option value="me">@me</option>';
+            }
         }
 
         function editTask(id) {
@@ -1558,67 +1601,108 @@
             escalatedLiteTaskId = null; // Сброс при отмене
         }
 
-        function deployOrUpdateTask() {
+        async function deployOrUpdateTask() {
             const input = document.getElementById('taskInput');
-            if(!input.value.trim()) { showToast(t('toast_err'), t('toast_task_err'), 'error'); return; }
+            if(!input.value.trim()) { showToast('ERROR', 'Empty task', 'error'); return; }
 
             const sphereVal = document.querySelector('input[name="sphere"]:checked').value;
             const impVal = document.querySelector('input[name="importance"]:checked').value === 'yes';
             const urgVal = document.querySelector('input[name="urgency"]:checked').value === 'yes';
-            
+
             const macroSel = document.getElementById('newTaskMacro');
             const macroId = macroSel ? macroSel.value : null;
 
-            const isPurchase = shopModuleActive && document.getElementById('isPurchaseCheckbox').checked;
+            const isPurchase = typeof shopModuleActive !== 'undefined' && shopModuleActive && document.getElementById('isPurchaseCheckbox') && document.getElementById('isPurchaseCheckbox').checked;
             let priceVal = null;
             if(isPurchase) {
                 const p = document.getElementById('taskPriceInput').value;
                 if(p.trim() !== '') priceVal = p;
             }
 
+            const sharedScope = sharedScopes.find(s => s.name === sphereVal);
+            const username = localStorage.getItem('priority_user');
+
             if (editTaskId) {
+                // Логика редактирования (пока оставляем как есть для личных задач)
                 const taskObj = tasks.find(x => x.id === editTaskId);
-                taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
-                
-                if(priceVal !== null) taskObj.price = priceVal; else delete taskObj.price;
-                if(macroId) taskObj.macroId = parseInt(macroId); else delete taskObj.macroId;
-
-                cancelEdit();
-                showToast(t('toast_sys'), t('toast_task_upd'), 'info');
-            } else {
-                const newTask = {
-                    id: Date.now(), title: input.value, sphere: sphereVal, isImportant: impVal, isUrgent: urgVal,
-                    completed: false, createdAt: getDateStr(), completedAt: null, comments: []
-                };
-                
-                if(priceVal !== null) newTask.price = priceVal;
-                if(macroId) newTask.macroId = parseInt(macroId);
-                
-                tasks.unshift(newTask);
-
-                pushSysLog('TASK_DEPLOY', `Deployed new task: ${newTask.title}`);
-                
-                input.value = '';
-                if(shopModuleActive) {
-                    document.getElementById('isPurchaseCheckbox').checked = false;
-                    togglePriceInput();
+                if (taskObj) {
+                    taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
+                    if(priceVal !== null) taskObj.price = priceVal; else delete taskObj.price;
+                    if(macroId) taskObj.macroId = parseInt(macroId); else delete taskObj.macroId;
+                    cancelEdit();
+                    showToast('SYS', 'Updated', 'info');
+                    saveData('priority_tasks', tasks);
+                    renderTasks();
+                    renderMacros();
                 }
-                if(macroSel) macroSel.value = '';
-                
-                input.focus();
-                unlockAchievement('first_task');
-                if(priceVal !== null) unlockAchievement('shopaholic');
-            }
-            saveData('priority_tasks', tasks);
-            renderTasks();
-            renderMacros(); 
+            } else {
+                if (sharedScope) {
+                    // БОЕВАЯ ЛОГИКА B2B: Отправка в SQL
+                    const assignee = document.getElementById('taskAssignee').value || username;
+                    const finalAssignee = (assignee === 'me' || assignee === '@me') ? username : assignee;
 
-            // Если задача была создана из LITE-буфера — теперь удаляем её оттуда
-            if (escalatedLiteTaskId && !editTaskId) {
-                liteTasks = liteTasks.filter(x => x.id !== escalatedLiteTaskId);
-                localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
-                escalatedLiteTaskId = null;
-                renderDashLite();
+                    // Умная маршрутизация: себе -> в матрицу, другому -> в INBOX (Карантин)
+                    let targetStatus = 'inbox';
+                    if (finalAssignee === username) {
+                        if (impVal && urgVal) targetStatus = 'q1';
+                        else if (impVal && !urgVal) targetStatus = 'q2';
+                        else if (!impVal && urgVal) targetStatus = 'q3';
+                        else targetStatus = 'q4';
+                    }
+
+                    try {
+                        const { data, error } = await supabaseClient.from('shared_tasks').insert({
+                            scope_id: sharedScope.id,
+                            title: input.value,
+                            creator_username: username,
+                            assignee_username: finalAssignee,
+                            status: targetStatus,
+                            price: priceVal
+                        }).select().single();
+
+                        if (error) throw error;
+
+                        sharedTasks.push(data); // Добавляем локально для мгновенной отрисовки INBOX
+                        showToast('СЕТЬ', `Задача делегирована (${finalAssignee})`, 'success');
+
+                        input.value = '';
+                        if(isPurchase) { document.getElementById('isPurchaseCheckbox').checked = false; togglePriceInput(); }
+                        if(macroSel) macroSel.value = '';
+                        
+                        if (typeof renderInbox === 'function') renderInbox();
+
+                    } catch (err) {
+                        console.error(err);
+                        showToast('ERROR', 'Ошибка сети при создании задачи', 'error');
+                        return;
+                    }
+                } else {
+                    // ЛОГИКА LOCAL-FIRST: Личные задачи в JSONB
+                    const newTask = {
+                        id: Date.now(), title: input.value, sphere: sphereVal, isImportant: impVal, isUrgent: urgVal,
+                        completed: false, createdAt: getDateStr(), completedAt: null, comments: []
+                    };
+
+                    if(priceVal !== null) newTask.price = priceVal;
+                    if(macroId) newTask.macroId = parseInt(macroId);
+
+                    tasks.unshift(newTask);
+                    input.value = '';
+                    if(isPurchase) { document.getElementById('isPurchaseCheckbox').checked = false; togglePriceInput(); }
+                    if(macroSel) macroSel.value = '';
+
+                    saveData('priority_tasks', tasks); // Триггерит отправку в облако
+                    renderTasks();
+                    renderMacros();
+                }
+
+                // Эскалация LITE (Общая для обоих путей)
+                if (typeof escalatedLiteTaskId !== 'undefined' && escalatedLiteTaskId && !editTaskId) {
+                    liteTasks = liteTasks.filter(x => x.id !== escalatedLiteTaskId);
+                    localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+                    escalatedLiteTaskId = null;
+                    if (typeof renderDashLite === 'function') renderDashLite();
+                }
             }
         }
 
@@ -1802,7 +1886,29 @@
 
         // --- TASK CREATION & EDITING ---
 
-        function toggleTask(id) {
+        async function toggleTask(id) {
+            // --- 1. SQL РОУТИНГ (Для общих задач B2B) ---
+            if (typeof id === 'string') { 
+                const task = sharedTasks.find(t => t.id === id);
+                if (!task) return;
+                const newStatus = task.status === 'completed' ? 'q4' : 'completed';
+                const completedTime = newStatus === 'completed' ? new Date().toISOString() : null;
+                try {
+                    // Оптимистичный UI для сети (меняем статус локально до ответа сервера)
+                    task.status = newStatus; 
+                    task.completed_at = completedTime;
+                    
+                    // Обновляем в фоне
+                    await supabaseClient.from('shared_tasks').update({ status: newStatus, completed_at: completedTime }).eq('id', id);
+                    
+                    renderTasks(); // Для общих задач делаем полный рендер, чтобы Матрица обновилась
+                } catch(e) { 
+                    showToast('ERROR', 'Сбой сети при обновлении статуса', 'error'); 
+                }
+                return;
+            }
+            
+            // --- 2. ЛОКАЛЬНЫЙ JSONB (Твой "Умный рендер" за 0 мс) ---
             const task = tasks.find(t => t.id === id);
             
             // Если завершаем задачу
@@ -1822,7 +1928,7 @@
                     // Добавляем тег времени завершения
                     const metaContainer = taskCard.querySelector('.flex-wrap');
                     if(metaContainer) {
-                        metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">${t('done')}: ${task.completedAt}</span>`);
+                        metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">DONE: ${task.completedAt}</span>`);
                     }
                     
                     // Скрываем блок действий
@@ -1855,45 +1961,70 @@
             }
         }
 
-        function deleteTask(id) {
-            const taskIndex = tasks.findIndex(t => t.id === id);
-            if (taskIndex > -1) {
-                // Сохраняем задачу и её позицию перед удалением
-                lastDeletedTask = { ...tasks[taskIndex], originalIndex: taskIndex };
-                tasks.splice(taskIndex, 1);
-                
-                saveData('priority_tasks', tasks);
-                renderTasks();
-                renderMacros();
-
-                // Создаем специальный Toast для отмены
-                const container = document.getElementById('toastContainer');
-                if(!container) return;
-                
-                const toast = document.createElement('div');
-                toast.className = `bg-panel-light dark:bg-panel-dark border border-red-500 p-4 rounded shadow-2xl flex items-center justify-between gap-6 toast-enter pointer-events-auto font-mono-tech z-[999]`;
-                toast.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="text-2xl">🗑️</div>
-                        <div>
-                            <div class="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-1">TASK DELETED</div>
-                            <div class="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate w-32 md:w-48">${lastDeletedTask.title}</div>
-                        </div>
-                    </div>
-                    <button onclick="undoDeleteTask(this)" class="shrink-0 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-500 dark:hover:text-black border border-red-200 dark:border-red-900/50 text-xs font-bold rounded uppercase tracking-widest transition-colors btn-press">UNDO</button>
-                `;
-                container.appendChild(toast);
-                
-                // Очищаем предыдущий таймер, если удалили две задачи подряд
-                clearTimeout(undoTimeout);
-                undoTimeout = setTimeout(() => {
-                    if(toast.parentElement) {
-                        toast.classList.replace('toast-enter', 'toast-leave');
-                        setTimeout(() => toast.remove(), 400);
-                    }
-                    lastDeletedTask = null;
-                }, 5000); // 5 секунд на отмену
+        async function toggleTask(id) {
+            // --- 1. SQL РОУТИНГ (Для общих задач B2B) ---
+            if (typeof id === 'string') { 
+                const task = sharedTasks.find(t => t.id === id);
+                if (!task) return;
+                const newStatus = task.status === 'completed' ? 'q4' : 'completed';
+                const completedTime = newStatus === 'completed' ? new Date().toISOString() : null;
+                try {
+                    // Оптимистичный UI для сети (меняем статус локально до ответа сервера)
+                    task.status = newStatus; 
+                    task.completed_at = completedTime;
+                    
+                    // Обновляем в фоне
+                    await supabaseClient.from('shared_tasks').update({ status: newStatus, completed_at: completedTime }).eq('id', id);
+                    
+                    renderTasks(); // Для общих задач делаем полный рендер, чтобы Матрица обновилась
+                } catch(e) { 
+                    showToast('ERROR', 'Сбой сети при обновлении статуса', 'error'); 
+                }
+                return;
             }
+            
+            // --- 2. ЛОКАЛЬНЫЙ JSONB (Твой "Умный рендер" за 0 мс) ---
+            const task = tasks.find(t => t.id === id);
+            
+            // Если завершаем задачу
+            if(!task.completed) {
+                task.completedAt = getDateTimeStr();
+                task.completed = true;
+                pushSysLog('TASK_DONE', `Completed task: ${task.title}`);
+                
+                // УМНЫЙ РЕНДЕР: Мгновенно переносим карточку в DOM, не трогая другие!
+                const taskCard = document.getElementById(`task-${id}`);
+                const archiveList = document.getElementById('completedTasks');
+                if (taskCard && archiveList) {
+                    // Перечеркиваем заголовок
+                    const titleEl = taskCard.querySelector('.text-base');
+                    if(titleEl) titleEl.classList.add('strike-through', 'text-zinc-500');
+                    
+                    // Добавляем тег времени завершения
+                    const metaContainer = taskCard.querySelector('.flex-wrap');
+                    if(metaContainer) {
+                        metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">DONE: ${task.completedAt}</span>`);
+                    }
+                    
+                    // Скрываем блок действий
+                    const actionsBlock = taskCard.querySelector('.peer-checked\\:max-w-\\[200px\\]');
+                    if(actionsBlock) actionsBlock.remove();
+                    
+                    // Перемещаем элемент
+                    archiveList.prepend(taskCard);
+                } else {
+                    renderTasks(); // Фолбек для вида "Матрица"
+                }
+            } else {
+                pushSysLog('TASK_RESTORE', `Restored task: ${task.title}`);
+                // Если отменяем завершение (возвращаем) — здесь лучше полный рендер,
+                // так как нужно вернуть задачу в правильный квадрант
+                task.completed = false;
+                renderTasks();
+            }
+            
+            saveData('priority_tasks', tasks);
+            renderMacros(); 
         }
 
         // Функция восстановления задачи
@@ -1924,16 +2055,49 @@
             else { box.classList.add('hidden'); openCommentsSet.delete(id); }
         }
 
-        function addComment(id) {
+        // 3. ДОБАВЛЕНИЕ КОММЕНТАРИЯ (ПОЛНОЦЕННЫЙ ЧАТ)
+        async function addComment(id) {
             const input = document.getElementById(`comment-input-${id}`);
-            if(input && input.value.trim() !== '') {
-                tasks.find(tObj => tObj.id === id).comments.push({ text: input.value.trim(), createdAt: getDateTimeStr() });
-                saveData('priority_tasks', tasks);
-                renderTasks();
-                setTimeout(() => document.getElementById(`comment-input-${id}`).focus(), 50);
+            if(!input || input.value.trim() === '') return;
+            const text = input.value.trim();
+            
+            if (typeof id === 'string') { // SQL Роутинг
+                const username = localStorage.getItem('priority_user');
+                try {
+                    const { data } = await supabaseClient.from('shared_comments').insert({
+                        task_id: id, author_username: username, text: text
+                    }).select().single();
+                    
+                    const tObj = sharedTasks.find(t => t.id === id);
+                    if (!tObj.shared_comments) tObj.shared_comments = [];
+                    tObj.shared_comments.push(data);
+                    
+                    input.value = ''; renderTasks();
+                    setTimeout(() => toggleComments(id), 50);
+                } catch(e) { showToast('ERROR', 'Ошибка отправки', 'error'); }
+                return;
             }
+            // Локальный JSONB
+            tasks.find(tObj => tObj.id === id).comments.push({ text: text, createdAt: getDateTimeStr() });
+            saveData('priority_tasks', tasks); renderTasks();
+            setTimeout(() => document.getElementById(`comment-input-${id}`).focus(), 50);
         }
-        function deleteComment(taskId, idx) { tasks.find(tObj => tObj.id === taskId).comments.splice(idx, 1); saveData('priority_tasks', tasks); renderTasks(); }
+
+        // 4. УДАЛЕНИЕ КОММЕНТАРИЯ
+        async function deleteComment(taskId, idx, commentId) {
+            if (typeof taskId === 'string') { // SQL Роутинг
+                try {
+                    await supabaseClient.from('shared_comments').delete().eq('id', commentId);
+                    const tObj = sharedTasks.find(t => t.id === taskId);
+                    tObj.shared_comments = tObj.shared_comments.filter(c => c.id !== commentId);
+                    renderTasks();
+                } catch(e) {}
+                return;
+            }
+            // Локальный JSONB
+            tasks.find(tObj => tObj.id === taskId).comments.splice(idx, 1);
+            saveData('priority_tasks', tasks); renderTasks();
+        }
 
         // --- DRAG & DROP ---
         function drag(ev, id) { draggedTaskId = id; ev.dataTransfer.setData("text", id); setTimeout(() => ev.target.classList.add('dragging'), 0); }
@@ -1964,6 +2128,7 @@
         }
 
         function renderTasks() {
+            const username = localStorage.getItem('priority_user'); // Добавлено для определения текущего пользователя
             const qLists = [document.getElementById('listQ1'), document.getElementById('listQ2'), document.getElementById('listQ3'), document.getElementById('listQ4')];
             const mLists = [document.getElementById('matrixQ1'), document.getElementById('matrixQ2'), document.getElementById('matrixQ3'), document.getElementById('matrixQ4')];
             const comp = document.getElementById('completedTasks');
@@ -1972,7 +2137,10 @@
             const sortedTasks = [...tasks].sort((a, b) => {
                 if (a.isGolden && !b.isGolden) return -1;
                 if (!a.isGolden && b.isGolden) return 1;
-                return b.id - a.id;
+                // Защита сортировки для строковых UUID и числовых ID
+                const timeA = typeof a.id === 'string' ? 0 : a.id; 
+                const timeB = typeof b.id === 'string' ? 0 : b.id;
+                return timeB - timeA; 
             });
         
             let renderedArchiveCount = 0;
@@ -1995,7 +2163,9 @@
                 
                 const priceBadge = task.price ? `<span class="px-2 py-0.5 bg-transparent text-brand-light dark:text-brand-dark border border-brand-light/30 dark:border-brand-dark/30 rounded text-[10px] font-bold uppercase tracking-widest transition-colors">${shopCurrency}${task.price}</span>` : '';
                 const linkedMacro = task.macroId ? macros.find(m => m.id === task.macroId) : null;
-                const macroTag = linkedMacro ? `<button type="button" onclick="unlinkTask(${task.id})" class="px-2 py-0.5 bg-brand-light/10 text-brand-light dark:text-brand-dark border border-brand-light/30 rounded text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30" title="Click to Unlink">${t('lbl_linked_to')} ${linkedMacro.title} ✕</button>` : '';
+                const macroTag = linkedMacro ? `<button type="button" onclick="unlinkTask('${task.id}')" class="px-2 py-0.5 bg-brand-light/10 text-brand-light dark:text-brand-dark border border-brand-light/30 rounded text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30" title="Click to Unlink">${t('lbl_linked_to')} ${linkedMacro.title} ✕</button>` : '';
+                
+                const sharedBadge = task.isShared ? `<span class="px-2 py-0.5 bg-brand-light/10 text-brand-light border border-brand-light/30 rounded text-[9px] font-bold uppercase tracking-widest ml-1" title="Создал: ${task.creator}">👤 ${task.assignee === username ? 'МНЕ' : task.assignee}</span>` : '';
             
                 const commentsHTML = `
                     <div id="comments-${task.id}" class="mt-4 border-t border-borderline-light dark:border-borderline-dark pt-4 ${isCommentsOpen ? '' : 'hidden'} comments-section transition-colors">
@@ -2003,16 +2173,19 @@
                             ${task.comments.map((c, i) => `
                                 <div class="flex flex-col bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark p-3 rounded-md transition-colors">
                                     <div class="flex justify-between items-start mb-1.5">
-                                        <span class="text-sm text-zinc-800 dark:text-zinc-300 font-medium">> ${c.text}</span>
-                                        <button type="button" onclick="deleteComment(${task.id}, ${i})" class="btn-press text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-500 text-sm ml-3 font-bold">✕</button>
+                                        <span class="text-sm text-zinc-800 dark:text-zinc-300 font-medium">
+                                            ${c.author ? `<span class="text-[9px] bg-brand-light text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-widest mr-2">${c.author}</span>` : '<span class="mr-2 text-zinc-400">></span>'}
+                                            ${c.text}
+                                        </span>
+                                        <button type="button" onclick="deleteComment('${task.id}', ${i}, ${c.id ? `'${c.id}'` : 'null'})" class="btn-press text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-500 text-sm ml-3 font-bold">✕</button>
                                     </div>
                                     <span class="text-[10px] text-brand-light/90 dark:text-brand-dark/80 font-bold">${c.createdAt}</span>
                                 </div>
                             `).join('')}
                         </div>
                         <div class="flex gap-2 font-mono-tech">
-                            <input type="text" id="comment-input-${task.id}" onkeypress="if(event.key==='Enter') addComment(${task.id})" class="flex-1 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded outline-none text-sm text-zinc-900 dark:text-zinc-100 px-4 py-2.5 focus:border-brand-light dark:focus:border-brand-dark transition-colors shadow-sm dark:shadow-none placeholder-zinc-400 dark:placeholder-zinc-600" placeholder="${t('log_ph')}">
-                            <button type="button" onclick="addComment(${task.id})" class="btn-press text-[11px] font-bold text-white dark:text-black bg-brand-light dark:bg-brand-dark hover:opacity-90 rounded px-4 py-2.5 transition-colors uppercase tracking-widest shadow-sm">${t('btn_commit')}</button>
+                            <input type="text" id="comment-input-${task.id}" onkeypress="if(event.key==='Enter') addComment('${task.id}')" class="flex-1 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded outline-none text-sm text-zinc-900 dark:text-zinc-100 px-4 py-2.5 focus:border-brand-light dark:focus:border-brand-dark transition-colors shadow-sm dark:shadow-none placeholder-zinc-400 dark:placeholder-zinc-600" placeholder="${t('log_ph')}">
+                            <button type="button" onclick="addComment('${task.id}')" class="btn-press text-[11px] font-bold text-white dark:text-black bg-brand-light dark:bg-brand-dark hover:opacity-90 rounded px-4 py-2.5 transition-colors uppercase tracking-widest shadow-sm">${t('btn_commit')}</button>
                         </div>
                     </div>
                 `;
@@ -2022,15 +2195,16 @@
                     : 'border-borderline-light dark:border-borderline-dark hover:border-brand-light/50 dark:hover:border-brand-dark/50';
                 
                 const listHTML = `
-                    <div id="task-${task.id}" onmouseenter="hoveredTaskId = ${task.id}" onmouseleave="hoveredTaskId = null" class="tech-card-task group flex flex-col p-4 bg-panel-light dark:bg-panel-dark border ${goldClassList} rounded-lg transition-all shadow-sm hover-magnet" ondragend="this.removeAttribute('draggable'); dragEnd(event)" ondragstart="drag(event, ${task.id})">
+                    <div id="task-${task.id}" onmouseenter="hoveredTaskId = '${task.id}'" onmouseleave="hoveredTaskId = null" class="tech-card-task group flex flex-col p-4 bg-panel-light dark:bg-panel-dark border ${goldClassList} rounded-lg transition-all shadow-sm hover-magnet" ondragend="this.removeAttribute('draggable'); dragEnd(event)" ondragstart="drag(event, '${task.id}')">
                         <div class="flex items-center gap-2 w-full">
-                            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})" class="tech-checkbox w-6 h-6 rounded border-2 border-zinc-300 dark:border-zinc-600 bg-base-light dark:bg-base-dark cursor-pointer transition-colors shrink-0">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.id}')" class="tech-checkbox w-6 h-6 rounded border-2 border-zinc-300 dark:border-zinc-600 bg-base-light dark:bg-base-dark cursor-pointer transition-colors shrink-0">
                             
                             <div class="flex-1 ml-2 min-w-0">
                                 <div class="font-bold text-base truncate ${task.completed ? 'strike-through' : 'text-zinc-900 dark:text-zinc-100'} transition-colors" style="font-family: var(--font-primary);">${task.title}</div>
                                 <div class="flex items-center gap-2 mt-2 flex-wrap font-mono-tech">
                                     <span class="px-2 py-0.5 bg-base-light dark:bg-base-dark text-zinc-700 dark:text-zinc-300 border border-borderline-light dark:border-transparent rounded text-[10px] font-bold uppercase tracking-widest transition-colors">${displaySphereName}</span>
                                     ${priceBadge}
+                                    ${sharedBadge}
                                     ${macroTag}
                                     <span class="text-zinc-500 dark:text-zinc-500 text-[10px] font-bold transition-colors ml-1 hidden md:inline">${t('init')}: ${task.createdAt}</span>
                                     ${task.completed ? `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold">${t('done')}: ${task.completedAt}</span>` : ''}
@@ -2041,21 +2215,21 @@
                                 <input type="checkbox" id="action-toggle-${task.id}" class="peer hidden">
                                 <div class="flex items-center gap-1 overflow-hidden transition-all duration-200 max-w-0 opacity-0 peer-checked:max-w-[200px] peer-checked:opacity-100 md:max-w-none md:opacity-0 md:group-hover:opacity-100">
                                     ${!task.completed ? `
-                                        <button type="button" onclick="openFocusMode(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-lg" title="${t('btn_focus')}">🎯</button>
-                                        <button type="button" onclick="editTask(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_edit')}">✏️</button>
-                                        <button type="button" onclick="openLinkModal(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_link_macro')}">🔗</button>
+                                        <button type="button" onclick="openFocusMode('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-lg" title="${t('btn_focus')}">🎯</button>
+                                        <button type="button" onclick="editTask('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_edit')}">✏️</button>
+                                        <button type="button" onclick="openLinkModal('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_link_macro')}">🔗</button>
                                     ` : ''}
-                                    <button type="button" onclick="copyTask(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_copy')}">📋</button>
+                                    <button type="button" onclick="copyTask('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_copy')}">📋</button>
                                 </div>
                                 <label for="action-toggle-${task.id}" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex items-center justify-center transition-colors text-xl cursor-pointer md:hidden ml-1">⋮</label>
                                 <div class="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
-                                    <button type="button" onclick="toggleComments(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 flex shrink-0 items-center justify-center transition-colors relative text-lg" title="${t('btn_logs')}">
+                                    <button type="button" onclick="toggleComments('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 flex shrink-0 items-center justify-center transition-colors relative text-lg" title="${t('btn_logs')}">
                                         📝 ${task.comments.length > 0 ? `<span class="absolute -top-1 -right-1 text-[9px] font-bold bg-brand-light dark:bg-brand-dark text-white dark:text-black rounded px-1.5 shadow-sm">${task.comments.length}</span>` : ''}
                                     </button>
-                                    <button type="button" onclick="deleteTask(${task.id})" class="btn-press w-8 h-8 rounded-md hover:bg-red-50 dark:hover:bg-red-500/10 text-zinc-400 dark:text-zinc-600 hover:text-red-600 dark:hover:text-red-500 flex shrink-0 items-center justify-center transition-colors text-lg" title="${t('btn_delete')}">🗑️</button>
+                                    <button type="button" onclick="deleteTask('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-red-50 dark:hover:bg-red-500/10 text-zinc-400 dark:text-zinc-600 hover:text-red-600 dark:hover:text-red-500 flex shrink-0 items-center justify-center transition-colors text-lg" title="${t('btn_delete')}">🗑️</button>
                                 </div>
-                                <button type="button" onclick="toggleGolden(${task.id})" class="px-2 text-2xl transition-all btn-press ${task.isGolden ? 'text-yellow-500 opacity-100 md:opacity-100 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'text-zinc-300 dark:text-zinc-700 hover:text-yellow-500 md:opacity-0 md:group-hover:opacity-100'}" title="Golden Task">★</button>
-                                <button type="button" onclick="openTeleport(${task.id})" class="text-zinc-300 dark:text-zinc-700 md:opacity-0 md:group-hover:opacity-100 hover:text-brand-light dark:hover:text-brand-dark px-2 text-lg transition-all font-bold font-mono-tech btn-press" title="Change Priority">⣿</button>
+                                <button type="button" onclick="toggleGolden('${task.id}')" class="px-2 text-2xl transition-all btn-press ${task.isGolden ? 'text-yellow-500 opacity-100 md:opacity-100 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'text-zinc-300 dark:text-zinc-700 hover:text-yellow-500 md:opacity-0 md:group-hover:opacity-100'}" title="Golden Task">★</button>
+                                <button type="button" onclick="openTeleport('${task.id}')" class="text-zinc-300 dark:text-zinc-700 md:opacity-0 md:group-hover:opacity-100 hover:text-brand-light dark:hover:text-brand-dark px-2 text-lg transition-all font-bold font-mono-tech btn-press" title="Change Priority">⣿</button>
                             </div>
                         </div>
                         ${commentsHTML}
@@ -2068,7 +2242,7 @@
                 
                 const matrixHTML = `
                     <div id="matrix-task-${task.id}" class="p-4 bg-panel-light dark:bg-panel-dark border ${goldClassMatrix} rounded-md flex items-start gap-3 transition-colors shadow-sm dark:shadow-none hover-magnet tech-card-task group">
-                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})" class="tech-checkbox shrink-0 w-5 h-5 mt-0.5 rounded border-2 border-zinc-300 dark:border-zinc-600 bg-base-light dark:bg-base-dark cursor-pointer transition-colors">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.id}')" class="tech-checkbox shrink-0 w-5 h-5 mt-0.5 rounded border-2 border-zinc-300 dark:border-zinc-600 bg-base-light dark:bg-base-dark cursor-pointer transition-colors">
                         <div class="flex-1 min-w-0">
                             <div class="font-bold text-sm ${task.completed ? 'strike-through' : 'text-zinc-900 dark:text-zinc-100'} mb-3 leading-snug transition-colors truncate whitespace-normal" style="font-family: var(--font-primary);">${task.title}</div>
                             ${macroTag ? `<div class="mb-2">${macroTag}</div>` : ''}
@@ -2076,13 +2250,14 @@
                                 <div class="flex gap-2 items-center flex-wrap">
                                     <span class="px-2 py-1 bg-base-light dark:bg-base-dark text-zinc-600 dark:text-zinc-400 rounded text-[9px] font-bold uppercase tracking-widest transition-colors">${displaySphereName}</span>
                                     ${priceBadge}
+                                    ${sharedBadge}
                                 </div>
                                 ${task.comments.length > 0 ? `<span class="text-[10px] font-bold text-brand-light dark:text-brand-dark transition-colors">${t('btn_logs')}:${task.comments.length}</span>` : ''}
                             </div>
                         </div>
                         <div class="flex flex-col items-center gap-1 shrink-0 -mt-1 -mr-1">
-                            <button type="button" onclick="toggleGolden(${task.id})" class="px-1 text-2xl transition-all btn-press ${task.isGolden ? 'text-yellow-500 opacity-100 md:opacity-100 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'text-zinc-300 dark:text-zinc-700 hover:text-yellow-500 opacity-100 md:opacity-0 md:group-hover:opacity-100'}" title="Golden Task">★</button>
-                            <button type="button" onclick="openTeleport(${task.id})" class="text-zinc-300 dark:text-zinc-700 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-brand-light dark:hover:text-brand-dark transition-all text-xl font-bold font-mono-tech btn-press cursor-pointer px-1" title="Relocate">⣿</button>
+                            <button type="button" onclick="toggleGolden('${task.id}')" class="px-1 text-2xl transition-all btn-press ${task.isGolden ? 'text-yellow-500 opacity-100 md:opacity-100 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'text-zinc-300 dark:text-zinc-700 hover:text-yellow-500 opacity-100 md:opacity-0 md:group-hover:opacity-100'}" title="Golden Task">★</button>
+                            <button type="button" onclick="openTeleport('${task.id}')" class="text-zinc-300 dark:text-zinc-700 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-brand-light dark:hover:text-brand-dark transition-all text-xl font-bold font-mono-tech btn-press cursor-pointer px-1" title="Relocate">⣿</button>
                         </div>
                     </div>
                 `;
@@ -2776,6 +2951,49 @@ YOUR OBJECTIVE (Answer in these steps):
                     renderDashLite();
                 }
             }, 200);
+        }
+
+        // --- ЗАГРУЗКА ОБЩИХ СФЕР, ЗАДАЧ И КОММЕНТАРИЕВ ---
+        async function loadSharedScopes() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+
+            try {
+                // 1. Ищем сферы
+                const { data: membersData } = await supabaseClient
+                    .from('scope_members')
+                    .select('scope_id, role, shared_scopes(id, name)')
+                    .eq('username', username);
+
+                if (membersData && membersData.length > 0) {
+                    sharedScopes = membersData.map(m => m.shared_scopes).filter(Boolean);
+                    initDynamicScopes();
+                    
+                    // 2. Скачиваем ВСЕ задачи для этих сфер вместе с комментариями
+                    const scopeIds = sharedScopes.map(s => s.id);
+                    const { data: tasksData } = await supabaseClient
+                        .from('shared_tasks')
+                        .select('*, shared_comments(*)')
+                        .in('scope_id', scopeIds);
+                        
+                    if (tasksData) {
+                        sharedTasks = tasksData;
+                        // Сортируем комментарии по дате создания
+                        sharedTasks.forEach(t => {
+                            if (t.shared_comments) t.shared_comments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                        });
+                        if (typeof renderInbox === 'function') renderInbox();
+                        renderTasks(); // Запускаем слияние матриц!
+                    }
+                } else {
+                    sharedScopes = []; sharedTasks = [];
+                    initDynamicScopes();
+                    if (typeof renderInbox === 'function') renderInbox();
+                    renderTasks();
+                }
+            } catch (err) {
+                console.error('Ошибка загрузки командных данных:', err);
+            }
         }
 
         function escalateLiteTask(id) {
