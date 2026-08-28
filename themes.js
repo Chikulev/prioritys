@@ -514,6 +514,147 @@ const SYSTEM_THEMES = {
             en: { "dash_subtitle_main": "SCULPTOR STUDIO", "macro_title": "MASTERPIECES", "quad_1": "BAKE NOW 🔥 [Q1]", "quad_2": "MOLDING 🧸 [Q2]", "quad_3": "SOFT CLAY 🫧 [Q3]", "quad_4": "CRUSH 💥 [Q4]", "empty_tasks": "Table is clean.", "lbl_macro": "Sculpture", "btn_init_macro": "Mold Idea", "archived": "Fired Works" },
             ru: { "dash_subtitle_main": "СТУДИЯ ЛЕПКИ", "macro_title": "ШЕДЕВРЫ", "quad_1": "В ПЕЧЬ 🔥 [Q1]", "quad_2": "ФОРМОВКА 🧸 [Q2]", "quad_3": "МЯГКАЯ ГЛИНА 🫧 [Q3]", "quad_4": "СМЯТЬ 💥 [Q4]", "empty_tasks": "Стол чист.", "lbl_macro": "Фигурка", "btn_init_macro": "Слепить Идею", "archived": "Затвердело" }
         }
+    },
+    titanium: {
+        id: 'titanium',
+        name: 'Titanium',
+        fontPrimary: "'Inter', sans-serif",
+        desc: { en: "Aerospace grade neumorphism. Heavy metal and precision.", ru: "Аэрокосмический нейроморфизм. Литой металл и абсолютная точность." },
+        icon: "🛸",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#3b82f6", "--color-brand-dark": "#60a5fa",
+            "--color-base-light": "#e0e5ec", "--color-base-dark": "#1a1f25",
+            "--color-panel-light": "#e0e5ec", "--color-panel-dark": "#1a1f25",
+            "--color-border-light": "transparent", "--color-border-dark": "transparent"
+        },
+        customCss: `
+            body { background: var(--color-base-light) !important; }
+            .dark body { background: var(--color-base-dark) !important; }
+
+            /* Нейроморфизм: элементы "выдавлены" из цельного куска металла */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
+                background: var(--color-base-light) !important;
+                border-radius: 16px !important;
+                border: none !important;
+                box-shadow: 
+                    8px 8px 16px rgba(163, 177, 198, 0.6), 
+                    -8px -8px 16px rgba(255, 255, 255, 0.8) !important;
+            }
+            .dark .bg-panel-light, .dark .dark\\:bg-panel-dark, .dark .tech-card-task, .dark #templatesDropdown, .dark .theme-card {
+                background: var(--color-base-dark) !important;
+                box-shadow: 
+                    8px 8px 16px rgba(0, 0, 0, 0.5), 
+                    -8px -8px 16px rgba(45, 55, 65, 0.5) !important;
+            }
+
+            /* Вдавленные поля ввода (эффект гравировки/фрезеровки) */
+            input[type="text"], input[type="time"], select { 
+                background: var(--color-base-light) !important;
+                border-radius: 12px !important; 
+                border: none !important;
+                box-shadow: 
+                    inset 6px 6px 10px rgba(163, 177, 198, 0.6),
+                    inset -6px -6px 10px rgba(255, 255, 255, 0.8) !important;
+                padding: 1rem 1.25rem !important;
+            }
+            .dark input[type="text"], .dark input[type="time"], .dark select { 
+                background: var(--color-base-dark) !important;
+                box-shadow: 
+                    inset 6px 6px 10px rgba(0, 0, 0, 0.6),
+                    inset -6px -6px 10px rgba(45, 55, 65, 0.4) !important;
+            }
+
+            /* При нажатии кнопка физически "вдавливается" в металл */
+            .btn-press:active {
+                box-shadow: 
+                    inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+                    inset -4px -4px 8px rgba(255, 255, 255, 0.8) !important;
+                transform: scale(0.98) !important;
+            }
+            .dark .btn-press:active {
+                box-shadow: 
+                    inset 4px 4px 8px rgba(0, 0, 0, 0.6),
+                    inset -4px -4px 8px rgba(45, 55, 65, 0.4) !important;
+            }
+            
+            h1, h2, h3 { font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.05em; color: #475569 !important; }
+            .dark h1, .dark h2, .dark h3 { color: #94a3b8 !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "MISSION CONTROL", "macro_title": "ORBITAL GOALS", "quad_1": "CRITICAL BURN [Q1]", "quad_2": "NAVIGATION [Q2]", "quad_3": "SYSTEM CHECK [Q3]", "quad_4": "JETTISON [Q4]", "empty_tasks": "All systems nominal.", "lbl_macro": "Module", "btn_init_macro": "Launch Module", "archived": "Deorbited" },
+            ru: { "dash_subtitle_main": "ЦУП: ЦЕНТР УПРАВЛЕНИЯ", "macro_title": "ОРБИТАЛЬНЫЕ ЦЕЛИ", "quad_1": "КРИТИЧЕСКИЙ ЗАПУСК [Q1]", "quad_2": "НАВИГАЦИЯ [Q2]", "quad_3": "ДИАГНОСТИКА [Q3]", "quad_4": "ОТСТРЕЛ [Q4]", "empty_tasks": "Все системы в норме.", "lbl_macro": "Модуль", "btn_init_macro": "Сборка модуля", "archived": "Сошли с орбиты" }
+        }
+    },
+    blueprint: {
+        id: 'blueprint',
+        name: 'CAD',
+        fontPrimary: "'JetBrains Mono', 'Courier New', monospace",
+        desc: { en: "Architectural drafts, deep blue canvas and vector precision.", ru: "Архитектурные чертежи, глубокий синий холст и векторная точность." },
+        icon: "📐",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#FFFFFF", "--color-brand-dark": "#FFFFFF",
+            "--color-base-light": "#0A369D", "--color-base-dark": "#062265",
+            "--color-panel-light": "rgba(10, 54, 157, 0.6)", "--color-panel-dark": "rgba(6, 34, 101, 0.6)",
+            "--color-border-light": "rgba(255, 255, 255, 0.4)", "--color-border-dark": "rgba(255, 255, 255, 0.2)"
+        },
+        customCss: `
+            /* Идеальная миллиметровка (светлые и толстые линии сетки) */
+            body { 
+                background-color: var(--color-base-light) !important;
+                background-image: 
+                    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                    linear-gradient(rgba(255, 255, 255, 0.2) 2px, transparent 2px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.2) 2px, transparent 2px) !important;
+                background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px !important;
+                color: #FFFFFF !important;
+            }
+            .dark body { background-color: var(--color-base-dark) !important; }
+
+            /* Карточки выглядят как начерченные зоны */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
+                background: var(--color-panel-light) !important;
+                backdrop-filter: blur(4px) !important;
+                border-radius: 0px !important;
+                border: 2px dashed var(--color-border-light) !important;
+                box-shadow: none !important;
+            }
+            .dark .bg-panel-light, .dark .dark\\:bg-panel-dark, .dark .tech-card-task, .dark #templatesDropdown, .dark .theme-card {
+                background: var(--color-panel-dark) !important;
+                border: 2px dashed var(--color-border-dark) !important;
+            }
+
+            /* Инпуты как поля для ввода параметров */
+            input[type="text"], input[type="time"], select { 
+                background: transparent !important;
+                border-radius: 0px !important; 
+                border: 1px solid #FFFFFF !important;
+                color: #FFFFFF !important;
+                padding: 0.75rem 1.25rem !important;
+            }
+            input[type="text"]::placeholder { color: rgba(255,255,255,0.5) !important; }
+
+            /* Эффект выделения чертежа при наведении */
+            .hover-magnet:hover { 
+                border-style: solid !important; 
+                border-color: #FFFFFF !important;
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.3) !important;
+            }
+
+            /* Тексты форсированно делаем белыми */
+            .text-zinc-900, .dark\\:text-zinc-100, .text-zinc-600, .text-zinc-500, .text-zinc-700, .text-zinc-400, .text-brand-light, .dark\\:text-brand-dark { 
+                color: #FFFFFF !important; 
+                opacity: 0.9;
+            }
+            
+            h1, h2, h3 { font-weight: 400 !important; text-transform: uppercase !important; letter-spacing: 0.1em; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "PROJECT DRAFT", "macro_title": "MASTER PLANS", "quad_1": "CORE STRUCTURE [Q1]", "quad_2": "ARCHITECTURE [Q2]", "quad_3": "DETAILING [Q3]", "quad_4": "SCRAP [Q4]", "empty_tasks": "Canvas is blank.", "lbl_macro": "Plan", "btn_init_macro": "Draft Plan", "archived": "Archived Drafts" },
+            ru: { "dash_subtitle_main": "ИНЖЕНЕРНЫЙ ЧЕРТЕЖ", "macro_title": "ГЕНПЛАНЫ", "quad_1": "НЕСУЩИЕ ОПОРЫ [Q1]", "quad_2": "АРХИТЕКТУРА [Q2]", "quad_3": "ДЕТАЛИЗАЦИЯ [Q3]", "quad_4": "В КОРЗИНУ [Q4]", "empty_tasks": "Холст чист.", "lbl_macro": "Проект", "btn_init_macro": "Новый чертеж", "archived": "В архиве" }
+        }
     }
 };
 
