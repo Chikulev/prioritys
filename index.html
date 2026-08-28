@@ -1623,7 +1623,6 @@
             const username = localStorage.getItem('priority_user');
 
             if (editTaskId) {
-                // Логика редактирования (пока оставляем как есть для личных задач)
                 const taskObj = tasks.find(x => x.id === editTaskId);
                 if (taskObj) {
                     taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
@@ -1637,18 +1636,8 @@
                 }
             } else {
                 if (sharedScope) {
-                    // БОЕВАЯ ЛОГИКА B2B: Отправка в SQL
                     const assignee = document.getElementById('taskAssignee').value || username;
                     const finalAssignee = (assignee === 'me' || assignee === '@me') ? username : assignee;
-
-                    // Умная маршрутизация: себе -> в матрицу, другому -> в INBOX (Карантин)
-                    let targetStatus = 'inbox';
-                    if (finalAssignee === username) {
-                        if (impVal && urgVal) targetStatus = 'q1';
-                        else if (impVal && !urgVal) targetStatus = 'q2';
-                        else if (!impVal && urgVal) targetStatus = 'q3';
-                        else targetStatus = 'q4';
-                    }
 
                     try {
                         const { data, error } = await supabaseClient.from('shared_tasks').insert({
@@ -1656,23 +1645,24 @@
                             title: input.value,
                             creator_username: username,
                             assignee_username: finalAssignee,
-                            is_important: impVal,      // Сохраняем важность
-                            is_urgent: urgVal,         // Сохраняем спешность
-                            is_acknowledged: finalAssignee === username, // Если назначил себе - карантин не нужен
-                            status: 'active',
+                            is_important: impVal,      // ВАЖНО: сохраняем флаг
+                            is_urgent: urgVal,         // ВАЖНО: сохраняем флаг
+                            is_acknowledged: finalAssignee === username, // ВАЖНО: если себе - не нужно принимать
+                            status: 'active',          // Статус всегда active
                             price: priceVal
                         }).select().single();
 
                         if (error) throw error;
 
-                        sharedTasks.push(data); // Добавляем локально для мгновенной отрисовки INBOX
-                        showToast('СЕТЬ', `Задача делегирована (${finalAssignee})`, 'success');
+                        sharedTasks.push(data); 
+                        showToast('СЕТЬ', `Задача создана (${finalAssignee})`, 'success');
 
                         input.value = '';
                         if(isPurchase) { document.getElementById('isPurchaseCheckbox').checked = false; togglePriceInput(); }
                         if(macroSel) macroSel.value = '';
                         
-                        if (typeof renderInbox === 'function') renderInbox();
+                        renderInbox(); 
+                        renderTasks(); // ОБЯЗАТЕЛЬНО ОБНОВЛЯЕМ МАТРИЦУ
 
                     } catch (err) {
                         console.error(err);
@@ -1680,7 +1670,6 @@
                         return;
                     }
                 } else {
-                    // ЛОГИКА LOCAL-FIRST: Личные задачи в JSONB
                     const newTask = {
                         id: Date.now(), title: input.value, sphere: sphereVal, isImportant: impVal, isUrgent: urgVal,
                         completed: false, createdAt: getDateStr(), completedAt: null, comments: []
@@ -1694,12 +1683,11 @@
                     if(isPurchase) { document.getElementById('isPurchaseCheckbox').checked = false; togglePriceInput(); }
                     if(macroSel) macroSel.value = '';
 
-                    saveData('priority_tasks', tasks); // Триггерит отправку в облако
+                    saveData('priority_tasks', tasks); 
                     renderTasks();
                     renderMacros();
                 }
 
-                // Эскалация LITE (Общая для обоих путей)
                 if (typeof escalatedLiteTaskId !== 'undefined' && escalatedLiteTaskId && !editTaskId) {
                     liteTasks = liteTasks.filter(x => x.id !== escalatedLiteTaskId);
                     localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
@@ -1890,63 +1878,51 @@
         // --- TASK CREATION & EDITING ---
 
         async function toggleTask(id) {
-            // --- 1. SQL РОУТИНГ (Для общих задач B2B) ---
             if (typeof id === 'string') { 
                 const task = sharedTasks.find(t => t.id === id);
                 if (!task) return;
-                const newStatus = task.status === 'completed' ? 'q4' : 'completed';
+                const newStatus = task.status === 'completed' ? 'active' : 'completed'; // ИСПРАВЛЕН БАГ
                 const completedTime = newStatus === 'completed' ? new Date().toISOString() : null;
                 try {
-                    // Оптимистичный UI для сети (меняем статус локально до ответа сервера)
                     task.status = newStatus; 
                     task.completed_at = completedTime;
                     
-                    // Обновляем в фоне
                     await supabaseClient.from('shared_tasks').update({ status: newStatus, completed_at: completedTime }).eq('id', id);
                     
-                    renderTasks(); // Для общих задач делаем полный рендер, чтобы Матрица обновилась
+                    renderTasks(); 
                 } catch(e) { 
                     showToast('ERROR', 'Сбой сети при обновлении статуса', 'error'); 
                 }
                 return;
             }
             
-            // --- 2. ЛОКАЛЬНЫЙ JSONB (Твой "Умный рендер" за 0 мс) ---
             const task = tasks.find(t => t.id === id);
             
-            // Если завершаем задачу
             if(!task.completed) {
                 task.completedAt = getDateTimeStr();
                 task.completed = true;
                 pushSysLog('TASK_DONE', `Completed task: ${task.title}`);
                 
-                // УМНЫЙ РЕНДЕР: Мгновенно переносим карточку в DOM, не трогая другие!
                 const taskCard = document.getElementById(`task-${id}`);
                 const archiveList = document.getElementById('completedTasks');
                 if (taskCard && archiveList) {
-                    // Перечеркиваем заголовок
                     const titleEl = taskCard.querySelector('.text-base');
                     if(titleEl) titleEl.classList.add('strike-through', 'text-zinc-500');
                     
-                    // Добавляем тег времени завершения
                     const metaContainer = taskCard.querySelector('.flex-wrap');
                     if(metaContainer) {
                         metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">DONE: ${task.completedAt}</span>`);
                     }
                     
-                    // Скрываем блок действий
                     const actionsBlock = taskCard.querySelector('.peer-checked\\:max-w-\\[200px\\]');
                     if(actionsBlock) actionsBlock.remove();
                     
-                    // Перемещаем элемент
                     archiveList.prepend(taskCard);
                 } else {
-                    renderTasks(); // Фолбек для вида "Матрица"
+                    renderTasks(); 
                 }
             } else {
                 pushSysLog('TASK_RESTORE', `Restored task: ${task.title}`);
-                // Если отменяем завершение (возвращаем) — здесь лучше полный рендер,
-                // так как нужно вернуть задачу в правильный квадрант
                 task.completed = false;
                 renderTasks();
             }
@@ -1962,72 +1938,6 @@
                 saveData('priority_tasks', tasks);
                 renderTasks();
             }
-        }
-
-        async function toggleTask(id) {
-            // --- 1. SQL РОУТИНГ (Для общих задач B2B) ---
-            if (typeof id === 'string') { 
-                const task = sharedTasks.find(t => t.id === id);
-                if (!task) return;
-                const newStatus = task.status === 'completed' ? 'q4' : 'completed';
-                const completedTime = newStatus === 'completed' ? new Date().toISOString() : null;
-                try {
-                    // Оптимистичный UI для сети (меняем статус локально до ответа сервера)
-                    task.status = newStatus; 
-                    task.completed_at = completedTime;
-                    
-                    // Обновляем в фоне
-                    await supabaseClient.from('shared_tasks').update({ status: newStatus, completed_at: completedTime }).eq('id', id);
-                    
-                    renderTasks(); // Для общих задач делаем полный рендер, чтобы Матрица обновилась
-                } catch(e) { 
-                    showToast('ERROR', 'Сбой сети при обновлении статуса', 'error'); 
-                }
-                return;
-            }
-            
-            // --- 2. ЛОКАЛЬНЫЙ JSONB (Твой "Умный рендер" за 0 мс) ---
-            const task = tasks.find(t => t.id === id);
-            
-            // Если завершаем задачу
-            if(!task.completed) {
-                task.completedAt = getDateTimeStr();
-                task.completed = true;
-                pushSysLog('TASK_DONE', `Completed task: ${task.title}`);
-                
-                // УМНЫЙ РЕНДЕР: Мгновенно переносим карточку в DOM, не трогая другие!
-                const taskCard = document.getElementById(`task-${id}`);
-                const archiveList = document.getElementById('completedTasks');
-                if (taskCard && archiveList) {
-                    // Перечеркиваем заголовок
-                    const titleEl = taskCard.querySelector('.text-base');
-                    if(titleEl) titleEl.classList.add('strike-through', 'text-zinc-500');
-                    
-                    // Добавляем тег времени завершения
-                    const metaContainer = taskCard.querySelector('.flex-wrap');
-                    if(metaContainer) {
-                        metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">DONE: ${task.completedAt}</span>`);
-                    }
-                    
-                    // Скрываем блок действий
-                    const actionsBlock = taskCard.querySelector('.peer-checked\\:max-w-\\[200px\\]');
-                    if(actionsBlock) actionsBlock.remove();
-                    
-                    // Перемещаем элемент
-                    archiveList.prepend(taskCard);
-                } else {
-                    renderTasks(); // Фолбек для вида "Матрица"
-                }
-            } else {
-                pushSysLog('TASK_RESTORE', `Restored task: ${task.title}`);
-                // Если отменяем завершение (возвращаем) — здесь лучше полный рендер,
-                // так как нужно вернуть задачу в правильный квадрант
-                task.completed = false;
-                renderTasks();
-            }
-            
-            saveData('priority_tasks', tasks);
-            renderMacros(); 
         }
 
         // Функция восстановления задачи
@@ -3063,7 +2973,6 @@ YOUR OBJECTIVE (Answer in these steps):
 
         function renderInbox() {
             const username = localStorage.getItem('priority_user');
-            // В карантин падают только задачи, назначенные на нас и еще не подтвержденные
             const inboxTasks = sharedTasks.filter(t => t.assignee_username === username && t.is_acknowledged === false && t.status !== 'completed');
             const wrapper = document.getElementById('inboxWrapper');
             const container = document.getElementById('inboxTasksContainer');
@@ -3093,10 +3002,11 @@ YOUR OBJECTIVE (Answer in these steps):
         }
 
         async function acceptInboxTask(taskId) {
-            // Мгновенная реакция UI
             const t = sharedTasks.find(x => x.id === taskId);
             if(t) t.is_acknowledged = true;
-            renderInbox();
+            
+            renderInbox(); 
+            renderTasks(); // ОБЯЗАТЕЛЬНО ОБНОВЛЯЕМ МАТРИЦУ
 
             try {
                 await supabaseClient.from('shared_tasks').update({ is_acknowledged: true }).eq('id', taskId);
