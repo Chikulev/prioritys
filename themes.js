@@ -382,6 +382,138 @@ const SYSTEM_THEMES = {
             en: { "dash_subtitle_main": "Reading Room", "macro_title": "DISSERTATIONS", "quad_1": "URGENT MANUSCRIPT [Q1]", "quad_2": "RESEARCH [Q2]", "quad_3": "SORTING [Q3]", "quad_4": "ARCHIVE [Q4]", "empty_tasks": "Silence in the library.", "lbl_macro": "Tome", "btn_init_macro": "New Manuscript", "archived": "Published Works" },
             ru: { "dash_subtitle_main": "Читальный зал", "macro_title": "ДИССЕРТАЦИИ", "quad_1": "СРОЧНО В ПЕЧАТЬ 🖋️ [Q1]", "quad_2": "ИССЛЕДОВАНИЕ 📖 [Q2]", "quad_3": "КАТАЛОГ 🗂️ [Q3]", "quad_4": "МАКУЛАТУРА 🗑️ [Q4]", "empty_tasks": "В библиотеке тишина.", "lbl_macro": "Том", "btn_init_macro": "Новый Труд", "archived": "Сдано в архив" }
         }
+    },
+    abyss: {
+        id: 'abyss',
+        name: 'AbyssGlow',
+        fontPrimary: "'Space Grotesk', 'Montserrat', sans-serif",
+        desc: { en: "Mariana trench, bioluminescence, and crushing depths.", ru: "Глубины океана, биолюминесценция и абсолютное погружение." },
+        icon: "🪼",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#00E5FF", "--color-brand-dark": "#64FFDA",
+            "--color-base-light": "#E0F7FA", "--color-base-dark": "#020C1B",
+            "--color-panel-light": "rgba(255, 255, 255, 0.8)", "--color-panel-dark": "rgba(10, 25, 47, 0.85)",
+            "--color-border-light": "#B2EBF2", "--color-border-dark": "#112240"
+        },
+        customCss: `
+            /* Свечение на фоне (подводные лучи) */
+            body { 
+                background: radial-gradient(circle at 50% -20%, #B2EBF2, #E0F7FA 60%) !important; 
+                background-attachment: fixed !important;
+            }
+            .dark body { 
+                background: radial-gradient(circle at 50% -20%, #112240, #020C1B 70%) !important; 
+                background-attachment: fixed !important;
+            }
+            
+            /* Эффект глубоководного свечения (Glow) */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
+                border-radius: 16px !important;
+                backdrop-filter: blur(12px) !important;
+                border: 1px solid var(--color-border-light) !important;
+                box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1) !important;
+            }
+            .dark .bg-panel-light, .dark .dark\\:bg-panel-dark, .dark .tech-card-task, .dark #templatesDropdown, .dark .theme-card {
+                border: 1px solid var(--color-border-dark) !important;
+                box-shadow: 0 10px 30px rgba(100, 255, 218, 0.05), inset 0 0 20px rgba(100, 255, 218, 0.02) !important;
+            }
+            
+            /* Карточки при наведении вспыхивают как медузы */
+            .hover-magnet:hover { box-shadow: 0 0 25px rgba(0, 229, 255, 0.4) !important; border-color: var(--color-brand-light) !important; }
+            .dark .hover-magnet:hover { box-shadow: 0 0 25px rgba(100, 255, 218, 0.3) !important; border-color: var(--color-brand-dark) !important; }
+            
+            h1, h2, h3 { font-weight: 700 !important; letter-spacing: 0.05em !important; }
+            
+            /* Неоновые инпуты */
+            input[type="text"], input[type="time"], select { 
+                border-radius: 12px !important; 
+                border: 1px solid var(--color-brand-light) !important; 
+                background: rgba(255, 255, 255, 0.5) !important;
+                box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.05) !important;
+                padding: 0.8rem 1.25rem !important;
+            }
+            .dark input[type="text"], .dark input[type="time"], .dark select { 
+                border: 1px solid var(--color-brand-dark) !important;
+                background: rgba(0, 0, 0, 0.3) !important;
+                box-shadow: inset 0 0 10px rgba(100, 255, 218, 0.1) !important;
+            }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "BATHYSCAPHE", "macro_title": "TRENCH EXPEDITIONS", "quad_1": "BIOLUMINESCENCE 🪼 [Q1]", "quad_2": "DEEP CURRENTS 🌊 [Q2]", "quad_3": "DRIFTING 🫧 [Q3]", "quad_4": "SINKING ⚓ [Q4]", "empty_tasks": "The ocean is silent.", "lbl_macro": "Depth", "btn_init_macro": "Dive Deeper", "archived": "Fossils" },
+            ru: { "dash_subtitle_main": "БАТИСКАФ", "macro_title": "ГЛУБОКОВОДНЫЕ ЦЕЛИ", "quad_1": "СВЕЧЕНИЕ 🪼 [Q1]", "quad_2": "ТЕЧЕНИЕ 🌊 [Q2]", "quad_3": "ДРЕЙФ 🫧 [Q3]", "quad_4": "НА ДНО ⚓ [Q4]", "empty_tasks": "В океане тишина.", "lbl_macro": "Глубина", "btn_init_macro": "Погружение", "archived": "Окаменелости" }
+        }
+    },
+    clay: {
+        id: 'clay',
+        name: 'SoftClay',
+        fontPrimary: "'Nunito', 'Quicksand', sans-serif",
+        desc: { en: "Tactile 3D claymorphism, soft matte materials.", ru: "Тактильный 3D-клейморфизм, эффект мягкого матового пластилина." },
+        icon: "🏺",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#FF7E67", "--color-brand-dark": "#FF9A85",
+            "--color-base-light": "#E8EDF2", "--color-base-dark": "#2A2E35",
+            "--color-panel-light": "#E8EDF2", "--color-panel-dark": "#2A2E35", 
+            "--color-border-light": "transparent", "--color-border-dark": "transparent"
+        },
+        customCss: `
+            /* Фон сливается с панелями для создания иллюзии цельного куска глины */
+            body { background: #E8EDF2 !important; }
+            .dark body { background: #2A2E35 !important; }
+            
+            /* Клейморфизм: Массивные скругления + Внутренние и внешние тени создают объем */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
+                background: var(--color-base-light) !important;
+                border-radius: 32px !important;
+                border: none !important;
+                box-shadow: 
+                    12px 12px 24px rgba(163, 177, 198, 0.4), 
+                    -12px -12px 24px rgba(255, 255, 255, 0.8),
+                    inset 4px 4px 10px rgba(255, 255, 255, 0.6),
+                    inset -4px -4px 10px rgba(163, 177, 198, 0.15) !important;
+            }
+            .dark .bg-panel-light, .dark .dark\\:bg-panel-dark, .dark .tech-card-task, .dark #templatesDropdown, .dark .theme-card {
+                background: var(--color-base-dark) !important;
+                box-shadow: 
+                    12px 12px 24px rgba(0, 0, 0, 0.4), 
+                    -12px -12px 24px rgba(60, 65, 75, 0.3),
+                    inset 4px 4px 10px rgba(60, 65, 75, 0.15),
+                    inset -4px -4px 10px rgba(0, 0, 0, 0.3) !important;
+            }
+            
+            /* Выдавленные (вдавленные) инпуты - эффект нажатия на глину */
+            input[type="text"], input[type="time"], select { 
+                background: var(--color-base-light) !important;
+                border-radius: 20px !important; 
+                border: none !important;
+                box-shadow: 
+                    inset 6px 6px 12px rgba(163, 177, 198, 0.5),
+                    inset -6px -6px 12px rgba(255, 255, 255, 0.9) !important;
+                padding: 1rem 1.5rem !important;
+            }
+            .dark input[type="text"], .dark input[type="time"], .dark select { 
+                background: var(--color-base-dark) !important;
+                box-shadow: 
+                    inset 6px 6px 12px rgba(0, 0, 0, 0.5),
+                    inset -6px -6px 12px rgba(60, 65, 75, 0.3) !important;
+            }
+            
+            /* Идеально пухлые кнопки с внутренним бликом */
+            .btn-press { 
+                border-radius: 9999px !important; 
+                box-shadow: 4px 4px 10px rgba(255, 126, 103, 0.3), inset 2px 2px 5px rgba(255,255,255,0.4) !important;
+            }
+            .dark .btn-press {
+                box-shadow: 4px 4px 10px rgba(0,0,0, 0.4), inset 2px 2px 5px rgba(255,255,255,0.1) !important;
+            }
+            
+            h1, h2, h3 { font-weight: 900 !important; letter-spacing: -0.03em !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "SCULPTOR STUDIO", "macro_title": "MASTERPIECES", "quad_1": "BAKE NOW 🔥 [Q1]", "quad_2": "MOLDING 🧸 [Q2]", "quad_3": "SOFT CLAY 🫧 [Q3]", "quad_4": "CRUSH 💥 [Q4]", "empty_tasks": "Table is clean.", "lbl_macro": "Sculpture", "btn_init_macro": "Mold Idea", "archived": "Fired Works" },
+            ru: { "dash_subtitle_main": "СТУДИЯ ЛЕПКИ", "macro_title": "ШЕДЕВРЫ", "quad_1": "В ПЕЧЬ 🔥 [Q1]", "quad_2": "ФОРМОВКА 🧸 [Q2]", "quad_3": "МЯГКАЯ ГЛИНА 🫧 [Q3]", "quad_4": "СМЯТЬ 💥 [Q4]", "empty_tasks": "Стол чист.", "lbl_macro": "Фигурка", "btn_init_macro": "Слепить Идею", "archived": "Затвердело" }
+        }
     }
 };
 
