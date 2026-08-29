@@ -3,6 +3,16 @@
 <head>
 
     <script>
+    // РОУТИНГ: Если устройство мобильное, перекидываем на m.html
+    if (window.innerWidth < 768) {
+        window.location.replace('m.html');
+    }
+    window.addEventListener('resize', () => {
+        if (window.innerWidth < 768) window.location.replace('m.html');
+    });
+    </script>
+
+    <script>
         // 1. Мгновенно применяем темную тему ДО рендеринга страницы (убивает белую вспышку)
         const isDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
         if (isDark) document.documentElement.classList.add('dark');
@@ -49,10 +59,6 @@
         }
 
         body { font-family: var(--font-primary); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-
-        /* Скрытие скроллбара для горизонтальных табов */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* Кастомные чекбоксы */
         input[type="radio"].peer { display: none; }
@@ -165,7 +171,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                     <div class="space-y-4">
                         <div class="bg-brand-light/5 dark:bg-brand-dark/5 border-l-2 border-brand-light dark:border-brand-dark p-4 transition-transform hover:scale-[1.02]">
-                            <p data-i18n="auth_welcome_text" class="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-mono-tech"></p>
+                            <p data-i18n="auth_welcome_text" class="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-mono-tech">
+                                </p>
                         </div>
                     </div>
                     
@@ -227,29 +234,32 @@
             </div>
             
             <div class="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 font-mono-tech">
-                <span class="text-zinc-300 dark:text-zinc-700 hidden md:inline">|</span>
+
+                <span class="text-zinc-300 dark:text-zinc-700">|</span>
                 <button type="button" id="guideBtn" onclick="openGuideModal()" data-i18n-title="nav_guide" class="shrink-0 p-2 hover:text-brand-light dark:hover:text-brand-dark hover:bg-base-light dark:hover:bg-base-dark rounded transition-colors btn-press">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
                 </button>
-                <button type="button" onclick="exportAIAudit()" data-i18n-title="nav_ai" class="hidden md:block shrink-0 p-2 text-purple-500 dark:text-purple-400 hover:text-white hover:bg-purple-500 dark:hover:bg-purple-500/30 rounded transition-colors btn-press shadow-[0_0_10px_rgba(168,85,247,0.0)] hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                <button type="button" onclick="exportAIAudit()" data-i18n-title="nav_ai" class="shrink-0 p-2 text-purple-500 dark:text-purple-400 hover:text-white hover:bg-purple-500 dark:hover:bg-purple-500/30 rounded transition-colors btn-press shadow-[0_0_10px_rgba(168,85,247,0.0)] hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
                     </svg>
                 </button>
-                <a href="lite.html" data-i18n-title="nav_lite" class="hidden md:block shrink-0 p-2 text-yellow-500 hover:text-white hover:bg-yellow-500 rounded transition-colors btn-press hover:shadow-[0_0_15px_rgba(234,179,8,0.5)]">
+                <a href="lite.html" data-i18n-title="nav_lite" class="shrink-0 p-2 text-yellow-500 hover:text-white hover:bg-yellow-500 rounded transition-colors btn-press hover:shadow-[0_0_15px_rgba(234,179,8,0.5)]">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </a>
-                <button type="button" onclick="openBadgesModal()" data-i18n-title="nav_badges" class="hidden md:block shrink-0 p-2 text-yellow-600 dark:text-yellow-500 hover:text-yellow-500 dark:hover:text-yellow-400 hover:bg-base-light dark:hover:bg-base-dark rounded transition-colors btn-press">
+
+                <button type="button" onclick="openBadgesModal()" data-i18n-title="nav_badges" class="shrink-0 p-2 text-yellow-600 dark:text-yellow-500 hover:text-yellow-500 dark:hover:text-yellow-400 hover:bg-base-light dark:hover:bg-base-dark rounded transition-colors btn-press">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
                 </button>
-                <a href="analytics.html" data-i18n-title="nav_stats" class="hidden md:flex shrink-0 p-2 hover:text-brand-light dark:hover:text-brand-dark hover:bg-base-light dark:hover:bg-base-dark rounded transition-colors btn-press">
+
+                <a href="analytics.html" data-i18n-title="nav_stats" class="shrink-0 p-2 hover:text-brand-light dark:hover:text-brand-dark hover:bg-base-light dark:hover:bg-base-dark rounded transition-colors btn-press">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="21"></line><line x1="16" y1="12" x2="16" y2="21"></line><line x1="8" y1="16" x2="8" y2="21"></line></svg>
                 </a>
+
                 <a href="config.html" data-i18n-title="nav_config" class="shrink-0 p-2 hover:text-brand-light dark:hover:text-brand-dark hover:bg-base-light dark:hover:bg-base-dark rounded transition-colors btn-press">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>                
-                </a>
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>                </a>
                 <span class="text-zinc-300 dark:text-zinc-700">|</span>
                 <button type="button" onclick="logout()" data-i18n-title="nav_logout" class="shrink-0 p-2 text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors btn-press">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -257,23 +267,29 @@
             </div>
         </header>
 
-        <!-- ПАНЕЛЬ ВВОДА ЗАДАЧИ (Sticky Bottom Bar на мобилках) -->
-        <div class="fixed bottom-0 left-0 right-0 z-[100] md:relative md:bottom-auto bg-panel-light dark:bg-panel-dark border-t-2 md:border border-borderline-light dark:border-borderline-dark p-4 md:p-8 mb-0 md:mb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.1)] md:shadow-sm transition-colors md:rounded-md md:border-l-4 md:border-l-brand-light md:dark:border-l-brand-dark hover-magnet">
-            <div class="flex flex-wrap md:flex-nowrap items-center gap-4 mb-4 md:mb-6 border-b border-borderline-light dark:border-borderline-dark pb-4 md:pb-6 transition-all relative">
-                <span class="text-brand-light dark:text-brand-dark font-bold text-2xl font-mono-tech hidden md:inline">></span>
-                <input type="text" id="taskInput" data-i18n-ph="task_ph" onkeypress="if(event.key==='Enter') deployOrUpdateTask()" class="flex-1 text-lg md:text-2xl font-medium text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 border-none focus:ring-0 bg-transparent outline-none min-w-0" style="font-family: var(--font-primary);">                
+        <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-6 md:p-8 mb-8 border-l-4 border-l-brand-light dark:border-l-brand-dark rounded-md shadow-sm transition-colors relative z-20 hover-magnet">
+            <div class="flex flex-wrap md:flex-nowrap items-center gap-4 mb-6 border-b border-borderline-light dark:border-borderline-dark pb-6 transition-all relative">
+                <span class="text-brand-light dark:text-brand-dark font-bold text-2xl font-mono-tech">></span>
+                <input type="text" id="taskInput" data-i18n-ph="task_ph" onkeypress="if(event.key==='Enter') deployOrUpdateTask()" class="flex-1 text-2xl font-medium text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 border-none focus:ring-0 bg-transparent outline-none min-w-0" style="font-family: var(--font-primary);">                
                 
-                <div class="relative font-mono-tech hidden md:block">
+
+                <div class="relative font-mono-tech">
                     <button type="button" onclick="toggleTemplates()" class="btn-press text-[11px] font-bold text-zinc-600 dark:text-zinc-400 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark px-4 py-2.5 rounded transition-colors uppercase tracking-widest flex items-center gap-2">
                         <span data-i18n="btn_templates">Templates</span> <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </button>
                     <div id="templatesDropdown" class="hidden absolute right-0 mt-2 w-80 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark rounded-md shadow-xl overflow-hidden z-50">
+                        
+                        <!-- Переключатель вкладок -->
                         <div class="flex text-[10px] font-bold uppercase tracking-widest border-b border-borderline-light dark:border-borderline-dark">
                             <button type="button" onclick="switchTemplateTab('user')" id="tab-user-tpl" class="btn-press flex-1 py-3 text-brand-light dark:text-brand-dark border-b-2 border-brand-light dark:border-brand-dark bg-brand-light/5 dark:bg-brand-dark/5 transition-colors">My Templates</button>
                             <button type="button" onclick="switchTemplateTab('system')" id="tab-sys-tpl" class="btn-press flex-1 py-3 text-zinc-500 border-b-2 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 bg-panel-light dark:bg-panel-dark transition-colors">Presets</button>
                         </div>
+
+                        <!-- Списки -->
                         <div id="templatesList" class="max-h-60 overflow-y-auto"></div>
                         <div id="blueprintsList" class="max-h-60 overflow-y-auto hidden"></div>
+
+                        <!-- Кнопка сохранения (только для вкладки User) -->
                         <div class="border-t border-borderline-light dark:border-borderline-dark p-2" id="saveTplBtnContainer">
                             <button type="button" onclick="saveCurrentAsTemplate()" data-i18n="btn_save_template" class="w-full text-left px-3 py-2 text-[10px] font-bold text-brand-light dark:text-brand-dark hover:bg-base-light dark:hover:bg-base-dark uppercase transition-colors rounded">+ Save as template</button>
                         </div>
@@ -281,63 +297,62 @@
                 </div>
             </div>
             
-            <div class="flex flex-wrap items-end gap-3 md:gap-10 font-mono-tech">
+            <div class="flex flex-wrap items-end gap-6 md:gap-10 font-mono-tech">
                 <div>
-                    <span data-i18n="lbl_scope" class="hidden md:block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Scope</span>
-                    <div id="scopeRadioContainer" class="flex overflow-x-auto no-scrollbar md:flex-wrap bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors"></div>
+                    <span data-i18n="lbl_scope" class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Scope</span>
+                    <div id="scopeRadioContainer" class="flex flex-wrap bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors"></div>
                 </div>
 
-                <div class="flex flex-wrap gap-3 md:gap-10">
+                
+
+                <div class="flex flex-wrap gap-6 md:gap-10">
                     <div>
-                        <span data-i18n="lbl_impact" class="hidden md:block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Impact</span>
+                        <span data-i18n="lbl_impact" class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Impact</span>
                         <div class="flex bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors">
-                            <label class="cursor-pointer"><input type="radio" name="importance" value="yes" class="peer" checked><div class="px-3 md:px-5 py-1.5 md:py-2 rounded-sm text-xs md:text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-light dark:bg-brand-dark"></span> <span data-i18n="lbl_high">High</span></div></label>
-                            <label class="cursor-pointer"><input type="radio" name="importance" value="no" class="peer"><div data-i18n="lbl_low" class="px-3 md:px-5 py-1.5 md:py-2 rounded-sm text-xs md:text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase">Low</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="importance" value="yes" class="peer" checked><div class="px-5 py-2 rounded-sm text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-light dark:bg-brand-dark"></span> <span data-i18n="lbl_high">High</span></div></label>
+                            <label class="cursor-pointer"><input type="radio" name="importance" value="no" class="peer"><div data-i18n="lbl_low" class="px-5 py-2 rounded-sm text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase">Low</div></label>
                         </div>
                     </div>
                     <div>
-                        <span data-i18n="lbl_sla" class="hidden md:block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">SLA</span>
+                        <span data-i18n="lbl_sla" class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">SLA</span>
                         <div class="flex bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors">
-                            <label class="cursor-pointer"><input type="radio" name="urgency" value="yes" class="peer"><div data-i18n="lbl_immediate" class="px-3 md:px-5 py-1.5 md:py-2 rounded-sm text-xs md:text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-red-100 dark:peer-checked:bg-red-500/20 peer-checked:text-red-700 dark:peer-checked:text-red-400 transition-all uppercase">Immediate</div></label>
-                            <label class="cursor-pointer"><input type="radio" name="urgency" value="no" class="peer" checked><div data-i18n="lbl_planned" class="px-3 md:px-5 py-1.5 md:py-2 rounded-sm text-xs md:text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase">Planned</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="urgency" value="yes" class="peer"><div data-i18n="lbl_immediate" class="px-5 py-2 rounded-sm text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-red-100 dark:peer-checked:bg-red-500/20 peer-checked:text-red-700 dark:peer-checked:text-red-400 transition-all uppercase">Immediate</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="urgency" value="no" class="peer" checked><div data-i18n="lbl_planned" class="px-5 py-2 rounded-sm text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase">Planned</div></label>
                         </div>
                     </div>
 
                     <div id="assigneeBlock" class="hidden flex-col">
-                        <span data-i18n="lbl_assignee" class="hidden md:block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Assignee</span>
-                        <select id="taskAssignee" class="bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-1.5 text-xs md:text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none h-full transition-colors min-w-[100px]">
+                        <span data-i18n="lbl_assignee" class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Assignee</span>
+                        <select id="taskAssignee" class="bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark rounded px-3 py-1.5 text-sm font-bold text-zinc-900 dark:text-zinc-100 outline-none h-full transition-colors min-w-[120px]">
                             <option value="me">@me</option>
                         </select>
                     </div>
 
                     <div id="shopFeatureBlock" class="hidden flex-col">
-                        <span data-i18n="lbl_is_purchase" class="hidden md:block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Purchase</span>
+                        <span data-i18n="lbl_is_purchase" class="block text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Purchase</span>
                         <div class="flex items-center gap-2 bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors h-full">
                             <label class="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-sm hover:bg-panel-light dark:hover:bg-panel-dark transition-colors group">
-                                <input type="checkbox" id="isPurchaseCheckbox" onchange="togglePriceInput()" class="tech-checkbox w-4 h-4 md:w-5 md:h-5 rounded border-2 border-zinc-300 dark:border-zinc-600 bg-transparent cursor-pointer shrink-0">
-                                <span data-i18n="txt_buy" class="text-xs md:text-sm font-bold text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors uppercase font-mono-tech">Buy</span>
+                                <input type="checkbox" id="isPurchaseCheckbox" onchange="togglePriceInput()" class="tech-checkbox w-5 h-5 rounded border-2 border-zinc-300 dark:border-zinc-600 bg-transparent cursor-pointer shrink-0">
+                                <span data-i18n="txt_buy" class="text-sm font-bold text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors uppercase font-mono-tech">Buy</span>
                             </label>
                             <div id="priceInputWrapper" class="hidden items-center gap-1 pl-2 border-l border-borderline-light dark:border-borderline-dark transition-all h-full">
-                                <span id="currencySymbolPrefix" class="text-zinc-500 font-bold text-xs md:text-sm">₽</span>
-                                <input type="number" id="taskPriceInput" class="w-12 md:w-16 bg-transparent border-none outline-none text-xs md:text-sm font-bold text-brand-light dark:text-brand-dark focus:ring-0 p-0 placeholder-zinc-300 dark:placeholder-zinc-700" placeholder="0.00">
+                                <span id="currencySymbolPrefix" class="text-zinc-500 font-bold text-sm">₽</span>
+                                <input type="number" id="taskPriceInput" class="w-16 bg-transparent border-none outline-none text-sm font-bold text-brand-light dark:text-brand-dark focus:ring-0 p-0 placeholder-zinc-300 dark:placeholder-zinc-700" placeholder="0.00">
                             </div>
                         </div>
                     </div>
 
                 </div>
 
-                <div class="ml-auto flex gap-2 md:gap-3 mt-4 md:mt-0 w-full md:w-auto">
-                    <button type="button" onclick="cancelEdit()" id="cancelEditBtn" data-i18n="btn_cancel" class="hidden btn-press bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-600 dark:text-zinc-400 font-bold px-4 py-2.5 md:px-6 md:py-3.5 rounded text-[10px] md:text-xs uppercase tracking-widest transition-colors flex-1 md:flex-none">Cancel</button>
-                    <button type="button" onclick="deployOrUpdateTask()" id="deployBtn" data-i18n="btn_deploy" class="btn-press bg-zinc-900 dark:bg-zinc-100 hover:opacity-90 text-white dark:text-black font-bold px-4 py-2.5 md:px-10 md:py-3.5 rounded text-[10px] md:text-xs uppercase tracking-widest transition-colors shadow-sm flex-1 md:flex-none">Deploy Task</button>
+                <div class="ml-auto flex gap-3 mt-4 md:mt-0">
+                    <button type="button" onclick="cancelEdit()" id="cancelEditBtn" data-i18n="btn_cancel" class="hidden btn-press bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-600 dark:text-zinc-400 font-bold px-6 py-3.5 rounded text-xs uppercase tracking-widest transition-colors">Cancel</button>
+                    <button type="button" onclick="deployOrUpdateTask()" id="deployBtn" data-i18n="btn_deploy" class="btn-press bg-zinc-900 dark:bg-zinc-100 hover:opacity-90 text-white dark:text-black font-bold px-10 py-3.5 rounded text-xs uppercase tracking-widest transition-colors shadow-sm">Deploy Task</button>
                 </div>
             </div>
         </div>
 
-        <!-- КНОПКА LITE BUFFER ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ -->
-        <button onclick="window.location.href='lite.html'" class="md:hidden fixed bottom-[200px] right-4 z-[90] w-14 h-14 bg-yellow-500 text-black rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(234,179,8,0.4)] font-bold text-2xl btn-press border-2 border-yellow-400">⚡</button>
-
-        <!-- ВИДЖЕТ LITE BUFFER ДЛЯ ПК -->
-        <div class="hidden md:block bg-base-light/50 dark:bg-base-dark/50 border border-borderline-light dark:border-borderline-dark p-4 mb-6 rounded-md shadow-sm transition-colors relative z-20 font-mono-tech">
+        <!-- ВИДЖЕТ LITE BUFFER -->
+        <div class="bg-base-light/50 dark:bg-base-dark/50 border border-borderline-light dark:border-borderline-dark p-4 mb-6 rounded-md shadow-sm transition-colors relative z-20 font-mono-tech">
             <div class="flex justify-between items-center cursor-pointer btn-press" onclick="toggleDashLite()">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
@@ -357,7 +372,7 @@
         </div>
 
         <!-- INBOX / КАРАНТИН ДЕЛЕГИРОВАННЫХ ЗАДАЧ -->
-        <div id="inboxWrapper" class="hidden mb-6 bg-brand-light/5 border border-brand-light/50 dark:border-brand-dark/50 p-4 rounded-md shadow-sm relative font-mono-tech sticky top-2 z-[60] backdrop-blur-md">
+        <div id="inboxWrapper" class="hidden mb-6 bg-brand-light/5 border border-brand-light/50 dark:border-brand-dark/50 p-4 rounded-md shadow-sm relative font-mono-tech">
             <h3 class="text-[11px] font-bold text-brand-light dark:text-brand-dark uppercase tracking-widest mb-3 flex items-center gap-2">
                 <span class="w-2 h-2 bg-brand-light dark:bg-brand-dark rounded-full animate-pulse"></span>
                 INBOX // Требует распределения
@@ -367,7 +382,7 @@
 
         <div class="flex flex-wrap justify-between items-center mb-6 gap-4 font-mono-tech">
             <div class="flex flex-wrap gap-2 pt-2 pb-2" id="scopeFilterContainer"></div>
-            <div class="hidden md:flex gap-2 bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors shrink-0">
+            <div class="flex gap-2 bg-base-light dark:bg-base-dark p-1.5 rounded border border-borderline-light dark:border-borderline-dark transition-colors shrink-0">
                 <button type="button" onclick="setView('list')" id="btnList" class="px-5 py-1.5 rounded text-[11px] font-bold transition-all bg-panel-light dark:bg-panel-dark text-zinc-900 dark:text-zinc-100 uppercase tracking-widest shadow-sm border border-borderline-light dark:border-transparent">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </button>
@@ -377,33 +392,12 @@
             </div>
         </div>
 
-        <!-- МОБИЛЬНЫЕ ТАБЫ (Swipeable UI) -->
-        <div class="flex md:hidden bg-panel-light/90 dark:bg-panel-dark/90 backdrop-blur-md border-y border-borderline-light dark:border-borderline-dark overflow-x-auto sticky top-0 z-40 text-[10px] font-bold uppercase tracking-widest no-scrollbar mb-4 transition-colors">
-            <button onclick="switchMobileTab(1)" id="mob-tab-1" class="mob-tab flex-1 py-4 px-2 text-red-600 border-b-2 border-red-600 whitespace-nowrap btn-press transition-colors">КРИТИЧНО</button>
-            <button onclick="switchMobileTab(2)" id="mob-tab-2" class="mob-tab flex-1 py-4 px-2 text-zinc-400 dark:text-zinc-500 border-b-2 border-transparent whitespace-nowrap btn-press transition-colors">ФУНДАМЕНТ</button>
-            <button onclick="switchMobileTab(3)" id="mob-tab-3" class="mob-tab flex-1 py-4 px-2 text-zinc-400 dark:text-zinc-500 border-b-2 border-transparent whitespace-nowrap btn-press transition-colors">РУТИНА</button>
-            <button onclick="switchMobileTab(4)" id="mob-tab-4" class="mob-tab flex-1 py-4 px-2 text-zinc-400 dark:text-zinc-500 border-b-2 border-transparent whitespace-nowrap btn-press transition-colors">БЭКЛОГ</button>
-        </div>
-
         <div id="listView" class="mb-16 relative z-10 font-mono-tech">
-            <div id="container-q1" class="quad-container block md:block mb-8 pb-48 md:pb-0">
-                <h3 data-i18n="quad_1" class="hidden md:block text-[13px] font-bold text-red-600 dark:text-red-500 mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">CRITICAL [SEV-0]</h3>
-                <div id="listQ1" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 1)"></div>
-            </div>
-            <div id="container-q2" class="quad-container hidden md:block mb-8 pb-48 md:pb-0">
-                <h3 data-i18n="quad_2" class="hidden md:block text-[13px] font-bold text-brand-light dark:text-brand-dark mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">CORE [SEV-1]</h3>
-                <div id="listQ2" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 2)"></div>
-            </div>
-            <div id="container-q3" class="quad-container hidden md:block mb-8 pb-48 md:pb-0">
-                <h3 data-i18n="quad_3" class="hidden md:block text-[13px] font-bold text-yellow-600 dark:text-yellow-500 mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">ROUTINE [SEV-2]</h3>
-                <div id="listQ3" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 3)"></div>
-            </div>
-            <div id="container-q4" class="quad-container hidden md:block mb-8 pb-48 md:pb-0">
-                <h3 data-i18n="quad_4" class="hidden md:block text-[13px] font-bold text-zinc-500 dark:text-zinc-500 mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">BACKLOG [SEV-3]</h3>
-                <div id="listQ4" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 4)"></div>
-            </div>
-            
-            <div class="mt-12 mb-48 md:mb-0 p-5 border border-borderline-light dark:border-borderline-dark rounded-md bg-panel-light dark:bg-panel-dark transition-colors shadow-sm">
+            <div class="mb-8"><h3 data-i18n="quad_1" class="text-[13px] font-bold text-red-600 dark:text-red-500 mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">CRITICAL [SEV-0]</h3><div id="listQ1" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 1)"></div></div>
+            <div class="mb-8"><h3 data-i18n="quad_2" class="text-[13px] font-bold text-brand-light dark:text-brand-dark mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">CORE [SEV-1]</h3><div id="listQ2" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 2)"></div></div>
+            <div class="mb-8"><h3 data-i18n="quad_3" class="text-[13px] font-bold text-yellow-600 dark:text-yellow-500 mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">ROUTINE [SEV-2]</h3><div id="listQ3" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 3)"></div></div>
+            <div class="mb-8"><h3 data-i18n="quad_4" class="text-[13px] font-bold text-zinc-500 dark:text-zinc-500 mb-4 uppercase tracking-widest border-b-2 border-borderline-light dark:border-borderline-dark pb-2">BACKLOG [SEV-3]</h3><div id="listQ4" class="space-y-3" ondragover="allowDrop(event)" ondrop="drop(event, 4)"></div></div>
+            <div class="mt-12 p-5 border border-borderline-light dark:border-borderline-dark rounded-md bg-panel-light dark:bg-panel-dark transition-colors shadow-sm">
                 <div class="flex items-center justify-between cursor-pointer btn-press group" onclick="toggleArchive()">
                     <div class="flex items-center gap-3">
                         <h3 data-i18n="archived" class="text-[11px] font-bold text-zinc-500 dark:text-zinc-600 uppercase tracking-widest m-0 group-hover:text-brand-light transition-colors">Archived Processes</h3>
@@ -418,7 +412,7 @@
             </div>
         </div>
 
-        <div id="matrixView" class="hidden md:hidden mb-16 fade-in relative z-10 font-mono-tech">
+        <div id="matrixView" class="hidden mb-16 fade-in relative z-10 font-mono-tech">
             <div class="grid grid-cols-1 md:grid-cols-2 grid-rows-2 gap-6">
                 <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-6 border-l-4 border-l-red-600 dark:border-l-red-500 rounded shadow-sm hover-magnet">
                     <h3 data-i18n="quad_1" class="text-[11px] font-bold text-red-600 dark:text-red-500 mb-5 uppercase tracking-widest">CRITICAL [SEV-0]</h3>
@@ -439,8 +433,7 @@
             </div>
         </div>
 
-        <!-- MACRO OBJECTIVES (PC ONLY) -->
-        <div class="hidden md:block mt-20 relative z-10 border-t-2 border-borderline-light dark:border-borderline-dark pt-10 font-mono-tech">
+        <div class="mt-20 relative z-10 border-t-2 border-borderline-light dark:border-borderline-dark pt-10 font-mono-tech">
             <div class="max-w-3xl mb-10 border-l-2 border-borderline-light dark:border-borderline-dark pl-4 transition-colors">
                 <p data-i18n="macro_desc" class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed"></p>
             </div>
@@ -458,7 +451,6 @@
         </div>
     </div>
 
-    <!-- MODALS -->
     <div id="macroModal" class="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity font-mono-tech">
         <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-8 rounded-lg w-full max-w-md shadow-2xl">
             <h3 data-i18n="modal_macro_title" class="font-bold text-lg mb-6 uppercase tracking-widest text-zinc-900 dark:text-white border-b border-borderline-light dark:border-borderline-dark pb-2">Initialize Macro</h3>
@@ -498,7 +490,7 @@
                         <span data-i18n="tp_meta_sphere" class="text-zinc-400 text-[8px]">SECTOR</span>
                         <span id="tpMetaSphere" class="text-zinc-700 dark:text-zinc-300">---</span>
                     </div>
-                    <div class="w-px h-6 bg-borderline-light dark:border-borderline-dark"></div>
+                    <div class="w-px h-6 bg-borderline-light dark:bg-borderline-dark"></div>
                     <div class="flex flex-col gap-1">
                         <span data-i18n="tp_meta_created" class="text-zinc-400 text-[8px]">CREATED</span>
                         <span id="tpMetaCreated" class="text-zinc-700 dark:text-zinc-300">---</span>
@@ -768,21 +760,37 @@
             }
         });
 
+
         function updateScale(val) {
-            localStorage.setItem('priority_scale', val);
-            document.documentElement.style.setProperty('--system-scale', val);
+        localStorage.setItem('priority_scale', val);
+        document.documentElement.style.setProperty('--system-scale', val);
         }
         // При загрузке страницы:
         const savedScale = localStorage.getItem('priority_scale') || 1;
         document.documentElement.style.setProperty('--system-scale', savedScale);
 
+        
         function copyTask(id) {
-            const task = tasks.find(t => t.id === id);
+            let task = tasks.find(t => String(t.id) === String(id));
+            if(!task) {
+                const sharedTask = sharedTasks.find(t => String(t.id) === String(id));
+                if(sharedTask) {
+                    const scopeName = sharedScopes.find(s => s.id === sharedTask.scope_id)?.name || 'SYS_OTHER';
+                    task = {
+                        title: sharedTask.title,
+                        sphere: scopeName,
+                        price: sharedTask.price,
+                        createdAt: sharedTask.created_at ? new Date(sharedTask.created_at).toLocaleDateString('ru-RU') : ''
+                    };
+                }
+            }
+            
             if(!task) return;
+            
             const priceText = task.price ? ` [${shopCurrency}${task.price}]` : '';
-            const textToCopy = `[${task.sphere}] ${task.title}${priceText} (${t('init')}: ${task.createdAt})`;
+            const textToCopy = `[${task.sphere}] ${task.title}${priceText} (Создано: ${task.createdAt})`;
             navigator.clipboard.writeText(textToCopy);
-            showToast(t('toast_clip'), t('toast_copied_task'), 'success');
+            showToast(typeof t === 'function' ? t('toast_clip') : 'CLIPBOARD', typeof t === 'function' ? t('toast_copied_task') : 'Задача скопирована', 'success');
         }
         
         let taskToLink = null; 
@@ -890,12 +898,15 @@
             if(!document.body) return; 
             const cursorVal = localStorage.getItem('priority_cursor') || 'default';
             
+            // 1. Очистка старых классов и динамического стиля
             document.body.classList.remove('cursor-tech', 'cursor-royal', 'cursor-sword', 'cursor-wand', 'cursor-custom-emoji');
             const oldStyle = document.getElementById('dynamic-emoji-style');
             if (oldStyle) oldStyle.remove();
 
             if (cursorVal.startsWith('emoji:')) {
+                // 2. ГЕНЕРАЦИЯ ЭМОДЗИ-КУРСОРОВ (Normal & Active)
                 const emoji = cursorVal.replace('emoji:', '');
+                
                 const svgNormal = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='50%' y='50%' font-size='24' dominant-baseline='central' text-anchor='middle'>${emoji}</text></svg>`;
                 const svgActive = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='50%' y='50%' font-size='18' dominant-baseline='central' text-anchor='middle'>${emoji}</text></svg>`;
 
@@ -908,6 +919,7 @@
                 document.head.appendChild(style);
                 document.body.classList.add('cursor-custom-emoji');
             } else {
+                // 3. ПРИМЕНЕНИЕ СТАНДАРТНЫХ ПРЕСЕТОВ
                 if(cursorVal !== 'default') document.body.classList.add(cursorVal);
             }
         }
@@ -915,7 +927,7 @@
         function getDateStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`; }
         function getDateTimeStr() { const d = new Date(); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getFullYear()).slice(2)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
 
-        // --- ОБЛАЧНЫЙ ДВИЖОК СИНХРОНИЗАЦИИ ---
+       // --- ОБЛАЧНЫЙ ДВИЖОК СИНХРОНИЗАЦИИ ---
         let cloudSyncTimeout = null;
 
         function saveData(key, data) { 
@@ -926,11 +938,12 @@
         
             clearTimeout(cloudSyncTimeout);
             cloudSyncTimeout = setTimeout(async () => {
+                // ГЕНЕРИРУЕМ УНИКАЛЬНЫЙ ЯРЛЫК ЭТОГО СОХРАНЕНИЯ
                 const mutationId = Date.now().toString() + Math.random().toString(36).substring(7);
                 localStorage.setItem('priority_last_mutation', mutationId);
 
                 const appState = {
-                    _mutation_id: mutationId,
+                    _mutation_id: mutationId, // <--- ТОТ САМЫЙ ЯРЛЫК
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
@@ -951,18 +964,29 @@
                 try {
                     await supabaseClient
                         .from('users')
-                        .update({ app_data: appState, last_active_at: new Date().toISOString() })
+                        .update({ 
+                            app_data: appState,
+                            last_active_at: new Date().toISOString() 
+                        })
                         .eq('username', username);
-                } catch (err) {}
+                    console.log('☁️ State synced (Mutation: ' + mutationId + ')');
+                } catch (err) {
+                    console.error('Cloud sync failed', err);
+                }
             }, 1500);
         }
         
+        // Фоновая загрузка при F5 (ОБЪЕДИНЕННАЯ ВЕРСИЯ)
         async function syncFromCloud() {
            const username = localStorage.getItem('priority_user');
            if (!username) return;
 
            try {
-               const { data, error } = await supabaseClient.from('users').select('app_data, is_pro').eq('username', username).single();
+               const { data, error } = await supabaseClient
+                   .from('users')
+                   .select('app_data, is_pro')
+                   .eq('username', username)
+                   .single();
 
                if (data) {
                    isPro = data.is_pro || false;
@@ -971,6 +995,7 @@
                    if (data.app_data && Object.keys(data.app_data).length > 0) {
                        const cloudData = data.app_data;
 
+                       // 1. ВОССТАНАВЛИВАЕМ НАСТРОЙКИ ВИЗУАЛА
                        if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
                        if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
                        if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
@@ -981,6 +1006,7 @@
                            document.documentElement.style.setProperty('--system-scale', cloudData.scale);
                         }
 
+                       // 2. ВОССТАНАВЛИВАЕМ LITE-БУФЕР И ЕГО НАСТРОЙКИ
                        if (cloudData.lite_tasks) {
                            localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
                            liteTasks = cloudData.lite_tasks;
@@ -989,36 +1015,53 @@
                        if (cloudData.lite_cron_time) localStorage.setItem('lite_cron_time', cloudData.lite_cron_time);
                        if (cloudData.lite_cron_action) localStorage.setItem('lite_cron_action', cloudData.lite_cron_action);
                    
+                       // 3. ВОССТАНАВЛИВАЕМ ЯДРО (Матрицу)
                        localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes || []));
                        localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks || []));
                        localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros || []));
                        localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates || []));
                        localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges || []));
 
+                       // ОБНОВЛЯЕМ ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ
                        dynamicScopes = cloudData.scopes || [];
                        tasks = cloudData.tasks || [];
                        templates = cloudData.templates || [];
                        macros = cloudData.macros || [];
                        unlockedBadges = cloudData.badges || [];
 
+                       // 4. ПЕРЕРИСОВЫВАЕМ ВЕСЬ ИНТЕРФЕЙС
                        initDynamicScopes();
                        renderTasks();
                        renderMacros();
                        renderDashLite();
 
-                       const { data: inboxData } = await supabaseClient.from('shared_tasks').select('*').eq('assignee_username', username).eq('status', 'inbox');
+                       // ---> ДОБАВИТЬ ЭТОТ БЛОК: ЗАГРУЗКА INBOX <---
+                       const { data: inboxData } = await supabaseClient
+                           .from('shared_tasks')
+                           .select('*')
+                           .eq('assignee_username', username)
+                           .eq('status', 'inbox');
+
                        if (inboxData) {
                            sharedTasks = inboxData;
                            if (typeof renderInbox === 'function') renderInbox();
                        }
+                       // ---------------------------------------------
 
+                       // ПРИМЕНЯЕМ ВИЗУАЛ
                        applyAppTheme();
                        applyCursor();
                        applyI18n();
+
+                       // Подтягиваем общие SQL-сферы
                        loadSharedScopes();
+
+                       console.log('☁️ Unified state updated from cloud successfully');
                    }
                }
-           } catch (e) {}
+           } catch (e) {
+               console.error('Cloud pull failed:', e);
+           }
         }
 
         // --- ДВИЖОК SUPABASE REALTIME (WEBSOCKETS) ---
@@ -1026,7 +1069,8 @@
             const username = localStorage.getItem('priority_user');
             if (!username) return;
 
-            supabaseClient.channel('public:users')
+            supabaseClient
+                .channel('public:users')
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` }, (payload) => {
                     const cloudData = payload.new.app_data;
                     if (!cloudData) return;
@@ -1048,27 +1092,32 @@
                     initDynamicScopes(); renderTasks(); renderMacros(); renderDashLite();
                 }).subscribe();
 
+            // ВАЖНО: Слушаем общие задачи и чаты!
             supabaseClient.channel('public:shared_tasks')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_tasks' }, (payload) => {
-                    loadSharedScopes(); 
+                    console.log('🔄 Командная задача обновлена', payload);
+                    loadSharedScopes(); // Автоматически скачает и перерисует без F5
                 }).subscribe();
 
             supabaseClient.channel('public:shared_comments')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_comments' }, (payload) => {
-                    loadSharedScopes();
+                    console.log('🔄 Новый комментарий в чате', payload);
+                    loadSharedScopes(); // Автоматически скачает и перерисует без F5
                 }).subscribe();
         }
 
+        // --- AUTH & ROUTING LOGIC ---
         function checkAuth() {
             const isAuth = localStorage.getItem('priority_auth') === 'true';
             const isOnboarded = localStorage.getItem('priority_onboarded') === 'true';
 
+            // Делаем переключатели языка и темы всегда видимыми!
             document.getElementById('globalToggles').classList.remove('hidden');
 
             if (!isAuth) {
                 document.getElementById('mainApp').classList.add('hidden');
                 document.getElementById('authScreen').classList.remove('hidden');
-                applyI18n(); 
+                applyI18n(); // Жестко заставляем текст появиться
                 return;
             }
 
@@ -1084,25 +1133,34 @@
             applyAppTheme();
         }
 
+        // --- УМНЫЙ ВВОД OTP-КОДА И UX-УЛУЧШЕНИЯ ---
         const codeInputs = document.querySelectorAll('.code-cell');
             
         codeInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
+                // Убираем всё, кроме цифр
                 const val = e.target.value.replace(/[^0-9]/g, '');
 
+                // ЛОГИКА ДЛЯ МОБИЛЬНОГО АВТОЗАПОЛНЕНИЯ
                 if (val.length > 1) {
-                    e.target.value = val[0] || ''; 
+                    e.target.value = val[0] || ''; // Оставляем в текущей ячейке только первую цифру
+
+                    // Раскидываем остальные цифры по следующим ячейкам
                     codeInputs.forEach((cell, idx) => {
                         if (idx >= index && (idx - index) < val.length) {
                             cell.value = val[idx - index];
                         }
                     });
+                    // Переносим фокус на последнюю заполненную ячейку
                     const focusIndex = Math.min(index + val.length - 1, 3);
                     codeInputs[focusIndex].focus();
+
+                    // Если все 4 ячейки заполнены — входим
                     if (codeInputs[3].value !== '') confirmLogin();
                     return;
                 }
             
+                // СТАНДАРТНАЯ ЛОГИКА ДЛЯ РУЧНОГО ВВОДА
                 e.target.value = val;
                 if (val.length === 1) {
                     input.classList.remove('code-pop'); 
@@ -1118,6 +1176,7 @@
             });
         
             input.addEventListener('keydown', (e) => {
+                // Если поле пустое и жмут Backspace — прыгаем на предыдущий инпут и очищаем его
                 if (e.key === 'Backspace') {
                     if (!e.target.value && index > 0) {
                         codeInputs[index - 1].focus();
@@ -1128,19 +1187,26 @@
                 }
             });
         
+            // Поддержка вставки (Paste) 4 цифр буфером
             input.addEventListener('paste', (e) => {
                 e.preventDefault();
                 const pasteData = e.clipboardData.getData('text').trim().replace(/[^0-9]/g, '');
+                
                 if (pasteData.length >= 4) {
-                    codeInputs.forEach((cell, idx) => { cell.value = pasteData[idx] || ''; });
+                    codeInputs.forEach((cell, idx) => {
+                        cell.value = pasteData[idx] || '';
+                    });
                     codeInputs[codeInputs.length - 1].focus();
                     confirmLogin();
                 }
             });
         });
         
+        // Поддержка клавиши Enter для шага 1 (ввод логина)
         document.getElementById('tgLogin').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') requestTelegramCode();
+            if (e.key === 'Enter') {
+                requestTelegramCode();
+            }
         });
 
         async function requestTelegramCode() {
@@ -1170,19 +1236,27 @@
                     setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
                     setTimeout(() => codeInputs[0].focus(), 300);
                 } else {
-                    const botUrl = 'https://t.me/PrioritysBot';
-                    const errorMsg = `
-                        <div class="flex flex-col gap-4 mt-2">
-                            <span class="text-xs font-black text-zinc-700 dark:text-zinc-300 leading-relaxed tracking-widest">${t('toast_unreg_desc')}</span>
-                            <div class="flex gap-2 mt-1">
-                                <a href="${botUrl}" target="_blank" onclick="this.closest('.toast-enter').remove()" class="flex-1 flex items-center justify-center bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-black py-3 px-2 rounded text-[10px] uppercase tracking-widest shadow-md transition-all btn-press">${t('btn_open_bot')}</a>
-                                <button type="button" onclick="navigator.clipboard.writeText('${botUrl}'); showToast('${t('toast_clip')}', '${t('toast_copied')}', 'success', 3000);" class="shrink-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark hover:border-brand-light dark:hover:border-brand-dark text-zinc-600 dark:text-zinc-400 font-bold py-3 px-4 rounded text-base transition-all btn-press shadow-sm" title="${t('btn_copy_link')}">📋</button>
-                            </div>
-                        </div>
-                    `;
-                    showToast(t('toast_unreg_title'), errorMsg, 'error', 0);
-                }
-            } catch (err) { showToast('ERROR', 'Connection failed', 'error'); }
+            const botUrl = 'https://t.me/PrioritysBot';
+            const errorMsg = `
+                <div class="flex flex-col gap-4 mt-2">
+                    <span class="text-xs font-black text-zinc-700 dark:text-zinc-300 leading-relaxed tracking-widest">${t('toast_unreg_desc')}</span>
+                    <div class="flex gap-2 mt-1">
+                        <a href="${botUrl}" target="_blank" onclick="this.closest('.toast-enter').remove()" class="flex-1 flex items-center justify-center bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-black py-3 px-2 rounded text-[10px] uppercase tracking-widest shadow-md transition-all btn-press">
+                            ${t('btn_open_bot')}
+                        </a>
+                        <button type="button" onclick="navigator.clipboard.writeText('${botUrl}'); showToast('${t('toast_clip')}', '${t('toast_copied')}', 'success', 3000);" class="shrink-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark hover:border-brand-light dark:hover:border-brand-dark text-zinc-600 dark:text-zinc-400 font-bold py-3 px-4 rounded text-base transition-all btn-press shadow-sm" title="${t('btn_copy_link')}">
+                            📋
+                        </button>
+                    </div>
+                </div>
+            `;
+            // Вызываем с параметром 0 (вечный тост)
+            showToast(t('toast_unreg_title'), errorMsg, 'error', 0);
+        }
+            } catch (err) {
+                console.error(err);
+                showToast('ERROR', 'Connection failed', 'error');
+            }
         }
 
         async function confirmLogin() {
@@ -1196,15 +1270,31 @@
             }
         
             try {
-                const { data: otpRecord, error } = await supabaseClient.from('otp_codes').select('*').eq('username', loginInput).eq('code', code).eq('used', false).order('created_at', { ascending: false }).limit(1).single();
+                // 1. Проверяем OTP код
+                const { data: otpRecord, error } = await supabaseClient
+                    .from('otp_codes')
+                    .select('*')
+                    .eq('username', loginInput)
+                    .eq('code', code)
+                    .eq('used', false)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+            
                 if (error || !otpRecord) {
                     showToast('ACCESS DENIED', 'Invalid or expired code', 'error');
                     return;
                 }
             
+                // 2. Сжигаем код
                 await supabaseClient.from('otp_codes').update({ used: true }).eq('id', otpRecord.id);
             
-                const { data: userData } = await supabaseClient.from('users').select('is_pro, app_data').eq('username', loginInput).single();
+                // 3. ЗАГРУЖАЕМ БЭКАП И PRO-СТАТУС ИЗ ОБЛАКА ПРЯМО ПРИ ВХОДЕ
+                const { data: userData } = await supabaseClient
+                    .from('users')
+                    .select('is_pro, app_data')
+                    .eq('username', loginInput)
+                    .single();
             
                 localStorage.setItem('priority_auth', 'true');
                 localStorage.setItem('priority_user', loginInput);
@@ -1213,6 +1303,7 @@
                     isPro = userData.is_pro || false;
                     localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
 
+                    // ЕСЛИ В БАЗЕ ЕСТЬ ДАННЫЕ - МЫ УБИВАЕМ ОНБОРДИНГ И ВОССТАНАВЛИВАЕМ СТЕЙТ
                     if (userData.app_data && Object.keys(userData.app_data).length > 0) {
                         const cloudData = userData.app_data;
                         localStorage.setItem('priority_onboarded', 'true'); 
@@ -1222,6 +1313,8 @@
                         if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
                         if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
                         if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
+
+                        // --- ДОБАВИТЬ ЭТИ СТРОКИ ---
                         if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
                         if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
                         if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
@@ -1233,6 +1326,7 @@
             
                 showToast('SYSTEM', 'Access Granted', 'success');
             
+                // 4. Логика перенаправления
                 if (localStorage.getItem('priority_onboarded') !== 'true') {
                     window.location.href = 'onboarding.html';
                 } else {
@@ -1243,7 +1337,10 @@
                     applyAppTheme();
                     setTimeout(() => document.getElementById('taskInput').focus(), 100);
                 }
-            } catch (err) { showToast('ERROR', 'Verification error', 'error'); }
+            } catch (err) {
+                console.error(err);
+                showToast('ERROR', 'Verification error', 'error');
+            }
         }
 
         function backToStep1() {
@@ -1264,14 +1361,19 @@
             backToStep1();
         }
 
+        // --- MAIN APP LOGIC ---
         function loadDataFromStorage() {
+
             dynamicScopes = JSON.parse(localStorage.getItem('priority_scopes')) || [];
             tasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
             templates = JSON.parse(localStorage.getItem('priority_templates')) || [];
             macros = JSON.parse(localStorage.getItem('priority_macros')) || [];
             unlockedBadges = JSON.parse(localStorage.getItem('priority_badges')) || [];
+
             liteTasks = JSON.parse(localStorage.getItem('priority_lite_tasks')) || [];
+
             isPro = localStorage.getItem('priority_is_pro') === 'true';
+
             shopModuleActive = localStorage.getItem('priority_shop_module') === 'true';
             shopCurrency = localStorage.getItem('priority_currency') || '₽';
 
@@ -1284,8 +1386,13 @@
             renderMacros();
             applyCursor();
         
+            // Запускаем подтягивание данных из облака
             syncFromCloud();
+
+            // ВКЛЮЧАЕМ РЕАЛТАЙМ-СЛУХАЧА:
             initRealtimeSync();
+
+            // Запускаем перехват инвайт-ссылок
             processInviteLink();
             
             if(localStorage.getItem('priority_dash_lite_open') === 'true') {
@@ -1315,10 +1422,12 @@
 
         function renderBadges() {
             const container = document.getElementById('badgesContainer');
+            // Расширенный список ачивок
             const keys = ['first_task', 'first_macro', 'guide_passed', 'deep_work', 'ai_hacker', 'teleporter', 'shopaholic', 'matrix_neo'];
             
             container.innerHTML = keys.map(k => {
                 const isUnlocked = unlockedBadges.includes(k);
+                // Назначаем иконки для старых и новых ачивок
                 let icon = '🏆';
                 if(k==='first_task') icon='🎯'; if(k==='first_macro') icon='🏗️';
                 if(k==='guide_passed') icon='🧠'; if(k==='deep_work') icon='⚡';
@@ -1351,6 +1460,7 @@
             }).join('');
         }
 
+        // --- МОДУЛЬ ПОКУПОК ---
         function checkShopModule() {
             const shopBlock = document.getElementById('shopFeatureBlock');
             if(!shopBlock) return;
@@ -1388,6 +1498,8 @@
 
         function initDynamicScopes() {
             const radioContainer = document.getElementById('scopeRadioContainer');
+            
+            // Склеиваем личные сферы из JSONB и общие сферы из SQL
             const personalScopes = scopes.filter(s => !sharedScopes.find(ss => ss.name === s));
             const renderScopes = [...personalScopes, ...sharedScopes.map(s => s.name), 'SYS_OTHER'];
 
@@ -1400,9 +1512,9 @@
                     const sharedIcon = isShared ? ' <span title="Shared Scope">👥</span>' : '';
 
                     return `
-                    <label class="cursor-pointer shrink-0">
+                    <label class="cursor-pointer">
                         <input type="radio" name="sphere" value="${scopeName}" onchange="handleScopeChange('${scopeName}')" class="peer" ${index === 0 ? 'checked' : ''}>
-                        <div class="px-4 md:px-6 py-2 rounded-sm text-xs md:text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase font-mono-tech">${displayName}${sharedIcon}</div>
+                        <div class="px-6 py-2 rounded-sm text-sm font-bold text-zinc-600 dark:text-zinc-400 peer-checked:bg-panel-light dark:peer-checked:bg-panel-dark peer-checked:text-zinc-900 dark:peer-checked:text-zinc-100 peer-checked:shadow-sm transition-all uppercase font-mono-tech">${displayName}${sharedIcon}</div>
                     </label>
                     `;
                 }).join('');
@@ -1411,6 +1523,7 @@
             checkShopModule();
             renderFilters();
 
+            // Искусственно вызываем обработчик для первой выбранной сферы при загрузке
             const checkedInput = document.querySelector('input[name="sphere"]:checked');
             if(checkedInput) handleScopeChange(checkedInput.value);
         }
@@ -1421,15 +1534,24 @@
             const sharedScope = sharedScopes.find(s => s.name === scopeName);
 
             if (sharedScope) {
+                // Показываем селектор, если сфера общая
                 assigneeBlock.classList.remove('hidden');
                 assigneeBlock.classList.add('flex');
                 assigneeSelect.innerHTML = '<option value="">Загрузка...</option>';
 
-                const { data: members } = await supabaseClient.from('scope_members').select('username').eq('scope_id', sharedScope.id);
+                // Загружаем участников именно этой сферы
+                const { data: members } = await supabaseClient
+                    .from('scope_members')
+                    .select('username')
+                    .eq('scope_id', sharedScope.id);
+
                 if (members) {
-                    assigneeSelect.innerHTML = members.map(m => `<option value="${m.username}">${m.username === localStorage.getItem('priority_user') ? '@me' : m.username}</option>`).join('');
+                    assigneeSelect.innerHTML = members.map(m => 
+                        `<option value="${m.username}">${m.username === localStorage.getItem('priority_user') ? '@me' : m.username}</option>`
+                    ).join('');
                 }
             } else {
+                // Прячем селектор для личных сфер
                 assigneeBlock.classList.add('hidden');
                 assigneeBlock.classList.remove('flex');
                 assigneeSelect.innerHTML = '<option value="me">@me</option>';
@@ -1437,11 +1559,34 @@
         }
 
         function editTask(id) {
-            const tObj = tasks.find(x => x.id === id);
+            // Ищем задачу универсально (строго переводим всё в строки)
+            let tObj = tasks.find(x => String(x.id) === String(id));
+            let isShared = false;
+            
+            if (!tObj) {
+                const sharedT = sharedTasks.find(x => String(x.id) === String(id));
+                if (sharedT) {
+                    isShared = true;
+                    const scopeObj = sharedScopes.find(s => s.id === sharedT.scope_id);
+                    tObj = {
+                        title: sharedT.title,
+                        sphere: scopeObj ? scopeObj.name : 'SYS_OTHER',
+                        isImportant: sharedT.is_important,
+                        isUrgent: sharedT.is_urgent,
+                        price: sharedT.price,
+                        macroId: null // Общие задачи пока без макросов
+                    };
+                }
+            }
+            
+            if (!tObj) return;
+
             document.getElementById('taskInput').value = tObj.title;
             
             let targetSphere = tObj.sphere;
-            if (targetSphere === 'SYS_OTHER' || !dynamicScopes.includes(targetSphere)) targetSphere = 'SYS_OTHER';
+            if (targetSphere === 'SYS_OTHER' || (!dynamicScopes.includes(targetSphere) && !sharedScopes.find(s => s.name === targetSphere))) {
+                targetSphere = 'SYS_OTHER';
+            }
             const sphereRadio = document.querySelector(`input[name="sphere"][value="${targetSphere}"]`);
             if (sphereRadio) sphereRadio.checked = true;
             
@@ -1490,7 +1635,7 @@
             deployBtn.classList.remove('bg-brand-light', 'dark:bg-brand-dark');
             document.getElementById('cancelEditBtn').classList.add('hidden');
             
-            escalatedLiteTaskId = null;
+            escalatedLiteTaskId = null; // Сброс при отмене
         }
 
         async function deployOrUpdateTask() {
@@ -1515,22 +1660,50 @@
             const username = localStorage.getItem('priority_user');
 
             if (editTaskId) {
-                const numericId = Number(editTaskId);
-                const taskObj = tasks.find(x => x.id === numericId);
-                if (taskObj) {
-                    taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
-                    if(priceVal !== null) taskObj.price = priceVal; else delete taskObj.price;
-                    if(macroId) taskObj.macroId = parseInt(macroId); else delete taskObj.macroId;
+                // ПРОВЕРЯЕМ ОБЩИЕ ЗАДАЧИ
+                const sharedTask = sharedTasks.find(x => String(x.id) === String(editTaskId));
+                if (sharedTask) {
+                    sharedTask.title = input.value;
+                    sharedTask.is_important = impVal;
+                    sharedTask.is_urgent = urgVal;
+                    if(priceVal !== null) sharedTask.price = priceVal; else sharedTask.price = null;
+                    
                     cancelEdit();
-                    showToast('SYS', 'Updated', 'info');
-                    saveData('priority_tasks', tasks);
+                    showToast('SYS', 'Updated (Cloud)', 'info');
+                    
+                    supabaseClient.from('shared_tasks').update({
+                        title: sharedTask.title,
+                        is_important: sharedTask.is_important,
+                        is_urgent: sharedTask.is_urgent,
+                        price: sharedTask.price
+                    }).eq('id', editTaskId).then(() => renderTasks());
                     renderTasks();
-                    renderMacros();
+                } else {
+                    // ПРОВЕРЯЕМ ЛОКАЛЬНЫЕ ЗАДАЧИ
+                    const taskObj = tasks.find(x => String(x.id) === String(editTaskId));
+                    if (taskObj) {
+                        taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
+                        if(priceVal !== null) taskObj.price = priceVal; else delete taskObj.price;
+                        if(macroId) taskObj.macroId = parseInt(macroId); else delete taskObj.macroId;
+                        cancelEdit();
+                        showToast('SYS', 'Updated', 'info');
+                        saveData('priority_tasks', tasks);
+                        renderTasks();
+                        renderMacros();
+                    }
                 }
             } else {
                 if (sharedScope) {
                     const assignee = document.getElementById('taskAssignee').value || username;
                     const finalAssignee = (assignee === 'me' || assignee === '@me') ? username : assignee;
+
+                    let targetStatus = 'inbox';
+                    if (finalAssignee === username) {
+                        if (impVal && urgVal) targetStatus = 'q1';
+                        else if (impVal && !urgVal) targetStatus = 'q2';
+                        else if (!impVal && urgVal) targetStatus = 'q3';
+                        else targetStatus = 'q4';
+                    }
 
                     const tempId = 'temp_' + Date.now();
                     const tempTask = {
@@ -1542,7 +1715,7 @@
                         is_important: impVal,
                         is_urgent: urgVal,
                         is_acknowledged: finalAssignee === username,
-                        status: 'active',
+                        status: targetStatus,
                         price: priceVal,
                         created_at: new Date().toISOString()
                     };
@@ -1557,22 +1730,23 @@
                     renderTasks();
 
                     supabaseClient.from('shared_tasks').insert({
-                        scope_id: sharedScope.id, title: tempTask.title, creator_username: tempTask.creator_username, assignee_username: tempTask.assignee_username,
-                        is_important: tempTask.is_important, is_urgent: tempTask.is_urgent, is_acknowledged: tempTask.is_acknowledged, status: tempTask.status, price: tempTask.price
+                        scope_id: sharedScope.id,
+                        title: tempTask.title,
+                        creator_username: tempTask.creator_username,
+                        assignee_username: tempTask.assignee_username,
+                        is_important: tempTask.is_important,
+                        is_urgent: tempTask.is_urgent,
+                        is_acknowledged: tempTask.is_acknowledged,
+                        status: tempTask.status,
+                        price: tempTask.price
                     }).select().single().then(({ data, error }) => {
                         if (error) {
                             showToast('ERROR', 'Ошибка сети при создании задачи', 'error');
-                            sharedTasks = sharedTasks.filter(t => t.id !== tempId);
+                            sharedTasks = sharedTasks.filter(t => String(t.id) !== String(tempId));
                             renderTasks();
                         } else if (data) {
-                            const idx = sharedTasks.findIndex(t => t.id === tempId);
-                            if (idx > -1) sharedTasks[idx] = data; 
-                            if (finalAssignee !== username) {
-                                fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
-                                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ action: 'notify_delegation', assignee: finalAssignee, creator: username, taskTitle: tempTask.title, scope: sphereVal })
-                                }).catch(err => console.error('Push notification failed:', err));
-                            }
+                            const idx = sharedTasks.findIndex(t => String(t.id) === String(tempId));
+                            if (idx > -1) sharedTasks[idx] = data;
                         }
                     });
 
@@ -1595,7 +1769,7 @@
                 }
 
                 if (typeof escalatedLiteTaskId !== 'undefined' && escalatedLiteTaskId && !editTaskId) {
-                    liteTasks = liteTasks.filter(x => x.id !== escalatedLiteTaskId);
+                    liteTasks = liteTasks.filter(x => String(x.id) !== String(escalatedLiteTaskId));
                     localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
                     escalatedLiteTaskId = null;
                     if (typeof renderDashLite === 'function') renderDashLite();
@@ -1656,11 +1830,11 @@
             showToast(t('toast_sys'), t('toast_tmpl_saved'), 'success');
         }
 
+        // --- MACRO & LATE BINDING ---
         function renderMacros() {
             const container = document.getElementById('macrosContainer');
             const archiveContainer = document.getElementById('archivedMacrosContainer');
             const archiveSection = document.getElementById('archivedMacrosSection');
-            if(!container || !archiveContainer || !archiveSection) return;
             container.innerHTML = ''; archiveContainer.innerHTML = '';
             let hasArchive = false;
 
@@ -1734,6 +1908,7 @@
             }
         }
 
+        // --- ЛОГИКА ПРИВЯЗКИ (LATE BINDING) ---
         function openLinkModal(taskId) {
             taskToLink = taskId;
             const modal = document.getElementById('linkMacroModal');
@@ -1760,7 +1935,7 @@
         }
 
         function linkTaskToMacro(macroId) {
-            const task = tasks.find(t => t.id === taskToLink);
+            const task = tasks.find(t => String(t.id) === String(taskToLink));
             if(task) {
                 task.macroId = macroId;
                 saveData('priority_tasks', tasks);
@@ -1771,7 +1946,7 @@
         }
 
         function unlinkTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
+            const task = tasks.find(t => String(t.id) === String(taskId));
             if(task) {
                 delete task.macroId;
                 saveData('priority_tasks', tasks);
@@ -1780,61 +1955,60 @@
             }
         }
 
-        const isSharedId = (id) => String(id).includes('-') || String(id).startsWith('temp_');
+        // --- TASK CREATION & EDITING ---
+
+        // --- ЗАВЕРШЕНИЕ ЗАДАЧИ ---
 
         async function toggleTask(id) {
-            if (isSharedId(id)) { 
-                if (String(id).startsWith('temp_')) return showToast('INFO', 'Синхронизация, подождите...', 'info');
-                const task = sharedTasks.find(t => t.id === id);
-                if (!task) return;
-                const newStatus = task.status === 'completed' ? 'active' : 'completed';
+            if (String(id).startsWith('temp_')) return showToast('INFO', 'Синхронизация, подождите...', 'info');
+
+            const sharedTask = sharedTasks.find(t => String(t.id) === String(id));
+            if (sharedTask) {
+                const newStatus = sharedTask.status === 'completed' ? 'active' : 'completed';
                 const completedTime = newStatus === 'completed' ? new Date().toISOString() : null;
                 try {
-                    task.status = newStatus; task.completed_at = completedTime;
+                    sharedTask.status = newStatus; 
+                    sharedTask.completed_at = completedTime;
                     renderTasks(); 
                     await supabaseClient.from('shared_tasks').update({ status: newStatus, completed_at: completedTime }).eq('id', id);
-
-                    if (newStatus === 'completed') {
-                        const targetUser = task.creator_username === username ? task.assignee_username : task.creator_username;
-                        if (targetUser && targetUser !== username) {
-                            fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'notify_completion', target: targetUser, actor: username, taskTitle: task.title })
-                            }).catch(()=>{});
-                        }
-                    }
                 } catch(e) { showToast('ERROR', 'Сбой сети', 'error'); }
                 return;
             }
             
-            const numericId = Number(id);
-            const task = tasks.find(t => t.id === numericId);
-            if(!task.completed) {
-                task.completedAt = getDateTimeStr(); task.completed = true;
-                pushSysLog('TASK_DONE', `Completed task: ${task.title}`);
-                const taskCard = document.getElementById(`task-${numericId}`);
-                const archiveList = document.getElementById('completedTasks');
-                if (taskCard && archiveList) {
-                    const titleEl = taskCard.querySelector('.text-base');
-                    if(titleEl) titleEl.classList.add('strike-through', 'text-zinc-500');
-                    const metaContainer = taskCard.querySelector('.flex-wrap');
-                    if(metaContainer) metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">DONE: ${task.completedAt}</span>`);
-                    const actionsBlock = taskCard.querySelector('.peer-checked\\:max-w-\\[200px\\]');
-                    if(actionsBlock) actionsBlock.remove();
-                    archiveList.prepend(taskCard);
-                } else renderTasks(); 
-            } else {
-                pushSysLog('TASK_RESTORE', `Restored task: ${task.title}`);
-                task.completed = false; renderTasks();
+            const task = tasks.find(t => String(t.id) === String(id));
+            if (task) {
+                if(!task.completed) {
+                    task.completedAt = getDateTimeStr(); 
+                    task.completed = true;
+                    pushSysLog('TASK_DONE', `Completed task: ${task.title}`);
+                    
+                    const taskCard = document.getElementById(`task-${id}`);
+                    const archiveList = document.getElementById('completedTasks');
+                    if (taskCard && archiveList) {
+                        const titleEl = taskCard.querySelector('.text-base');
+                        if(titleEl) titleEl.classList.add('strike-through', 'text-zinc-500');
+                        const metaContainer = taskCard.querySelector('.flex-wrap');
+                        if(metaContainer) metaContainer.insertAdjacentHTML('beforeend', `<span class="text-emerald-600 dark:text-emerald-500 text-[10px] font-bold temp-done-tag">DONE: ${task.completedAt}</span>`);
+                        const actionsBlock = taskCard.querySelector('.peer-checked\\:max-w-\\[200px\\]');
+                        if(actionsBlock) actionsBlock.remove();
+                        archiveList.prepend(taskCard);
+                    } else renderTasks(); 
+                } else {
+                    pushSysLog('TASK_RESTORE', `Restored task: ${task.title}`);
+                    task.completed = false; 
+                    renderTasks();
+                }
+                saveData('priority_tasks', tasks); renderMacros(); 
             }
-            saveData('priority_tasks', tasks); renderMacros(); 
         }
 
         async function deleteTask(id) {
-            if (isSharedId(id)) { 
-                if (String(id).startsWith('temp_')) return;
+            if (String(id).startsWith('temp_')) return;
+            
+            const sharedTask = sharedTasks.find(t => String(t.id) === String(id));
+            if (sharedTask) {
                 try {
-                    sharedTasks = sharedTasks.filter(t => t.id !== id);
+                    sharedTasks = sharedTasks.filter(t => String(t.id) !== String(id));
                     renderTasks();
                     await supabaseClient.from('shared_tasks').delete().eq('id', id);
                     showToast('SYSTEM', 'Общая задача удалена', 'info');
@@ -1842,8 +2016,7 @@
                 return;
             }
 
-            const numericId = Number(id);
-            const taskIndex = tasks.findIndex(t => t.id === numericId);
+            const taskIndex = tasks.findIndex(t => String(t.id) === String(id));
             if (taskIndex > -1) {
                 lastDeletedTask = { ...tasks[taskIndex], originalIndex: taskIndex };
                 tasks.splice(taskIndex, 1);
@@ -1902,13 +2075,22 @@
                     if (!tObj.shared_comments) tObj.shared_comments = [];
                     tObj.shared_comments.push(data);
 
+                    // ---> ДОБАВЛЯЕМ УВЕДОМЛЕНИЕ О КОММЕНТАРИИ <---
                     const targetUser = tObj.creator_username === username ? tObj.assignee_username : tObj.creator_username;
                     if (targetUser && targetUser !== username) {
                         fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
-                            method: 'POST', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ action: 'notify_comment', target: targetUser, actor: username, taskTitle: tObj.title, commentText: text })
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                action: 'notify_comment', 
+                                target: targetUser,
+                                actor: username,
+                                taskTitle: tObj.title,
+                                commentText: text
+                            })
                         }).catch(()=>{});
                     }
+                    // ---------------------------------------------
 
                     input.value = ''; renderTasks();
                     setTimeout(() => toggleComments(id), 50);
@@ -1936,6 +2118,7 @@
             saveData('priority_tasks', tasks); renderTasks();
         }
 
+        // --- DRAG & DROP ---
         function drag(ev, id) { draggedTaskId = id; ev.dataTransfer.setData("text", id); setTimeout(() => ev.target.classList.add('dragging'), 0); }
         function dragEnd(ev) { ev.target.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }
         function allowDrop(ev) { ev.preventDefault(); const trg = ev.target.closest('.tech-card-task'); if(trg && trg.id !== `task-${draggedTaskId}`) trg.classList.add('drag-over'); }
@@ -1963,64 +2146,48 @@
             renderTasks();
         }
 
-        // --- MOBILE TABS LOGIC ---
-        function switchMobileTab(quadIndex) {
-            if (window.innerWidth >= 768) return; 
-
-            document.querySelectorAll('.quad-container').forEach(el => {
-                el.classList.remove('block');
-                el.classList.add('hidden');
-            });
-            const target = document.getElementById(`container-q${quadIndex}`);
-            if(target) {
-                target.classList.remove('hidden');
-                target.classList.add('block');
-            }
-
-            document.querySelectorAll('.mob-tab').forEach(tab => {
-                tab.classList.remove('border-red-600', 'text-red-600', 'border-brand-light', 'text-brand-light', 'border-yellow-600', 'text-yellow-600', 'border-zinc-500', 'text-zinc-900', 'dark:text-white');
-                tab.classList.add('border-transparent', 'text-zinc-400', 'dark:text-zinc-500');
-            });
-
-            const activeTab = document.getElementById(`mob-tab-${quadIndex}`);
-            if (activeTab) {
-                if (quadIndex === 1) activeTab.classList.add('border-red-600', 'text-red-600');
-                if (quadIndex === 2) activeTab.classList.add('border-brand-light', 'text-brand-light');
-                if (quadIndex === 3) activeTab.classList.add('border-yellow-600', 'text-yellow-600');
-                if (quadIndex === 4) activeTab.classList.add('border-zinc-500', 'text-zinc-900', 'dark:text-white');
-                activeTab.classList.remove('text-zinc-400', 'dark:text-zinc-500', 'border-transparent');
-            }
-        }
-
         function renderTasks() {
-            const username = localStorage.getItem('priority_user'); 
+            const username = localStorage.getItem('priority_user'); // Добавлено для определения текущего пользователя
             const qLists = [document.getElementById('listQ1'), document.getElementById('listQ2'), document.getElementById('listQ3'), document.getElementById('listQ4')];
             const mLists = [document.getElementById('matrixQ1'), document.getElementById('matrixQ2'), document.getElementById('matrixQ3'), document.getElementById('matrixQ4')];
             const comp = document.getElementById('completedTasks');
             qLists.forEach(l => l.innerHTML = ''); mLists.forEach(l => l.innerHTML = ''); comp.innerHTML = '';
                 
+            // 1. АДАПТИРУЕМ ОБЩИЕ ЗАДАЧИ
             const allScopeNames = Array.from(new Set([...scopes, ...sharedScopes.map(s => s.name)]));
 
             const acceptedShared = sharedTasks
-                .filter(t => !(t.assignee_username === username && t.is_acknowledged === false)) 
+                .filter(t => !(t.assignee_username === username && t.is_acknowledged === false)) // СКРЫВАЕМ ИЗ МАТРИЦЫ ТО, ЧТО В ИНБОКСЕ
                 .map(t => {
                     const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER';
                     return {
-                        id: t.id, title: t.title, sphere: scopeName, isImportant: t.is_important, isUrgent: t.is_urgent,
-                        completed: t.status === 'completed', createdAt: new Date(t.created_at).toLocaleDateString('ru-RU'),
+                        id: t.id,
+                        title: t.title,
+                        sphere: scopeName,
+                        isImportant: t.is_important,
+                        isUrgent: t.is_urgent,
+                        completed: t.status === 'completed',
+                        createdAt: new Date(t.created_at).toLocaleDateString('ru-RU'),
                         completedAt: t.completed_at ? new Date(t.completed_at).toLocaleDateString('ru-RU') : null,
                         comments: t.shared_comments ? t.shared_comments.map(c => ({ 
                             id: c.id, text: c.text, author: c.author_username, createdAt: new Date(c.created_at).toLocaleString('ru-RU', {hour: '2-digit', minute:'2-digit'}) 
                         })) : [],
-                        price: t.price, isShared: true, creator: t.creator_username, assignee: t.assignee_username, isAcknowledged: t.is_acknowledged
+                        price: t.price,
+                        isShared: true,
+                        creator: t.creator_username,
+                        assignee: t.assignee_username,
+                        isAcknowledged: t.is_acknowledged
                     };
                 });
 
+            // 2. СЛИЯНИЕ ДАННЫХ
             const allTasks = [...tasks, ...acceptedShared];
 
+            // 3. СОРТИРОВКА ОБЪЕДИНЕННОГО МАССИВА
             const sortedTasks = allTasks.sort((a, b) => {
                 if (a.isGolden && !b.isGolden) return -1;
                 if (!a.isGolden && b.isGolden) return 1;
+                // Универсальная сортировка для строк и чисел
                 const timeA = typeof a.id === 'string' ? 0 : a.id; 
                 const timeB = typeof b.id === 'string' ? 0 : b.id;
                 return timeB - timeA; 
@@ -2099,7 +2266,7 @@
                                 <input type="checkbox" id="action-toggle-${task.id}" class="peer hidden">
                                 <div class="flex items-center gap-1 overflow-hidden transition-all duration-200 max-w-0 opacity-0 peer-checked:max-w-[200px] peer-checked:opacity-100 md:max-w-none md:opacity-0 md:group-hover:opacity-100">
                                     ${!task.completed ? `
-                                        <button type="button" onclick="openFocusMode('${task.id}')" class="hidden md:flex btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark shrink-0 items-center justify-center transition-colors text-lg" title="${t('btn_focus')}">🎯</button>
+                                        <button type="button" onclick="openFocusMode('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-lg" title="${t('btn_focus')}">🎯</button>
                                         <button type="button" onclick="editTask('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_edit')}">✏️</button>
                                         <button type="button" onclick="openLinkModal('${task.id}')" class="btn-press w-8 h-8 rounded-md hover:bg-base-light dark:hover:bg-base-dark text-zinc-500 hover:text-brand-light dark:hover:text-brand-dark flex shrink-0 items-center justify-center transition-colors text-sm" title="${t('btn_link_macro')}">🔗</button>
                                     ` : ''}
@@ -2160,6 +2327,7 @@
         
             comp.innerHTML = archiveHTML;
         
+            // Генерируем кнопки для архива
             if (totalArchiveCount > archiveLimit) {
                 comp.innerHTML += `
                 <div class="flex flex-wrap md:flex-nowrap gap-3 mt-6 pt-5 border-t border-borderline-light dark:border-borderline-dark">
@@ -2176,17 +2344,36 @@
             renderArchiveMetrics();
         }
 
+        // --- РЕЖИМ ФОКУСА ---
+        let currentFocusTaskId = null;
+
         function openFocusMode(id) {
             currentFocusTaskId = id;
-            const task = tasks.find(t => t.id === id);
+            
+            // Ищем задачу универсально
+            let task = tasks.find(t => String(t.id) === String(id));
+            if (!task) {
+                const sharedT = sharedTasks.find(t => String(t.id) === String(id));
+                if (sharedT) {
+                    task = { title: sharedT.title };
+                }
+            }
+            
+            if (!task) {
+                showToast('ERROR', 'Задача не найдена', 'error');
+                return;
+            }
+
             document.getElementById('focusTaskTitle').innerText = task.title;
             const btn = document.getElementById('zenCompleteBtn');
-            btn.innerText = t('focus_complete');
+            btn.innerText = typeof t === 'function' ? t('focus_complete') : 'EXECUTE COMPLETE()';
             btn.className = 'bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black px-12 py-5 rounded-lg font-bold text-base uppercase tracking-widest transition-all shadow-lg dark:shadow-[0_0_20px_rgba(6,182,212,0.3)] btn-press font-mono-tech';
+            
             const o = document.getElementById('zenOverlay');
             o.classList.remove('hidden');
             setTimeout(() => o.classList.remove('opacity-0'), 10);
         }
+
         function closeFocusMode() {
             const o = document.getElementById('zenOverlay');
             o.classList.add('opacity-0');
@@ -2194,16 +2381,30 @@
             currentFocusTaskId = null;
             document.getElementById('taskInput').focus();
         }
-        document.getElementById('zenCompleteBtn').addEventListener('click', function() {
+
+        document.getElementById('zenCompleteBtn').addEventListener('click', async function() {
             if(!currentFocusTaskId) return;
+            
             this.innerText = 'STATUS 200: OK';
             this.className = 'bg-emerald-500 text-white dark:text-black px-12 py-5 rounded-lg font-bold text-base uppercase tracking-widest transition-all shadow-lg dark:shadow-[0_0_20px_rgba(16,185,129,0.3)] font-mono-tech';
-            const taskObj = tasks.find(t => t.id === currentFocusTaskId);
-            if(taskObj) { if(!taskObj.completed) taskObj.completedAt = getDateTimeStr(); taskObj.completed = true; }
-            saveData('priority_tasks', tasks);
+            
+            const sharedTask = sharedTasks.find(t => String(t.id) === String(currentFocusTaskId));
+            if (sharedTask) {
+                sharedTask.status = 'completed';
+                sharedTask.completed_at = new Date().toISOString();
+                await supabaseClient.from('shared_tasks').update({ status: 'completed', completed_at: sharedTask.completed_at }).eq('id', currentFocusTaskId);
+            } else {
+                const taskObj = tasks.find(t => String(t.id) === String(currentFocusTaskId));
+                if(taskObj && !taskObj.completed) { 
+                    taskObj.completedAt = getDateTimeStr(); 
+                    taskObj.completed = true; 
+                }
+                saveData('priority_tasks', tasks);
+            }
+            
             renderTasks();
             setTimeout(() => closeFocusMode(), 800);
-            unlockAchievement('deep_work');
+            if(typeof unlockAchievement === 'function') unlockAchievement('deep_work');
         });
 
         function setView(view) {
@@ -2221,6 +2422,7 @@
             }
         }
 
+        // --- INTERACTIVE GUIDE & DYNAMIC QUIZ ---
         let currentGuideStep = 1;
         let currentQuizIndex = 0;
         let quizScore = 0;
@@ -2290,7 +2492,7 @@
                     <button onclick="if(currentGuideStep>1){currentGuideStep--; renderGuideStep()}" class="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-brand-light transition-colors ${currentGuideStep===1 ? 'opacity-0 pointer-events-none' : ''}">${t('btn_prev')}</button>
                     ${currentGuideStep < 3 
                         ? `<button onclick="currentGuideStep++; renderGuideStep()" class="px-8 py-3 bg-brand-light dark:bg-brand-dark text-white dark:text-black font-black rounded text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all">${t('btn_next')}</button>`
-                        : `<button onclick="startQuiz()" class="px-8 py-3 bg-emerald-50 text-emerald-600 border-emerald-200 dark:border-emerald-600 dark:bg-emerald-900/30 font-black rounded text-[10px] uppercase tracking-widest shadow-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all animate-pulse">Start Examination</button>`
+                        : `<button onclick="startQuiz()" class="px-8 py-3 bg-emerald-500 text-white font-black rounded text-[10px] uppercase tracking-widest shadow-lg hover:bg-emerald-600 transition-all animate-pulse">Start Examination</button>`
                     }
                 </div>
             `;
@@ -2310,7 +2512,7 @@
             document.getElementById('quizProgress').innerHTML = `
                 <div class="flex justify-between items-end mb-2">
                     <span class="text-[10px] font-black text-brand-light dark:text-brand-dark uppercase">Verification: ${currentQuizIndex + 1}/${quizData.length}</span>
-                    <span class="text-[10px] font-bold text-zinc-400"> ${Math.round(progress)}%</span>
+                    <span class="text-[10px] font-bold text-zinc-400"> ${Math.round(progress)}%</span>
                 </div>
                 <div class="w-full h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                     <div class="h-full bg-brand-light dark:bg-brand-dark transition-all duration-300" style="width: ${progress}%"></div>
@@ -2381,6 +2583,7 @@
             unlockAchievement('guide_passed');
         }
 
+        // --- PRESETS ENGINE ---
         function switchTemplateTab(tab) {
             const userList = document.getElementById('templatesList');
             const sysList = document.getElementById('blueprintsList');
@@ -2411,6 +2614,7 @@
             const lang = localStorage.getItem('priority_lang') || 'en';
 
             list.innerHTML = SYSTEM_PRESETS.map(p => {
+                // Проверяем, есть ли у нас активные задачи из этого пресета
                 const isActive = tasks.some(t => t.presetId === p.id && !t.completed);
                 
                 const btnStyle = isActive 
@@ -2435,6 +2639,7 @@
             `}).join('');
         }
 
+        // --- ПРИЕМНИК ИНВАЙТ-ССЫЛОК ---
         async function processInviteLink() {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('invite');
@@ -2445,16 +2650,28 @@
             showToast('SYSTEM', 'Анализ инвайт-токена...', 'info');
 
             try {
-                const { data: scope, error: scopeErr } = await supabaseClient.from('shared_scopes').select('*').eq('invite_token', token).single();
+                // 1. Ищем сферу по токену
+                const { data: scope, error: scopeErr } = await supabaseClient
+                    .from('shared_scopes')
+                    .select('*')
+                    .eq('invite_token', token)
+                    .single();
+
                 if (scopeErr || !scope) throw new Error('Сфера не найдена');
 
-                const { error: insertErr } = await supabaseClient.from('scope_members').insert({ scope_id: scope.id, username: username, role: 'editor' });
+                // 2. Записываем юзера в участники (по умолчанию 'editor')
+                const { error: insertErr } = await supabaseClient
+                    .from('scope_members')
+                    .insert({ scope_id: scope.id, username: username, role: 'editor' });
+
+                // Код 23505 означает нарушение уникальности (юзер уже в сфере)
                 if (insertErr && insertErr.code !== '23505') throw insertErr; 
 
+                // 3. Добавляем сферу локально, если её еще нет
                 if (!scopes.includes(scope.name)) {
                     scopes.unshift(scope.name);
                     dynamicScopes = [...scopes];
-                    saveData('priority_scopes', scopes); 
+                    saveData('priority_scopes', scopes); // Автоматически улетит в облако
                     initDynamicScopes();
                     renderFilters();
                 }
@@ -2466,8 +2683,12 @@
                 }
 
                 await loadSharedScopes();
+
+                // 4. Очищаем URL от токена, чтобы не было повторных срабатываний при F5
                 window.history.replaceState({}, document.title, window.location.pathname);
+
             } catch (err) {
+                console.error(err);
                 showToast('ERROR', 'Инвайт-токен недействителен или устарел', 'error');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
@@ -2477,6 +2698,7 @@
             const isActive = tasks.some(t => t.presetId === id);
 
             if (isActive) {
+                // УДАЛЕНИЕ ПРЕСЕТА
                 tasks = tasks.filter(t => t.presetId !== id);
                 saveData('priority_tasks', tasks);
                 renderTasks();
@@ -2485,17 +2707,20 @@
                 return;
             }
 
+            // ДОБАВЛЕНИЕ ПРЕСЕТА
             const preset = SYSTEM_PRESETS.find(p => p.id === id);
             const lang = localStorage.getItem('priority_lang') || 'en';
             const scopeName = preset.scope[lang] || preset.scope.en;
 
+            // 1. Синхронизируем сферу жестко, чтобы не падало в "Другое"
             if (!scopes.includes(scopeName)) {
                 scopes.unshift(scopeName);
                 dynamicScopes = [...scopes];
                 saveData('priority_scopes', scopes);
-                initDynamicScopes(); 
+                initDynamicScopes(); // Перерисовываем радио-кнопки сверху
             }
 
+            // 2. Генерируем задачи с датами и комментариями
             const baseDate = new Date();
             const newTasks = preset.tasks.map((t, idx) => {
                 let finalTitle = t.title;
@@ -2508,15 +2733,26 @@
                 }
 
                 const taskComments = [];
-                if (t.comment) taskComments.push({ text: `[INFO]: ${t.comment}`, createdAt: getDateTimeStr() });
+                if (t.comment) {
+                    // Системный лог, который будет виден при открытии 📝
+                    taskComments.push({ text: `[INFO]: ${t.comment}`, createdAt: getDateTimeStr() });
+                }
 
                 return {
-                    id: Date.now() + idx, presetId: id, title: finalTitle, sphere: scopeName,
-                    isImportant: t.isImportant, isUrgent: t.isUrgent, completed: false,
-                    createdAt: getDateStr(), completedAt: null, comments: taskComments
+                    id: Date.now() + idx,
+                    presetId: id, // <--- СЕКРЕТНЫЙ ИДЕНТИФИКАТОР ПРЕСЕТА
+                    title: finalTitle,
+                    sphere: scopeName,
+                    isImportant: t.isImportant,
+                    isUrgent: t.isUrgent,
+                    completed: false,
+                    createdAt: getDateStr(),
+                    completedAt: null,
+                    comments: taskComments
                 };
             });
 
+            // 3. Заливаем массив в Матрицу
             tasks = [...newTasks.reverse(), ...tasks]; 
             saveData('priority_tasks', tasks);
             renderTasks();
@@ -2525,21 +2761,43 @@
             showToast('SYSTEM', `Пресет загружен! Открой логи (📝) у задач для инструкций.`, 'success');
         }
 
+        // --- СИСТЕМА ТЕЛЕПОРТАЦИИ (ЗАМЕНА DRAG & DROP) ---
         let teleportTargetId = null;
 
         function openTeleport(id) {
             teleportTargetId = id;
-            const task = tasks.find(t => t.id === id);
-            if(!task) return;
+            
+            // Ищем задачу, приводя ID к строке
+            let task = tasks.find(t => String(t.id) === String(id));
+            
+            if (!task) {
+                const sharedT = sharedTasks.find(t => String(t.id) === String(id));
+                if (sharedT) {
+                    const scopeObj = sharedScopes.find(s => s.id === sharedT.scope_id);
+                    task = {
+                        title: sharedT.title,
+                        sphere: scopeObj ? scopeObj.name : 'SYS_OTHER',
+                        isImportant: sharedT.is_important,
+                        isUrgent: sharedT.is_urgent,
+                        createdAt: sharedT.created_at ? new Date(sharedT.created_at).toLocaleDateString('ru-RU') : ''
+                    };
+                }
+            }
+            
+            if(!task) {
+                showToast('ERROR', 'Задача не найдена', 'error');
+                return;
+            }
             
             document.getElementById('teleportTaskTitle').innerText = task.title;
             document.getElementById('tpMetaSphere').innerText = task.sphere;
-            document.getElementById('tpMetaCreated').innerText = task.createdAt;
+            document.getElementById('tpMetaCreated').innerText = task.createdAt || '';
 
             const buttons = document.querySelectorAll('#teleportButtons button');
             buttons.forEach(btn => {
                 btn.classList.remove('ring-2', 'ring-inset', 'ring-brand-light', 'dark:ring-brand-dark', 'bg-brand-light/5', 'dark:bg-brand-dark/5');
-                btn.querySelector('.current-label').classList.add('hidden');
+                const label = btn.querySelector('.current-label');
+                if(label) label.classList.add('hidden');
             });
 
             let activeBtnId = '';
@@ -2551,12 +2809,12 @@
             const activeBtn = document.getElementById(activeBtnId);
             if (activeBtn) {
                 activeBtn.classList.add('ring-2', 'ring-inset', 'ring-zinc-200', 'dark:ring-zinc-500');
-                activeBtn.querySelector('.current-label').classList.remove('hidden');
+                const activeLabel = activeBtn.querySelector('.current-label');
+                if(activeLabel) activeLabel.classList.remove('hidden');
             }
 
             const modal = document.getElementById('teleportModal');
             modal.classList.remove('hidden');
-            applyI18n();
 
             setTimeout(() => { 
                 modal.classList.remove('opacity-0'); 
@@ -2564,12 +2822,22 @@
             }, 10);
         }
 
+        function closeTeleport() {
+            const modal = document.getElementById('teleportModal');
+            modal.classList.add('opacity-0'); 
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => { 
+                modal.classList.add('hidden'); 
+                teleportTargetId = null;
+            }, 200);
+        }
+
         function pushSysLog(action, details) {
             const logs = JSON.parse(localStorage.getItem('priority_sys_logs') || '[]');
             const d = new Date();
             const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
             logs.unshift({ action, details, time });
-            if (logs.length > 50) logs.pop(); 
+            if (logs.length > 50) logs.pop(); // Храним только последние 50 записей
             localStorage.setItem('priority_sys_logs', JSON.stringify(logs));
         }
 
@@ -2585,22 +2853,39 @@
 
         function confirmTeleport(isImportant, isUrgent) {
             if(!teleportTargetId) return;
-            const task = tasks.find(t => t.id === teleportTargetId);
             
-            if(task && (task.isImportant !== isImportant || task.isUrgent !== isUrgent)) {
-                task.isImportant = isImportant;
-                task.isUrgent = isUrgent;
-                saveData('priority_tasks', tasks);
-                renderTasks();
-                unlockAchievement('teleporter');
-                showToast(t('toast_sys') || 'SYS', 'Task teleported successfully', 'success');
+            const sharedTask = sharedTasks.find(t => String(t.id) === String(teleportTargetId));
+            if (sharedTask) {
+                if (sharedTask.is_important !== isImportant || sharedTask.is_urgent !== isUrgent) {
+                    sharedTask.is_important = isImportant;
+                    sharedTask.is_urgent = isUrgent;
+                    supabaseClient.from('shared_tasks').update({ is_important: isImportant, is_urgent: isUrgent }).eq('id', teleportTargetId);
+                    renderTasks();
+                    if(typeof unlockAchievement === 'function') unlockAchievement('teleporter');
+                    showToast(typeof t === 'function' ? t('toast_sys') : 'SYS', 'Task teleported successfully', 'success');
+                }
+            } else {
+                const task = tasks.find(t => String(t.id) === String(teleportTargetId));
+                if(task && (task.isImportant !== isImportant || task.isUrgent !== isUrgent)) {
+                    task.isImportant = isImportant;
+                    task.isUrgent = isUrgent;
+                    saveData('priority_tasks', tasks);
+                    renderTasks();
+                    if(typeof unlockAchievement === 'function') unlockAchievement('teleporter');
+                    showToast(typeof t === 'function' ? t('toast_sys') : 'SYS', 'Task teleported successfully', 'success');
+                }
             }
             closeTeleport();
         }
 
+        // --- AI AUDIT EXPORT ---
         function exportAIAudit() {
             const activeTasks = tasks.filter(t => !t.completed);
-            if (activeTasks.length === 0) { showToast('SYSTEM', 'No active tasks to analyze', 'warn'); return; }
+            
+            if (activeTasks.length === 0) {
+                showToast('SYSTEM', 'No active tasks to analyze', 'warn');
+                return;
+            }
 
             const q1 = activeTasks.filter(t => t.isImportant && t.isUrgent).map(t => `- [${t.sphere}] ${t.title}`).join('\n');
             const q2 = activeTasks.filter(t => t.isImportant && !t.isUrgent).map(t => `- [${t.sphere}] ${t.title}`).join('\n');
@@ -2688,9 +2973,13 @@ YOUR OBJECTIVE (Answer in these steps):
                 showToast(t('toast_ai_title'), t('toast_ai_desc'), 'success');
                 unlockAchievement('ai_hacker');
                 pushSysLog('SYS', 'AI_EXPORT', 'Exported deep-coaching prompt to clipboard', 'info');
-            }).catch(err => { showToast('ERROR', 'Clipboard access denied', 'error'); });
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                showToast('ERROR', 'Clipboard access denied', 'error');
+            });
         }
 
+        // --- ЛОГИКА АРХИВА ---
         function toggleArchive() {
             const w = document.getElementById('completedTasksWrapper');
             const i = document.getElementById('archiveIcon');
@@ -2702,6 +2991,7 @@ YOUR OBJECTIVE (Answer in these steps):
             const compTasks = tasks.filter(t => t.completed);
             document.getElementById('archiveCounter').innerText = compTasks.length;
 
+            // Рисуем спарклайн (активность за последние 7 дней)
             const sparkline = document.getElementById('archiveSparkline');
             if(sparkline) {
                 const last7Days = Array.from({length: 7}, (_, i) => {
@@ -2709,16 +2999,17 @@ YOUR OBJECTIVE (Answer in these steps):
                     return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).slice(2)}`;
                 });
                 const counts = last7Days.map(date => compTasks.filter(t => t.completedAt && t.completedAt.startsWith(date)).length);
-                const max = Math.max(...counts, 1); 
+                const max = Math.max(...counts, 1); // чтобы не делить на ноль
 
                 sparkline.innerHTML = counts.map(c => {
-                    const h = Math.max((c / max) * 100, 15); 
+                    const h = Math.max((c / max) * 100, 15); // минимум 15% высоты для видимости
                     const color = c > 0 ? 'bg-brand-light dark:bg-brand-dark' : 'bg-zinc-300 dark:bg-zinc-700';
                     return `<div class="w-1.5 rounded-t-sm ${color} transition-all" style="height: ${h}%" title="${c} tasks"></div>`;
                 }).join('');
             }
         }
 
+        // --- ЛОГИКА LITE-ВИДЖЕТА ---
         function toggleDashLite() {
             const w = document.getElementById('dashLiteWrapper');
             const i = document.getElementById('dashLiteIcon');
@@ -2727,11 +3018,12 @@ YOUR OBJECTIVE (Answer in these steps):
             localStorage.setItem('priority_dash_lite_open', !isHidden);
         }
 
+        // Вычисляем старение задачи (красный градиент)
         function getLiteAgeStyle(isoDate) {
             if(!isoDate) return '';
             const diffDays = Math.floor((new Date() - new Date(isoDate)) / (1000*60*60*24));
             if(diffDays <= 0) return '';
-            const intensity = Math.min(diffDays / 10, 1); 
+            const intensity = Math.min(diffDays / 10, 1); // Максимум 10 дней
             return `background-color: rgba(239, 68, 68, ${intensity * 0.15}); border-color: rgba(239, 68, 68, ${intensity * 0.5}); color: ${intensity > 0.5 ? '#ef4444' : ''}`;
         }
 
@@ -2779,31 +3071,43 @@ YOUR OBJECTIVE (Answer in these steps):
                     localStorage.setItem('priority_lite_log', JSON.stringify(liteLog));
                     
                     localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
-                    saveData('priority_tasks', tasks); 
+                    saveData('priority_tasks', tasks); // Отправляем в облако
                     renderDashLite();
                 }
             }, 200);
         }
 
+        // --- ЗАГРУЗКА ОБЩИХ СФЕР, ЗАДАЧ И КОММЕНТАРИЕВ ---
         async function loadSharedScopes() {
             const username = localStorage.getItem('priority_user');
             if (!username) return;
 
             try {
-                const { data: membersData } = await supabaseClient.from('scope_members').select('scope_id, role, shared_scopes(id, name)').eq('username', username);
+                // 1. Ищем сферы
+                const { data: membersData } = await supabaseClient
+                    .from('scope_members')
+                    .select('scope_id, role, shared_scopes(id, name)')
+                    .eq('username', username);
 
                 if (membersData && membersData.length > 0) {
                     sharedScopes = membersData.map(m => m.shared_scopes).filter(Boolean);
                     initDynamicScopes();
                     
+                    // 2. Скачиваем ВСЕ задачи для этих сфер вместе с комментариями
                     const scopeIds = sharedScopes.map(s => s.id);
-                    const { data: tasksData } = await supabaseClient.from('shared_tasks').select('*, shared_comments(*)').in('scope_id', scopeIds);
+                    const { data: tasksData } = await supabaseClient
+                        .from('shared_tasks')
+                        .select('*, shared_comments(*)')
+                        .in('scope_id', scopeIds);
                         
                     if (tasksData) {
                         sharedTasks = tasksData;
-                        sharedTasks.forEach(t => { if (t.shared_comments) t.shared_comments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); });
+                        // Сортируем комментарии по дате создания
+                        sharedTasks.forEach(t => {
+                            if (t.shared_comments) t.shared_comments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                        });
                         if (typeof renderInbox === 'function') renderInbox();
-                        renderTasks(); 
+                        renderTasks(); // Запускаем слияние матриц!
                     }
                 } else {
                     sharedScopes = []; sharedTasks = [];
@@ -2811,7 +3115,9 @@ YOUR OBJECTIVE (Answer in these steps):
                     if (typeof renderInbox === 'function') renderInbox();
                     renderTasks();
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error('Ошибка загрузки командных данных:', err);
+            }
         }
 
         function escalateLiteTask(id) {
@@ -2819,7 +3125,10 @@ YOUR OBJECTIVE (Answer in these steps):
             if(t) {
                 document.getElementById('taskInput').value = t.text;
                 document.getElementById('taskInput').focus();
+
+                // Запоминаем ID, но НЕ удаляем из массива!
                 escalatedLiteTaskId = id; 
+
                 showToast('SYSTEM', 'Задача подготовлена. Выберите сферу и нажмите Deploy.', 'info');
             }
         }
@@ -2895,6 +3204,7 @@ YOUR OBJECTIVE (Answer in these steps):
             }
         }
 
+        // BOOT SEQUENCE (Запускается мгновенно!)
         initThemeToggle();
         checkAuth();
     </script>
