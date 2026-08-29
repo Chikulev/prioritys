@@ -246,6 +246,11 @@
         let openCommentsSet = new Set();
         let escalatedLiteTaskId = null;
 
+        function getDateTimeStr() { 
+            const d = new Date(); 
+            return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getFullYear()).slice(2)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; 
+        }
+
         // --- ОБЛАЧНАЯ СИНХРОНИЗАЦИЯ ---
         let cloudSyncTimeout = null;
 
@@ -729,18 +734,59 @@
         }
 
         async function toggleTask(id) {
-            const sharedTask = sharedTasks.find(t => String(t.id) === String(id));
-            if (sharedTask) {
-                sharedTask.status = sharedTask.status === 'completed' ? 'active' : 'completed';
-                renderTasks();
-                await supabaseClient.from('shared_tasks').update({ status: sharedTask.status, completed_at: new Date().toISOString() }).eq('id', id);
+            // Проверяем, общая ли это задача (по наличию дефиса от UUID или temp-префикса)
+            const isSharedId = String(id).includes('-') || String(id).startsWith('temp_');
+
+            if (isSharedId) {
+                if (String(id).startsWith('temp_')) return showToast('INFO', 'Синхронизация...', 'info');
+                
+                const sharedTask = sharedTasks.find(t => String(t.id) === String(id));
+                if (!sharedTask) return;
+
+                const newStatus = sharedTask.status === 'completed' ? 'active' : 'completed';
+                const completedTime = newStatus === 'completed' ? new Date().toISOString() : null;
+                const username = localStorage.getItem('priority_user');
+                
+                try {
+                    sharedTask.status = newStatus;
+                    sharedTask.completed_at = completedTime;
+                    renderTasks();
+                    await supabaseClient.from('shared_tasks').update({ status: newStatus, completed_at: completedTime }).eq('id', id);
+                    
+                    // ---> ПИНГ В ТЕЛЕГРАМ ОБ ИСПОЛНЕНИИ ЗАДАЧИ <---
+                    if (newStatus === 'completed') {
+                        const targetUser = sharedTask.creator_username === username ? sharedTask.assignee_username : sharedTask.creator_username;
+                        if (targetUser && targetUser !== username) {
+                            fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                    action: 'notify_completion', 
+                                    target: targetUser,
+                                    actor: username,
+                                    taskTitle: sharedTask.title
+                                })
+                            }).catch(()=>{});
+                        }
+                    }
+                } catch(e) {
+                    showToast('ERROR', 'Ошибка сети', 'error');
+                }
                 return;
             }
+
+            // ---> ЛОКАЛЬНЫЕ ЗАДАЧИ <---
             const task = tasks.find(t => String(t.id) === String(id));
             if (task) {
-                task.completed = !task.completed;
+                if (!task.completed) {
+                    task.completed = true;
+                    task.completedAt = getDateTimeStr(); // Обязательно добавляем дату для архива на ПК!
+                } else {
+                    task.completed = false;
+                }
                 saveData('priority_tasks', tasks);
-                renderTasks(); renderFilters();
+                renderTasks(); 
+                renderFilters();
             }
         }
 
