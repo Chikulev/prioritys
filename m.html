@@ -293,6 +293,66 @@
             }, 1500);
         }
 
+        // --- ПЕРВИЧНАЯ СИНХРОНИЗАЦИЯ С ОБЛАКОМ ---
+        async function syncFromCloud() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+
+            try {
+                const { data } = await supabaseClient.from('users').select('app_data').eq('username', username).single();
+                if (data && data.app_data) {
+                    const cloudData = data.app_data;
+                    
+                    // Подтягиваем тему при входе
+                    if (cloudData.theme) {
+                        localStorage.setItem('priority_theme', cloudData.theme);
+                        if (typeof applySystemTheme === 'function') applySystemTheme();
+                    }
+
+                    // Подтягиваем задачи, если телефон был оффлайн
+                    if (cloudData.tasks) {
+                        tasks = cloudData.tasks;
+                        localStorage.setItem('priority_tasks', JSON.stringify(tasks));
+                        renderTasks();
+                        renderFilters();
+                    }
+                }
+            } catch (e) { console.error('Cloud pull failed', e); }
+        }
+
+        // --- REALTIME СЛУХАЧ (WEBSOCKETS) ---
+        function initRealtimeSync() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+
+            // 1. Слушаем изменения профиля (смена темы на ПК)
+            supabaseClient.channel('mobile_user_sync')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` }, (payload) => {
+                    const cloudData = payload.new.app_data;
+                    if (!cloudData) return;
+                    
+                    // Мгновенная смена темы, если она пришла с ПК
+                    if (cloudData.theme && localStorage.getItem('priority_theme') !== cloudData.theme) {
+                        localStorage.setItem('priority_theme', cloudData.theme);
+                        if (typeof applySystemTheme === 'function') applySystemTheme();
+                    }
+
+                    // Синхронизация локальных задач на лету
+                    if (cloudData.tasks) {
+                        tasks = cloudData.tasks;
+                        localStorage.setItem('priority_tasks', JSON.stringify(tasks));
+                        renderTasks();
+                        renderFilters();
+                    }
+                }).subscribe();
+
+            // 2. Слушаем общие задачи (чтобы чаты и Inbox обновлялись сами без перезагрузки)
+            supabaseClient.channel('mobile_shared_sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_tasks' }, () => {
+                    loadSharedScopes();
+                }).subscribe();
+        }
+
         function showToast(title, desc, type = 'success') {
             const container = document.getElementById('toastContainer');
             if(!container) return;
@@ -428,6 +488,9 @@
             renderFilters();
             renderDashLite();
             
+            // ЗАПУСКАЕМ ОБЛАЧНУЮ МАГИЮ
+            syncFromCloud();
+            initRealtimeSync();
         }
 
         async function loadSharedScopes() {
