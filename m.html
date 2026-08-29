@@ -246,6 +246,48 @@
         let openCommentsSet = new Set();
         let escalatedLiteTaskId = null;
 
+        // --- ОБЛАЧНАЯ СИНХРОНИЗАЦИЯ ---
+        let cloudSyncTimeout = null;
+
+        function saveData(key, data) { 
+            localStorage.setItem(key, JSON.stringify(data)); 
+
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+
+            clearTimeout(cloudSyncTimeout);
+            cloudSyncTimeout = setTimeout(async () => {
+                const mutationId = Date.now().toString() + Math.random().toString(36).substring(7);
+                localStorage.setItem('priority_last_mutation', mutationId);
+
+                const appState = {
+                    _mutation_id: mutationId,
+                    scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
+                    tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
+                    macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
+                    templates: JSON.parse(localStorage.getItem('priority_templates') || '[]'),
+                    badges: JSON.parse(localStorage.getItem('priority_badges') || '[]'),
+                    theme: localStorage.getItem('priority_theme') || 'cyber',
+                    cursor: localStorage.getItem('priority_cursor') || 'default',
+                    lang: localStorage.getItem('priority_lang') || 'en',
+                    shop_module: localStorage.getItem('priority_shop_module') || 'false',
+                    currency: localStorage.getItem('priority_currency') || '₽',
+                    scale: localStorage.getItem('priority_scale') || '1',
+                    lite_tasks: JSON.parse(localStorage.getItem('priority_lite_tasks') || '[]'),
+                    lite_log: JSON.parse(localStorage.getItem('priority_lite_log') || '{}'),
+                    lite_cron_time: localStorage.getItem('lite_cron_time') || '00:00',
+                    lite_cron_action: localStorage.getItem('lite_cron_action') || 'fail'
+                };
+
+                try {
+                    await supabaseClient.from('users').update({ 
+                        app_data: appState,
+                        last_active_at: new Date().toISOString() 
+                    }).eq('username', username);
+                } catch (err) {}
+            }, 1500);
+        }
+
         function showToast(title, desc, type = 'success') {
             const container = document.getElementById('toastContainer');
             if(!container) return;
@@ -591,7 +633,7 @@
 
             if (isLiteMode && !editTaskId) {
                 liteTasks.push({ id: Date.now().toString(), text: input.value.trim(), status: 'active', date: new Date().toISOString() });
-                localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+                saveData('priority_lite_tasks', liteTasks);
                 input.value = ''; renderDashLite(); toggleLiteMode();
                 return showToast('LITE', 'Добавлено в буфер', 'success');
             }
@@ -613,7 +655,7 @@
                     if (taskObj) {
                         taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
                         cancelMobileEdit();
-                        localStorage.setItem('priority_tasks', JSON.stringify(tasks));
+                        saveData('priority_tasks', tasks);
                         renderTasks();
                     }
                 }
@@ -641,7 +683,7 @@
                 } else {
                     const d = new Date(); const dateStr = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`;
                     tasks.unshift({ id: Date.now(), title: input.value, sphere: sphereVal, isImportant: impVal, isUrgent: urgVal, completed: false, createdAt: dateStr, comments: [] });
-                    input.value = ''; localStorage.setItem('priority_tasks', JSON.stringify(tasks)); renderTasks(); renderFilters();
+                    input.value = ''; saveData('priority_tasks', tasks); renderTasks(); renderFilters();
                 }
                 
                 setCustomDropdown('imp', 'yes');
@@ -649,7 +691,7 @@
                 
                 if (escalatedLiteTaskId) {
                     liteTasks = liteTasks.filter(x => String(x.id) !== String(escalatedLiteTaskId));
-                    localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+                    saveData('priority_lite_tasks', liteTasks);
                     escalatedLiteTaskId = null; renderDashLite();
                 }
             }
@@ -697,7 +739,7 @@
             const task = tasks.find(t => String(t.id) === String(id));
             if (task) {
                 task.completed = !task.completed;
-                localStorage.setItem('priority_tasks', JSON.stringify(tasks));
+                saveData('priority_tasks', tasks);
                 renderTasks(); renderFilters();
             }
         }
@@ -712,7 +754,7 @@
                 await supabaseClient.from('shared_tasks').delete().eq('id', id);
             } else {
                 tasks = tasks.filter(t => String(t.id) !== String(id));
-                localStorage.setItem('priority_tasks', JSON.stringify(tasks));
+                saveData('priority_tasks', tasks);
                 renderTasks(); renderFilters();
             }
             showToast('СИСТЕМА', 'Задача удалена', 'info');
@@ -814,7 +856,7 @@
                 // ---------------------------------
             } else {
                 tasks.find(t => String(t.id) === String(id)).comments.push({ text: text, author_username: username });
-                localStorage.setItem('priority_tasks', JSON.stringify(tasks));
+                saveData('priority_tasks', tasks);
             }
             input.value = ''; renderTasks(); setTimeout(() => toggleComments(id), 50);
         }
@@ -859,7 +901,7 @@
                 const t = liteTasks.find(x => x.id === id);
                 if(t) {
                     t.status = 'done';
-                    localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+                    saveData('priority_lite_tasks', liteTasks);
                     renderDashLite();
                 }
             }, 200);
@@ -876,7 +918,7 @@
 
         function deleteDashLite(id) {
             liteTasks = liteTasks.filter(t => t.id !== id);
-            localStorage.setItem('priority_lite_tasks', JSON.stringify(liteTasks));
+            saveData('priority_lite_tasks', liteTasks);
             renderDashLite();
         }
 
