@@ -2062,6 +2062,9 @@
             else { box.classList.add('hidden'); openCommentsSet.delete(id); }
         }
 
+        // Общая проверка: UUID из базы содержит дефисы, временные начинаются на temp_
+        const isSharedId = (id) => String(id).includes('-') || String(id).startsWith('temp_');
+
         async function addComment(id) {
             const input = document.getElementById(`comment-input-${id}`);
             if(!input || input.value.trim() === '') return;
