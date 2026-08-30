@@ -100,7 +100,7 @@
         </button>
     </div>
 
-    <div id="systemModal" class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-zinc-900/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 font-mono-tech">
+    <div id="systemModal" class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-zinc-900/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 font-mono-tech" onclick="if(event.target.id === 'systemModal') closeModal()">
         <div class="w-full max-w-md bg-panel-light dark:bg-panel-dark border border-red-500/50 p-8 rounded-md shadow-2xl relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
             <h3 id="modalTitle" class="text-red-600 dark:text-red-500 font-bold text-lg tracking-widest uppercase mb-4">SYS.WARNING</h3>
@@ -454,7 +454,7 @@
         </div>
     </div>
 
-    <div id="donateModal" class="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity font-mono-tech">
+    <div id="donateModal" class="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm z-[100] flex items-center justify-center hidden opacity-0 transition-opacity font-mono-tech" onclick="if(event.target.id === 'donateModal') closeDonateModal()">
         <div class="bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark p-8 rounded-lg w-full max-w-md shadow-2xl relative">
             <button onclick="closeDonateModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-red-500 font-bold text-xl btn-press">✕</button>
             <h3 data-i18n="donate_title" class="font-bold text-xl mb-6 uppercase tracking-widest text-center">FUNDING_PORTAL</h3>
@@ -482,7 +482,7 @@
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО ШЕРИНГА СФЕРЫ -->
-    <div id="shareModal" class="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm z-[300] flex items-center justify-center hidden opacity-0 transition-opacity font-mono-tech">
+    <div id="shareModal" class="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm z-[300] flex items-center justify-center hidden opacity-0 transition-opacity font-mono-tech" onclick="if(event.target.id === 'shareModal') closeShareModal()">
         <div class="bg-panel-light dark:bg-panel-dark border border-brand-light dark:border-brand-dark p-8 rounded-lg w-full max-w-md shadow-2xl relative transform scale-95 transition-transform duration-200" id="shareModalInner">
             <button onclick="closeShareModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-red-500 font-bold text-xl btn-press">✕</button>
             <h3 class="font-bold text-lg mb-1 uppercase tracking-widest text-brand-light dark:text-brand-dark">SHARE_SCOPE // Доступ</h3>
