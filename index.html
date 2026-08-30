@@ -639,7 +639,22 @@
             const container = document.getElementById('scopeFilterContainer');
             if (!container) return;
 
-            const activeTasks = tasks.filter(t => !t.completed);
+            const username = localStorage.getItem('priority_user');
+
+            // 1. Собираем активные локальные задачи
+            const localActive = tasks.filter(t => !t.completed);
+
+            // 2. Собираем активные общие задачи (те, что приняты в работу и не завершены)
+            const sharedActive = sharedTasks
+                .filter(t => t.status !== 'completed' && !(t.assignee_username === username && t.is_acknowledged === false))
+                .map(t => {
+                    const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER';
+                    return { sphere: scopeName, price: t.price };
+                });
+
+            // 3. Объединяем оба массива для честного подсчета
+            const activeTasks = [...localActive, ...sharedActive];
+
             const counts = {};
             
             // ---> ОБЪЕДИНЯЕМ ВСЕ СФЕРЫ (ЛИЧНЫЕ И ОБЩИЕ) БЕЗ ДУБЛИКАТОВ <---
@@ -688,7 +703,6 @@
                 const taskCount = counts[scope] || 0;
                 const displayName = scope === 'SYS_OTHER' ? t('scope_other') : scope;
                 
-                // Кнопки Сфер: group позволяет менять стиль бейджа внутри при наведении на саму кнопку
                 html += `
                 <button onclick="toggleFilter('${scope}')" class="group flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest border transition-all duration-200 btn-press rounded
                 ${isActive 
@@ -2991,7 +3005,24 @@ YOUR OBJECTIVE (Answer in these steps):
         }
 
         function renderArchiveMetrics() {
-            const compTasks = tasks.filter(t => t.completed);
+            // 1. Локальные завершенные задачи
+            const localComp = tasks.filter(t => t.completed);
+            
+            // 2. Общие завершенные задачи с адаптацией формата даты
+            const sharedComp = sharedTasks
+                .filter(t => t.status === 'completed')
+                .map(t => {
+                    let compDateStr = null;
+                    if (t.completed_at) {
+                        const d = new Date(t.completed_at);
+                        compDateStr = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${String(d.getFullYear()).slice(2)}`;
+                    }
+                    return { completedAt: compDateStr };
+                });
+
+            // 3. Объединяем
+            const compTasks = [...localComp, ...sharedComp];
+
             document.getElementById('archiveCounter').innerText = compTasks.length;
 
             // Рисуем спарклайн (активность за последние 7 дней)
