@@ -612,9 +612,27 @@
 
         function renderFilters() {
             const container = document.getElementById('scopeFilterContainer');
+            if (!container) return;
+
+            const username = localStorage.getItem('priority_user');
+
+            // 1. Собираем активные локальные задачи
+            const localActive = tasks.filter(t => !t.completed);
+
+            // 2. Собираем активные общие задачи (исключаем завершенные и те, что висят в карантине)
+            const sharedActive = sharedTasks
+                .filter(t => t.status !== 'completed' && !(t.assignee_username === username && t.is_acknowledged === false))
+                .map(t => {
+                    const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER';
+                    return { sphere: scopeName }; 
+                });
+
+            // 3. Объединяем массивы для честного подсчета
+            const activeTasks = [...localActive, ...sharedActive];
+
             const allScopeNames = Array.from(new Set([...scopes, ...sharedScopes.map(s => s.name), 'SYS_OTHER']));
-            const activeTasks = tasks.filter(t => !t.completed);
             
+            // Подсчет задач для каждой сферы из объединенного пула
             const counts = {};
             allScopeNames.forEach(s => {
                 if (s === 'SYS_OTHER') {
@@ -624,6 +642,7 @@
                 }
             });
 
+            // Сортировка ПО УБЫВАНИЮ (от большего числа задач к меньшему)
             const sortedScopes = [...allScopeNames].sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
             
             let html = `<button onclick="toggleFilter('ALL')" class="shrink-0 px-3 py-2 text-[10px] font-bold uppercase tracking-widest border transition-all rounded ${activeFilterScope === 'ALL' ? 'bg-brand-light text-white border-transparent' : 'bg-panel-light dark:bg-panel-dark text-zinc-500 border-borderline-light dark:border-borderline-dark'}">ВСЕ</button>`;
@@ -632,8 +651,10 @@
                 const isActive = activeFilterScope === scope;
                 const displayName = scope === 'SYS_OTHER' ? 'ДРУГОЕ' : scope;
                 const taskCount = counts[scope] || 0;
+                
                 html += `<button onclick="toggleFilter('${scope}')" class="shrink-0 px-3 py-2 text-[10px] font-bold uppercase tracking-widest border transition-all rounded flex items-center gap-1 ${isActive ? 'bg-zinc-800 dark:bg-zinc-100 text-white dark:text-black border-transparent' : 'bg-panel-light dark:bg-panel-dark text-zinc-500 border-borderline-light dark:border-borderline-dark'}">${displayName} <span class="opacity-50 text-[8px]">[${taskCount}]</span></button>`;
             });
+            
             container.innerHTML = html;
         }
 
@@ -744,7 +765,13 @@
                         if (finalAssignee !== username) {
                             fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'notify_task', target: finalAssignee, actor: username, taskTitle: input.value })
+                                body: JSON.stringify({ 
+                                    action: 'notify_delegation', 
+                                    assignee: finalAssignee, 
+                                    creator: username, 
+                                    taskTitle: tempTask.title, 
+                                    scope: sphereVal 
+                                })
                             }).catch(()=>{});
                         }
                     }

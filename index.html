@@ -1761,6 +1761,21 @@
                         } else if (data) {
                             const idx = sharedTasks.findIndex(t => String(t.id) === String(tempId));
                             if (idx > -1) sharedTasks[idx] = data;
+
+                            // ---> ДОБАВЛЯЕМ ОТПРАВКУ ПУШ-УВЕДОМЛЕНИЯ <---
+                            if (finalAssignee !== username) {
+                                fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                        action: 'notify_delegation', 
+                                        assignee: finalAssignee,
+                                        creator: username,
+                                        taskTitle: tempTask.title,
+                                        scope: sphereVal
+                                    })
+                                }).catch(err => console.error('Push notification failed:', err));
+                            }
                         }
                     });
 
@@ -3142,6 +3157,8 @@ YOUR OBJECTIVE (Answer in these steps):
                         });
                         if (typeof renderInbox === 'function') renderInbox();
                         renderTasks(); // Запускаем слияние матриц!
+
+                        renderFilters(); // Обновляем счетчики после скачивания задач
                     }
                 } else {
                     sharedScopes = []; sharedTasks = [];
