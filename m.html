@@ -415,10 +415,10 @@
         async function confirmLogin() {
             const codeInputs = document.querySelectorAll('.code-cell');
             const code = Array.from(codeInputs).map(i => i.value).join('');
-                
+
             let loginInput = document.getElementById('tgLogin').value.trim().toLowerCase();
             if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
-                
+
             if (code.length < 4) {
                 showToast('ERROR', 'Enter 4-digit code', 'error');
                 return;
@@ -433,7 +433,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'verify_otp', username: loginInput, code: code })
                 });
-                
+
                 const result = await response.json();
             
                 if (!result.success) {
@@ -489,25 +489,8 @@
             
                 showToast('SYSTEM', 'Access Granted', 'success');
             
-                // 5. ТВОЯ ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ (SPA-переход)
-                if (localStorage.getItem('priority_onboarded') !== 'true') {
-                    window.location.href = 'onboarding.html';
-                } else {
-                    document.getElementById('authScreen').classList.add('hidden');
-                    document.getElementById('globalToggles').classList.add('hidden');
-                    document.getElementById('mainApp').classList.remove('hidden');
-                    
-                    // Инициализируем данные
-                    loadDataFromStorage();
-                    applyAppTheme();
-                    
-                    setTimeout(() => {
-                        const taskInput = document.getElementById('taskInput');
-                        const mobileTaskInput = document.getElementById('mobileTaskInput');
-                        if (taskInput) taskInput.focus();
-                        if (mobileTaskInput) mobileTaskInput.focus();
-                    }, 100);
-                }
+                // 5. ТВОЯ ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ (SPA-переход) (заменил на checkAuth();)
+                checkAuth();
             } catch (err) {
                 console.error(err);
                 showToast('ERROR', 'Verification error', 'error');
