@@ -5,10 +5,10 @@
     <script>
     // РОУТИНГ: Если устройство мобильное, перекидываем на m.html
     if (window.innerWidth < 768) {
-        window.location.replace('m.html');
+        window.location.replace('m.html' + window.location.search);
     }
     window.addEventListener('resize', () => {
-        if (window.innerWidth < 768) window.location.replace('m.html');
+        if (window.innerWidth < 768) window.location.replace('m.html' + window.location.search);
     });
     </script>
 
@@ -624,6 +624,15 @@
 
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
+
+        // --- ЛОВИМ ПРОМОКОД ИЗ ССЫЛКИ ---
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('promo') === 'vk') {
+            localStorage.setItem('priority_pending_promo', 'true');
+            // Очищаем URL, чтобы было красиво (опционально)
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        // --------------------------------
 
         // Бронебойная инициализация: принудительно вшиваем токен в каждый сетевой запрос
         let supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -1390,6 +1399,21 @@
 
         if (userData) {
             isPro = userData.is_pro || false;
+
+            // ---> АВТОАКТИВАЦИЯ PRO ПО АКЦИИ <---
+            if (localStorage.getItem('priority_pending_promo') === 'true') {
+                isPro = true;
+                // Апгрейдим юзера прямо в базе данных Supabase
+                await supabaseClient.from('users').update({ is_pro: true }).eq('username', loginInput);
+                localStorage.removeItem('priority_pending_promo');
+                
+                // Выводим красивое уведомление с небольшой задержкой после отрисовки интерфейса
+                setTimeout(() => {
+                    showToast('GIFT UNLOCKED', 'Акция запуска: Вечная PRO-лицензия успешно активирована!', 'success', 8000);
+                }, 1500);
+            }
+            // ---> КОНЕЦ АВТОАКТИВАЦИИ <---
+
             localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
 
             if (userData.app_data && Object.keys(userData.app_data).length > 0) {
