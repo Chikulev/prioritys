@@ -625,14 +625,22 @@
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
 
-        const customJwt = localStorage.getItem('priority_jwt');
+        // Бронебойная инициализация: принудительно вшиваем токен в каждый сетевой запрос
         let supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             global: {
-                headers: customJwt ? { Authorization: `Bearer ${customJwt}` } : {}
+                fetch: (url, options) => {
+                    const token = localStorage.getItem('priority_jwt');
+                    if (token) {
+                        options.headers = new Headers(options.headers);
+                        options.headers.set('Authorization', `Bearer ${token}`);
+                    }
+                    return fetch(url, options);
+                }
             }
         });
 
-        if (customJwt) supabaseClient.realtime.setAuth(customJwt);
+        const currentJwt = localStorage.getItem('priority_jwt');
+        if (currentJwt) supabaseClient.realtime.setAuth(currentJwt);
 
         function loadMoreArchive() {
             archiveLimit += 10;
@@ -1282,108 +1290,95 @@
         }
 
         async function confirmLogin() {
-            const codeInputs = document.querySelectorAll('.code-cell');
-            const code = Array.from(codeInputs).map(i => i.value).join('');
+    const codeInputs = document.querySelectorAll('.code-cell');
+    const code = Array.from(codeInputs).map(i => i.value).join('');
+    
+    let loginInput = document.getElementById('tgLogin').value.trim().toLowerCase();
+    if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
 
-            let loginInput = document.getElementById('tgLogin').value.trim().toLowerCase();
-            if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
+    if (code.length < 4) {
+        showToast('ERROR', 'Enter 4-digit code', 'error');
+        return;
+    }
 
-            if (code.length < 4) {
-                showToast('ERROR', 'Enter 4-digit code', 'error');
-                return;
-            }
+    showToast('SYSTEM', 'Verifying cryptographic signature...', 'info');
+
+    try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'verify_otp', username: loginInput, code: code })
+        });
         
-            showToast('SYSTEM', 'Проверка криптографической подписи...', 'info');
-        
-            try {
-                // 1. Получаем JWT токен через нашу Edge Function
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'verify_otp', username: loginInput, code: code })
-                });
+        const result = await response.json();
 
-                const result = await response.json();
-            
-                if (!result.success) {
-                    showToast('ACCESS DENIED', result.error || 'Invalid or expired code', 'error');
-                    codeInputs.forEach(i => i.value = '');
-                    if(codeInputs[0]) codeInputs[0].focus();
-                    return;
-                }
-            
-                // 2. Сохраняем сессию и JWT токен
-                localStorage.setItem('priority_auth', 'true');
-                localStorage.setItem('priority_user', loginInput);
-                localStorage.setItem('priority_jwt', result.token);
-            
-                // 3. БЕСШОВНОЕ ОБНОВЛЕНИЕ КЛИЕНТА (без перезагрузки страницы!)
-                // Пересоздаем клиент, вшивая в него свежий токен
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    global: { headers: { Authorization: `Bearer ${result.token}` } }
-                });
+        if (!result.success) {
+            showToast('ACCESS DENIED', result.error || 'Invalid or expired code', 'error');
+            codeInputs.forEach(i => i.value = '');
+            if(codeInputs[0]) codeInputs[0].focus();
+            return;
+        }
 
-                supabaseClient.realtime.setAuth(result.token);
-            
-                // 4. ТВОЯ ЛОГИКА: ЗАГРУЖАЕМ БЭКАП И PRO-СТАТУС ИЗ ОБЛАКА ПРЯМО ПРИ ВХОДЕ
-                const { data: userData } = await supabaseClient
-                    .from('users')
-                    .select('is_pro, app_data')
-                    .eq('username', loginInput)
-                    .single();
-            
-                if (userData) {
-                    isPro = userData.is_pro || false;
-                    localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
-                
-                    // ЕСЛИ В БАЗЕ ЕСТЬ ДАННЫЕ - МЫ УБИВАЕМ ОНБОРДИНГ И ВОССТАНАВЛИВАЕМ СТЕЙТ
-                    if (userData.app_data && Object.keys(userData.app_data).length > 0) {
-                        const cloudData = userData.app_data;
-                        localStorage.setItem('priority_onboarded', 'true'); 
-                    
-                        // Ядро
-                        if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
-                        if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
-                        if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
-                        if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
-                        if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
-                    
-                        // Визуал
-                        if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
-                        if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
-                        if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
-                        if (cloudData.shop_module) localStorage.setItem('priority_shop_module', cloudData.shop_module);
-                        if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
-                        if (cloudData.scale) localStorage.setItem('priority_scale', cloudData.scale);
-                    }
-                }
-            
-                showToast('SYSTEM', 'Access Granted', 'success');
-            
-                // 5. ТВОЯ ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ (SPA-переход)
-                if (localStorage.getItem('priority_onboarded') !== 'true') {
-                    window.location.href = 'onboarding.html';
-                } else {
-                    document.getElementById('authScreen').classList.add('hidden');
-                    document.getElementById('globalToggles').classList.add('hidden');
-                    document.getElementById('mainApp').classList.remove('hidden');
+        // 1. Сохраняем сессию и JWT токен
+        localStorage.setItem('priority_auth', 'true');
+        localStorage.setItem('priority_user', loginInput);
+        localStorage.setItem('priority_jwt', result.token);
 
-                    // Инициализируем данные
-                    loadDataFromStorage();
-                    applyAppTheme();
+        // 2. АВТОРИЗУЕМ WEBSOCKETS (fetch обновит заголовки сам)
+        supabaseClient.realtime.setAuth(result.token);
 
-                    setTimeout(() => {
-                        const taskInput = document.getElementById('taskInput');
-                        const mobileTaskInput = document.getElementById('mobileTaskInput');
-                        if (taskInput) taskInput.focus();
-                        if (mobileTaskInput) mobileTaskInput.focus();
-                    }, 100);
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('ERROR', 'Verification error', 'error');
+        // 3. ЗАГРУЖАЕМ БЭКАП
+        const { data: userData } = await supabaseClient
+            .from('users')
+            .select('is_pro, app_data')
+            .eq('username', loginInput)
+            .single();
+
+        if (userData) {
+            isPro = userData.is_pro || false;
+            localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
+
+            if (userData.app_data && Object.keys(userData.app_data).length > 0) {
+                const cloudData = userData.app_data;
+                localStorage.setItem('priority_onboarded', 'true'); 
+            
+                if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
+                if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
+                if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
+                if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
+                if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
+                if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
+                if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
+                if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
+                if (cloudData.shop_module) localStorage.setItem('priority_shop_module', cloudData.shop_module);
+                if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
+                if (cloudData.scale) localStorage.setItem('priority_scale', cloudData.scale);
             }
         }
+
+        showToast('SYSTEM', 'Access Granted', 'success');
+
+        // 4. ТВОЯ ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ
+        // Если это файл m.html, просто замени этот if-else на вызов checkAuth();
+        if (localStorage.getItem('priority_onboarded') !== 'true') {
+            window.location.href = 'onboarding.html';
+        } else {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('globalToggles').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            loadDataFromStorage();
+            applyAppTheme();
+            setTimeout(() => {
+                const taskInput = document.getElementById('taskInput');
+                if (taskInput) taskInput.focus();
+            }, 100);
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('ERROR', 'Verification error', 'error');
+    }
+}
 
         function backToStep1() {
             const s1 = document.getElementById('authStep1');
@@ -2182,28 +2177,68 @@
         function drag(ev, id) { draggedTaskId = id; ev.dataTransfer.setData("text", id); setTimeout(() => ev.target.classList.add('dragging'), 0); }
         function dragEnd(ev) { ev.target.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }
         function allowDrop(ev) { ev.preventDefault(); const trg = ev.target.closest('.tech-card-task'); if(trg && trg.id !== `task-${draggedTaskId}`) trg.classList.add('drag-over'); }
+        
         function drop(ev, targetQuad) {
-            ev.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            const task = tasks.find(tObj => tObj.id === draggedTaskId);
-            if(!task) return;
+            ev.preventDefault(); 
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
             
-            let newImp = task.isImportant; let newUrg = task.isUrgent;
-            if (targetQuad === 1) { newImp = true; newUrg = true; } else if (targetQuad === 2) { newImp = true; newUrg = false; } else if (targetQuad === 3) { newImp = false; newUrg = true; } else if (targetQuad === 4) { newImp = false; newUrg = false; }
+            // 1. Идентифицируем тип задачи (общая или личная) по формату ID
+            const isSharedId = String(draggedTaskId).includes('-') || String(draggedTaskId).startsWith('temp_');
+            
+            // 2. Декодируем квадрант
+            let newImp = false; let newUrg = false;
+            if (targetQuad === 1) { newImp = true; newUrg = true; } 
+            else if (targetQuad === 2) { newImp = true; newUrg = false; } 
+            else if (targetQuad === 3) { newImp = false; newUrg = true; } 
+            else if (targetQuad === 4) { newImp = false; newUrg = false; }
 
-            if (task.isImportant !== newImp || task.isUrgent !== newUrg) {
-                task.isImportant = newImp; task.isUrgent = newUrg;
-                showToast('SYSTEM UPDATE', t('toast_task_reclass'), 'info');
-            }
+            if (isSharedId) {
+                // ---> ОБРАБОТКА B2B (ОБЩИХ) ЗАДАЧ
+                const sharedTask = sharedTasks.find(t => String(t.id) === String(draggedTaskId));
+                if (!sharedTask) return;
+                
+                if (sharedTask.is_important !== newImp || sharedTask.is_urgent !== newUrg) {
+                    sharedTask.is_important = newImp;
+                    sharedTask.is_urgent = newUrg;
+                    
+                    // Сохраняем в облако
+                    supabaseClient.from('shared_tasks').update({ is_important: newImp, is_urgent: newUrg }).eq('id', draggedTaskId);
+                    showToast('SYSTEM UPDATE', typeof t === 'function' ? t('toast_task_reclass') : 'Priority updated', 'info');
+                }
+                renderTasks();
+                
+            } else {
+                // ---> ОБРАБОТКА ЛИЧНЫХ ЗАДАЧ
+                // Используем String() для защиты от несоответствия типов (Number vs String)
+                const task = tasks.find(tObj => String(tObj.id) === String(draggedTaskId));
+                if (!task) return;
+                
+                if (task.isImportant !== newImp || task.isUrgent !== newUrg) {
+                    task.isImportant = newImp; 
+                    task.isUrgent = newUrg;
+                    showToast('SYSTEM UPDATE', typeof t === 'function' ? t('toast_task_reclass') : 'Priority updated', 'info');
+                }
 
-            const dropTarget = ev.target.closest('.tech-card-task');
-            if (dropTarget) {
-                const targetId = parseInt(dropTarget.id.split('-')[1]);
-                const dIdx = tasks.findIndex(tObj => tObj.id === draggedTaskId);
-                const tIdx = tasks.findIndex(tObj => tObj.id === targetId);
-                const temp = tasks[dIdx]; tasks.splice(dIdx, 1); tasks.splice(tIdx, 0, temp);
+                // Визуальная пересортировка массива при наведении друг на друга
+                const dropTarget = ev.target.closest('.tech-card-task');
+                if (dropTarget) {
+                    const targetIdStr = dropTarget.id.replace('task-', '');
+                    // Блокируем слияние общих и личных массивов при сортировке
+                    if (!targetIdStr.includes('-') && !targetIdStr.startsWith('temp_')) {
+                        const dIdx = tasks.findIndex(tObj => String(tObj.id) === String(draggedTaskId));
+                        const tIdx = tasks.findIndex(tObj => String(tObj.id) === String(targetIdStr));
+                        
+                        if (dIdx > -1 && tIdx > -1) {
+                            const temp = tasks[dIdx]; 
+                            tasks.splice(dIdx, 1); 
+                            tasks.splice(tIdx, 0, temp);
+                        }
+                    }
+                }
+                
+                saveData('priority_tasks', tasks);
+                renderTasks();
             }
-            saveData('priority_tasks', tasks);
-            renderTasks();
         }
 
         function renderTasks() {

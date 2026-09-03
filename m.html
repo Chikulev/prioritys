@@ -232,15 +232,23 @@
     <script>
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_H3bf6T5zv1NkBcyJcm8Gew_zDjtTz9W';
-
-        const customJwt = localStorage.getItem('priority_jwt');
+            
+        // Бронебойная инициализация: принудительно вшиваем токен в каждый сетевой запрос
         let supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             global: {
-                headers: customJwt ? { Authorization: `Bearer ${customJwt}` } : {}
+                fetch: (url, options) => {
+                    const token = localStorage.getItem('priority_jwt');
+                    if (token) {
+                        options.headers = new Headers(options.headers);
+                        options.headers.set('Authorization', `Bearer ${token}`);
+                    }
+                    return fetch(url, options);
+                }
             }
         });
-
-        if (customJwt) supabaseClient.realtime.setAuth(customJwt);
+        
+        const currentJwt = localStorage.getItem('priority_jwt');
+        if (currentJwt) supabaseClient.realtime.setAuth(currentJwt);
 
         let tasks = [];
         let scopes = [];
@@ -426,10 +434,9 @@
                 return;
             }
         
-            showToast('SYSTEM', 'Проверка криптографической подписи...', 'info');
+            showToast('SYSTEM', 'Verifying cryptographic signature...', 'info');
         
             try {
-                // 1. Получаем JWT токен через нашу Edge Function
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -445,20 +452,15 @@
                     return;
                 }
             
-                // 2. Сохраняем сессию и JWT токен
+                // 1. Сохраняем сессию и JWT токен
                 localStorage.setItem('priority_auth', 'true');
                 localStorage.setItem('priority_user', loginInput);
                 localStorage.setItem('priority_jwt', result.token);
             
-                // 3. БЕСШОВНОЕ ОБНОВЛЕНИЕ КЛИЕНТА (без перезагрузки страницы!)
-                // Пересоздаем клиент, вшивая в него свежий токен
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    global: { headers: { Authorization: `Bearer ${result.token}` } }
-                });
-            
+                // 2. АВТОРИЗУЕМ WEBSOCKETS (fetch обновит заголовки сам)
                 supabaseClient.realtime.setAuth(result.token);
-                
-                // 4. ТВОЯ ЛОГИКА: ЗАГРУЖАЕМ БЭКАП И PRO-СТАТУС ИЗ ОБЛАКА ПРЯМО ПРИ ВХОДЕ
+            
+                // 3. ЗАГРУЖАЕМ БЭКАП
                 const { data: userData } = await supabaseClient
                     .from('users')
                     .select('is_pro, app_data')
@@ -469,19 +471,15 @@
                     isPro = userData.is_pro || false;
                     localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
                 
-                    // ЕСЛИ В БАЗЕ ЕСТЬ ДАННЫЕ - МЫ УБИВАЕМ ОНБОРДИНГ И ВОССТАНАВЛИВАЕМ СТЕЙТ
                     if (userData.app_data && Object.keys(userData.app_data).length > 0) {
                         const cloudData = userData.app_data;
                         localStorage.setItem('priority_onboarded', 'true'); 
                     
-                        // Ядро
                         if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
                         if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
                         if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
                         if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
                         if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
-                    
-                        // Визуал
                         if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
                         if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
                         if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
@@ -493,7 +491,8 @@
             
                 showToast('SYSTEM', 'Access Granted', 'success');
             
-                // 5. ТВОЯ ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ (SPA-переход) (заменил на checkAuth();)
+                // 4. ТВОЯ ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ
+                // Если это файл m.html, просто замени этот if-else на вызов checkAuth();
                 checkAuth();
             } catch (err) {
                 console.error(err);
