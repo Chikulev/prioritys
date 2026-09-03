@@ -1099,41 +1099,95 @@
             const username = localStorage.getItem('priority_user');
             if (!username) return;
 
+            // Единый канал для всех файлов
             supabaseClient
-                .channel('public:users')
+                .channel('public:users_realtime')
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` }, (payload) => {
                     const cloudData = payload.new.app_data;
                     if (!cloudData) return;
+
                     const lastMutation = localStorage.getItem('priority_last_mutation');
                     if (cloudData._mutation_id && cloudData._mutation_id === lastMutation) return;
 
-                    if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
-                    if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
-                    if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
-                    if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
-                    if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
-                    if (cloudData.lite_tasks) localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
+                    // 1. ВИЗУАЛ И НАСТРОЙКИ (Мгновенное применение)
+                    let visualChanged = false;
+                    
+                    if (cloudData.theme && localStorage.getItem('priority_theme') !== cloudData.theme) {
+                        localStorage.setItem('priority_theme', cloudData.theme);
+                        visualChanged = true;
+                    }
+                    if (cloudData.cursor && localStorage.getItem('priority_cursor') !== cloudData.cursor) {
+                        localStorage.setItem('priority_cursor', cloudData.cursor);
+                        if (typeof applyCursor === 'function') applyCursor();
+                    }
+                    if (cloudData.lang && localStorage.getItem('priority_lang') !== cloudData.lang) {
+                        localStorage.setItem('priority_lang', cloudData.lang);
+                        if (typeof applyI18n === 'function') applyI18n();
+                        if (typeof renderThemesMarketplace === 'function') renderThemesMarketplace();
+                    }
+                    if (cloudData.scale && localStorage.getItem('priority_scale') !== cloudData.scale) {
+                        localStorage.setItem('priority_scale', cloudData.scale);
+                        document.documentElement.style.setProperty('--system-scale', cloudData.scale);
+                    }
+                    if (cloudData.shop_module) {
+                        localStorage.setItem('priority_shop_module', cloudData.shop_module);
+                        if (typeof renderShopUI === 'function') renderShopUI();
+                    }
+                    if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
+                    
+                    // Если тема поменялась - применяем магию на лету
+                    if (visualChanged && typeof applyAppTheme === 'function') applyAppTheme();
 
-                    dynamicScopes = cloudData.scopes || []; scopes = cloudData.scopes || []; 
-                    tasks = cloudData.tasks || []; templates = cloudData.templates || [];
-                    macros = cloudData.macros || []; unlockedBadges = cloudData.badges || [];
-                    liteTasks = cloudData.lite_tasks || [];
+                    // 2. БАЗА ДАННЫХ (Задачи, макросы, сферы)
+                    if (cloudData.scopes) {
+                        localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
+                        if (typeof scopes !== 'undefined') scopes = cloudData.scopes;
+                        if (typeof dynamicScopes !== 'undefined') dynamicScopes = cloudData.scopes;
+                    }
+                    if (cloudData.tasks) {
+                        localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
+                        if (typeof tasks !== 'undefined') tasks = cloudData.tasks;
+                    }
+                    if (cloudData.macros) {
+                        localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
+                        if (typeof macros !== 'undefined') macros = cloudData.macros;
+                    }
+                    if (cloudData.lite_tasks) {
+                        localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
+                        if (typeof liteTasks !== 'undefined') liteTasks = cloudData.lite_tasks;
+                    }
+                    if (cloudData.templates) {
+                        localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
+                        if (typeof templates !== 'undefined') templates = cloudData.templates;
+                    }
+                    if (cloudData.lite_log) localStorage.setItem('priority_lite_log', JSON.stringify(cloudData.lite_log));
+                    if (cloudData.lite_cron_time) localStorage.setItem('lite_cron_time', cloudData.lite_cron_time);
+                    if (cloudData.lite_cron_action) localStorage.setItem('lite_cron_action', cloudData.lite_cron_action);
 
-                    initDynamicScopes(); renderTasks(); renderMacros(); renderDashLite();
+                    // 3. БЕСШОВНАЯ ПЕРЕРИСОВКА ИНТЕРФЕЙСА (Для всех возможных страниц)
+                    if (typeof initDynamicScopes === 'function') initDynamicScopes();
+                    if (typeof renderTasks === 'function') renderTasks();
+                    if (typeof renderMacros === 'function') renderMacros();
+                    if (typeof renderDashLite === 'function') renderDashLite();
+                    if (typeof renderScopes === 'function') renderScopes();
+                    if (typeof renderLite === 'function') renderLite();
+                    if (typeof renderStats === 'function') renderStats();
+                    if (typeof renderHeatmap === 'function') renderHeatmap();
+                    if (typeof renderFilters === 'function') renderFilters();
                 }).subscribe();
 
-            // ВАЖНО: Слушаем общие задачи и чаты!
-            supabaseClient.channel('public:shared_tasks')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_tasks' }, (payload) => {
-                    console.log('🔄 Командная задача обновлена', payload);
-                    loadSharedScopes(); // Автоматически скачает и перерисует без F5
-                }).subscribe();
+            // Слушаем общие задачи (Только для тех файлов, где есть эта логика: index.html, m.html)
+            if (typeof loadSharedScopes === 'function') {
+                supabaseClient.channel('public:shared_tasks_realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_tasks' }, () => {
+                        loadSharedScopes();
+                    }).subscribe();
 
-            supabaseClient.channel('public:shared_comments')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_comments' }, (payload) => {
-                    console.log('🔄 Новый комментарий в чате', payload);
-                    loadSharedScopes(); // Автоматически скачает и перерисует без F5
-                }).subscribe();
+                supabaseClient.channel('public:shared_comments_realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_comments' }, () => {
+                        loadSharedScopes();
+                    }).subscribe();
+            }
         }
 
         // --- AUTH & ROUTING LOGIC ---
