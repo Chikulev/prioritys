@@ -245,6 +245,8 @@
             }
         });
 
+        if (customJwt) supabaseClient.realtime.setAuth(customJwt);
+
         // ФОНОВАЯ ЗАГРУЗКА ДАННЫХ ПРИ ОТКРЫТИИ
         async function syncFromCloud() {
             const username = localStorage.getItem('priority_user');

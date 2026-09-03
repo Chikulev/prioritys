@@ -240,6 +240,8 @@
             }
         });
 
+        if (customJwt) supabaseClient.realtime.setAuth(customJwt);
+
         let tasks = [];
         let scopes = [];
         let sharedScopes = [];
@@ -454,6 +456,8 @@
                     global: { headers: { Authorization: `Bearer ${result.token}` } }
                 });
             
+                supabaseClient.realtime.setAuth(result.token);
+                
                 // 4. ТВОЯ ЛОГИКА: ЗАГРУЖАЕМ БЭКАП И PRO-СТАТУС ИЗ ОБЛАКА ПРЯМО ПРИ ВХОДЕ
                 const { data: userData } = await supabaseClient
                     .from('users')

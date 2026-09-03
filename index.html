@@ -632,6 +632,8 @@
             }
         });
 
+        if (customJwt) supabaseClient.realtime.setAuth(customJwt);
+
         function loadMoreArchive() {
             archiveLimit += 10;
             renderTasks();
@@ -1320,6 +1322,8 @@
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     global: { headers: { Authorization: `Bearer ${result.token}` } }
                 });
+
+                supabaseClient.realtime.setAuth(result.token);
             
                 // 4. ТВОЯ ЛОГИКА: ЗАГРУЖАЕМ БЭКАП И PRO-СТАТУС ИЗ ОБЛАКА ПРЯМО ПРИ ВХОДЕ
                 const { data: userData } = await supabaseClient

@@ -146,6 +146,8 @@
             }
         });
 
+        if (customJwt) supabaseClient.realtime.setAuth(customJwt);
+
         let cloudSyncTimeout = null;
 
         function syncStateToCloud() {

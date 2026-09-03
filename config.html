@@ -523,6 +523,8 @@
             }
         });
 
+        if (customJwt) supabaseClient.realtime.setAuth(customJwt);
+
         function showToast(title, desc, type = 'success') {
             const container = document.getElementById('toastContainer');
             if(!container) return;
