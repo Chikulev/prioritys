@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /lite.html
+Allow: /analytics.html
+Allow: /config.html
+Allow: /onboarding.html
+Allow: /assets/
+
+# Блокируем технические и служебные директории (если появятся)
+Disallow: /api/
+Disallow: /.git/
+
+# Ограничение частоты запросов для Яндекса, чтобы беречь ресурсы
+User-agent: Yandex
+Crawl-delay: 1
+
+# Блокируем бесполезных ботов, которые тратят краулинговый бюджет
+User-agent: Baiduspider
+Disallow: /
+
+Sitemap: https://prioritys.ru/sitemap.xml
