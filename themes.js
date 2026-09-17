@@ -313,6 +313,90 @@ const SYSTEM_THEMES = {
             ru: { "dash_subtitle_main": "ПРИБОРНАЯ ПАНЕЛЬ", "macro_title": "ДАЛЬНИЕ РЕЙСЫ", "quad_1": "ЧЕК ДВИГАТЕЛЯ ⚠️", "quad_2": "КРУИЗ-КОНТРОЛЬ 🛣️", "quad_3": "ДОЗАПРАВКА ⛽", "quad_4": "СТОЯНКА ☕", "empty_tasks": "ТРАССА ПУСТА.", "lbl_macro": "Маршрут", "btn_init_macro": "Настроить GPS" }
         }
     },
+    cosmic_voyager: {
+    id: 'cosmic_voyager',
+    name: 'Cosmic Voyager',
+    fontPrimary: "'Space Grotesk', sans-serif",
+    desc: { en: "Deep space voyage theme with nebula glow", ru: "Тема дальнего космоса с сиянием туманностей" },
+    icon: "🚀",
+    isPro: true,
+    cssVars: {
+        "--color-brand-light": "#7c3aed", "--color-brand-dark": "#a78bfa",
+        "--color-base-light": "#eef2ff", "--color-base-dark": "#030008",
+        "--color-panel-light": "rgba(255, 255, 255, 0.6)", "--color-panel-dark": "rgba(10, 4, 25, 0.7)",
+        "--color-border-light": "rgba(124, 58, 237, 0.3)", "--color-border-dark": "rgba(167, 139, 250, 0.2)"
+    },
+    customCss: `
+        /* СВЕТЛАЯ ТЕМА: Стратосфера */
+        body {
+            background: radial-gradient(circle at top, #e0e7ff 0%, #ede9fe 50%, #f3e8ff 100%) !important;
+            background-attachment: fixed !important;
+        }
+        /* ТЕМНАЯ ТЕМА: Открытый космос с туманностями */
+        .dark body {
+            background-color: #030008 !important;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(109, 40, 217, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.15) 0%, transparent 40%) !important;
+            background-attachment: fixed !important;
+        }
+
+        /* Эффект стеклянного иллюминатора корабля */
+        .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-radius: 16px !important;
+            border: 1px solid var(--color-border-light) !important;
+            box-shadow: 0 8px 32px rgba(109, 40, 217, 0.1) !important;
+        }
+        .dark .bg-panel-light, .dark .dark\\:bg-panel-dark, .dark .tech-card-task, .dark #templatesDropdown, .dark .theme-card {
+            border: 1px solid var(--color-border-dark) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(139, 92, 246, 0.1) !important;
+        }
+
+        /* Инпуты */
+        input[type="text"], input[type="time"], select {
+            background: rgba(255, 255, 255, 0.8) !important;
+            border: 1px solid var(--color-border-light) !important;
+            border-radius: 12px !important;
+            padding: 0.8rem 1.5rem !important;
+        }
+        .dark input[type="text"], .dark input[type="time"], .dark select {
+            background: rgba(0, 0, 0, 0.4) !important;
+            border: 1px solid var(--color-border-dark) !important;
+        }
+
+        /* Космическая типографика */
+        h1, h2, h3 { font-weight: 800 !important; letter-spacing: 0.05em !important; text-transform: uppercase !important; }
+        .btn-press { border-radius: 12px !important; font-weight: 900 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; }
+    `,
+        locales: {
+            en: {
+                "dash_subtitle_main": "Mission Control · Ready for launch",
+                "macro_title": "Galactic Objectives",
+                "quad_1": "Nebula [Q1]",
+                "quad_2": "Starlight [Q2]",
+                "quad_3": "Orbit [Q3]",
+                "quad_4": "Void [Q4]",
+                "empty_tasks": "No signals detected in this sector...",
+                "lbl_macro": "Star log entry",
+                "btn_init_macro": "Initiate launch",
+                "archived": "Docked in the hangar"
+            },
+            ru: {
+                "dash_subtitle_main": "Центр управления · Готовность к старту",
+                "macro_title": "Галактические цели",
+                "quad_1": "Туманность [Q1]",
+                "quad_2": "Сияние [Q2]",
+                "quad_3": "Орбита [Q3]",
+                "quad_4": "Пустота [Q4]",
+                "empty_tasks": "В этом секторе не обнаружено сигналов...",
+                "lbl_macro": "Звёздный журнал",
+                "btn_init_macro": "Запустить старт",
+                "archived": "В ангаре"
+            }
+        }
+    },
     darkroom: {
         id: 'darkroom',
         name: 'Darkroom Exposure',
