@@ -421,7 +421,7 @@
             }
         }
 
-        function showToast(title, desc, type = 'success') {
+        function showToast(title, desc, type = 'success', duration = 4000) {
             const container = document.getElementById('toastContainer');
             if(!container) return;
             const toast = document.createElement('div');
@@ -429,7 +429,7 @@
             toast.className = `bg-panel-light dark:bg-panel-dark ${colorClass} shadow-lg border p-4 rounded-lg flex items-start gap-3 relative pointer-events-auto transition-colors`;
             toast.innerHTML = `<div class="w-full flex-1"><div class="text-[9px] font-black uppercase tracking-[0.2em] mb-1">${title}</div><div class="font-bold text-xs">${desc}</div></div>`;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
+            if (duration > 0) setTimeout(() => toast.remove(), duration);
         }
 
         // --- АВТОРИЗАЦИЯ И РОУТИНГ ---
@@ -472,7 +472,7 @@
                     const s2 = document.getElementById('authStep2');
                     s2.classList.remove('hidden');
                     setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
-                    setTimeout(() => codeInputs[0].focus(), 300);
+                    setTimeout(() => document.querySelector('.code-cell')?.focus(), 300);
                 } else {
                     // ЕСЛИ ВЫДАЛО ОШИБКУ — ЭТО 100% ЗНАЧИТ, ЧТО ЮЗЕРА НЕТ В БАЗЕ. ВЫВОДИМ КНОПКУ.
                     const botUrl = 'https://t.me/PrioritysBot';
@@ -659,16 +659,24 @@
                 const { data: membersData } = await supabaseClient.from('scope_members').select('scope_id, role, shared_scopes(id, name)').eq('username', username);
                 if (membersData) {
                     sharedScopes = membersData.map(m => m.shared_scopes).filter(Boolean);
-                    initDynamicScopes();
+                    
+                    // --- НОВОЕ: ПОДСЧЕТ УЧАСТНИКОВ ---
                     const scopeIds = sharedScopes.map(s => s.id);
                     if(scopeIds.length > 0) {
+                        const { data: allMembers } = await supabaseClient.from('scope_members').select('scope_id').in('scope_id', scopeIds);
+                        const counts = {};
+                        if(allMembers) allMembers.forEach(m => counts[m.scope_id] = (counts[m.scope_id] || 0) + 1);
+                        sharedScopes = sharedScopes.map(s => ({...s, memberCount: counts[s.id] || 1}));
+                        
                         const { data: tasksData } = await supabaseClient.from('shared_tasks').select('*, shared_comments(*)').in('scope_id', scopeIds);
                         if (tasksData) {
                             sharedTasks = tasksData;
                             sharedTasks.forEach(t => { if (t.shared_comments) t.shared_comments.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); });
                         }
                     }
+                    // ----------------------------------
                 }
+                initDynamicScopes();
                 renderFilters();
                 renderInbox();
                 renderTasks();
@@ -729,26 +737,29 @@
             const personalScopes = scopes.filter(s => !sharedScopes.find(ss => ss.name === s));
             const renderScopes = [...personalScopes, ...sharedScopes.map(s => s.name), 'SYS_OTHER'];
             
-            // Генерируем элементы дропдауна
             dropdown.innerHTML = renderScopes.map(s => {
-                const isShared = sharedScopes.some(ss => ss.name === s);
-                const icon = isShared ? '👥 ' : '';
+                const sharedScope = sharedScopes.find(ss => ss.name === s);
+                const isActuallyShared = sharedScope && sharedScope.memberCount > 1;
+                const icon = isActuallyShared ? '👥 ' : '';
                 const display = s === 'SYS_OTHER' ? 'ДРУГОЕ' : s;
                 return `<div onclick="setCustomDropdown('scope', '${s}', '${icon}${display}')" class="px-5 py-5 text-sm font-bold uppercase text-zinc-700 dark:text-zinc-300 hover:bg-base-light dark:hover:bg-base-dark cursor-pointer border-b border-borderline-light dark:border-borderline-dark truncate flex items-center transition-colors">${icon}${display}</div>`;
             }).join('');
             
-            // Проверка текущего значения
             const currentVal = document.getElementById('mobileScopeSelect').value;
             if (!currentVal || !renderScopes.includes(currentVal)) {
                 document.getElementById('mobScopeLabel').innerText = 'ВЫБЕРИТЕ СФЕРУ';
                 document.getElementById('mobileScopeSelect').value = '';
                 document.getElementById('mobileAssigneeSelect').classList.add('hidden');
             } else {
-                const isShared = sharedScopes.some(ss => ss.name === currentVal);
-                const icon = isShared ? '👥 ' : '';
+                const sharedScope = sharedScopes.find(ss => ss.name === currentVal);
+                const isActuallyShared = sharedScope && sharedScope.memberCount > 1;
+                const icon = isActuallyShared ? '👥 ' : '';
                 const display = currentVal === 'SYS_OTHER' ? 'ДРУГОЕ' : currentVal;
                 document.getElementById('mobScopeLabel').innerText = `${icon}${display}`;
             }
+            
+            // Запускаем синхронизацию исполнителей
+            syncMobileScope();
         }
 
         async function syncMobileScope() {
@@ -760,6 +771,8 @@
             if (sharedScope) {
                 assigneeSelect.classList.remove('hidden');
                 assigneeSelect.classList.add('flex');
+                assigneeSelect.innerHTML = '<option value="">Загрузка...</option>';
+                
                 const { data: members } = await supabaseClient.from('scope_members').select('username').eq('scope_id', sharedScope.id);
                 if (members) {
                     assigneeSelect.innerHTML = members.map(m => `<option value="${m.username}">${m.username === localStorage.getItem('priority_user') ? '@me' : m.username}</option>`).join('');
@@ -767,6 +780,7 @@
             } else {
                 assigneeSelect.classList.add('hidden');
                 assigneeSelect.classList.remove('flex');
+                assigneeSelect.innerHTML = '<option value="me">@me</option>';
             }
         }
 
@@ -781,7 +795,7 @@
 
             // 2. Собираем активные общие задачи (исключаем завершенные и те, что висят в карантине)
             const sharedActive = sharedTasks
-                .filter(t => t.status !== 'completed' && !(t.assignee_username === username && t.is_acknowledged === false))
+                .filter(t => t.status !== 'completed' && !(t.assignee_username === username && t.status === 'inbox'))
                 .map(t => {
                     const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER';
                     return { sphere: scopeName }; 
@@ -830,22 +844,15 @@
         function toggleLiteMode() {
             isLiteMode = !isLiteMode;
             const lightningBtn = document.getElementById('lightningBtn');
+            const controls = document.getElementById('mobileTaskControls');
             const deployBtn = document.getElementById('mobileDeployBtn');
-            
-            // Изолируем применение обесцвечивания только на соседние контейнеры, 
-            // чтобы кнопка LITE не превращалась в серую кашу
-            const scopeRow = document.getElementById('mobileScopeSelect').parentElement;
-            const impWrapper = document.getElementById('mobImpWrapper');
-            const urgWrapper = document.getElementById('mobUrgWrapper');
 
             if (isLiteMode) {
                 lightningBtn.classList.remove('text-zinc-400', 'hover:text-yellow-500');
                 lightningBtn.classList.add('bg-yellow-500', 'text-black', 'shadow-[0_0_15px_rgba(234,179,8,0.5)]', 'rounded-full');
                 
                 document.getElementById('mobileScopeSelect').disabled = true;
-                scopeRow.classList.add('opacity-40', 'grayscale', 'pointer-events-none');
-                impWrapper.classList.add('opacity-40', 'grayscale', 'pointer-events-none');
-                urgWrapper.classList.add('opacity-40', 'grayscale', 'pointer-events-none');
+                controls.classList.add('opacity-40', 'grayscale', 'pointer-events-none');
                 
                 deployBtn.innerText = 'LITE';
                 deployBtn.className = "shrink-0 w-14 flex items-center justify-center bg-yellow-500 text-black rounded text-[10px] font-bold shadow-[0_0_15px_rgba(234,179,8,0.5)] btn-press transition-colors pointer-events-auto";
@@ -854,9 +861,7 @@
                 lightningBtn.classList.remove('bg-yellow-500', 'text-black', 'shadow-[0_0_15px_rgba(234,179,8,0.5)]', 'rounded-full');
                 
                 document.getElementById('mobileScopeSelect').disabled = false;
-                scopeRow.classList.remove('opacity-40', 'grayscale', 'pointer-events-none');
-                impWrapper.classList.remove('opacity-40', 'grayscale', 'pointer-events-none');
-                urgWrapper.classList.remove('opacity-40', 'grayscale', 'pointer-events-none');
+                controls.classList.remove('opacity-40', 'grayscale', 'pointer-events-none');
                 
                 deployBtn.innerText = '+';
                 deployBtn.className = "shrink-0 w-12 flex items-center justify-center bg-brand-light dark:bg-brand-dark text-white dark:text-black rounded text-2xl font-black shadow-sm btn-press transition-colors pb-1 pointer-events-auto";
@@ -876,7 +881,7 @@
             if(!input.value.trim()) return showToast('ERROR', 'Пустая задача', 'error');
 
             const sphereVal = document.getElementById('mobileScopeSelect').value;
-            
+
             // ЗАЩИТА ОТ ПУСТОЙ СФЕРЫ
             if (!isLiteMode && !sphereVal) return showToast('ERROR', 'Выберите сферу', 'error');
 
@@ -886,34 +891,32 @@
                 input.value = ''; renderDashLite(); toggleLiteMode();
                 return showToast('LITE', 'Добавлено в буфер', 'success');
             }
-
+        
             const impVal = document.getElementById('mobileImpSelect').value === 'yes';
             const urgVal = document.getElementById('mobileUrgSelect').value === 'yes';
             const sharedScope = sharedScopes.find(s => s.name === sphereVal);
             const username = localStorage.getItem('priority_user');
-
+        
             if (editTaskId) {
                 // 1. Проверяем, общая ли это задача (есть ли дефис от UUID)
                 const isShared = String(editTaskId).includes('-') || String(editTaskId).startsWith('temp_');
-                
+
                 if (isShared) {
                     const sharedTask = sharedTasks.find(x => String(x.id) === String(editTaskId));
                     if (sharedTask) {
                         sharedTask.title = input.value;
                         sharedTask.is_important = impVal;
                         sharedTask.is_urgent = urgVal;
-                        if(priceVal !== null) sharedTask.price = priceVal; else sharedTask.price = null;
-                        
-                        cancelEdit();
+
+                        cancelMobileEdit();
                         showToast('SYS', 'Updated (Cloud)', 'info');
-                        
+
                         supabaseClient.from('shared_tasks').update({
                             title: sharedTask.title,
                             is_important: sharedTask.is_important,
-                            is_urgent: sharedTask.is_urgent,
-                            price: sharedTask.price
+                            is_urgent: sharedTask.is_urgent
                         }).eq('id', editTaskId).then(() => renderTasks());
-                        
+
                         renderTasks();
                     }
                 } else {
@@ -921,15 +924,16 @@
                     const numericId = Number(editTaskId);
                     const taskObj = tasks.find(x => x.id === numericId);
                     if (taskObj) {
-                        taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
-                        if(priceVal !== null) taskObj.price = priceVal; else delete taskObj.price;
-                        if(macroId) taskObj.macroId = parseInt(macroId); else delete taskObj.macroId;
-                        
-                        cancelEdit();
+                        taskObj.title = input.value;
+                        taskObj.sphere = sphereVal;
+                        taskObj.isImportant = impVal;
+                        taskObj.isUrgent = urgVal;
+
+                        cancelMobileEdit();
                         showToast('SYS', 'Updated', 'info');
                         saveData('priority_tasks', tasks);
                         renderTasks();
-                        renderMacros();
+                        renderFilters();
                     }
                 }
             } else {
@@ -938,14 +942,25 @@
                     const finalAssignee = (assignee === 'me' || assignee === '@me') ? username : assignee;
                     let targetStatus = 'inbox';
                     if (finalAssignee === username) targetStatus = (impVal && urgVal) ? 'q1' : (impVal && !urgVal) ? 'q2' : (!impVal && urgVal) ? 'q3' : 'q4';
-
+                
                     const tempId = 'temp_' + Date.now();
                     const tempTask = { id: tempId, scope_id: sharedScope.id, title: input.value, creator_username: username, assignee_username: finalAssignee, is_important: impVal, is_urgent: urgVal, is_acknowledged: finalAssignee === username, status: targetStatus, created_at: new Date().toISOString() };
                     sharedTasks.push(tempTask);
                     input.value = ''; renderInbox(); renderTasks(); renderFilters();
-
-                    const { data } = await supabaseClient.from('shared_tasks').insert({ scope_id: sharedScope.id, title: tempTask.title, creator_username: tempTask.creator_username, assignee_username: tempTask.assignee_username, is_important: tempTask.is_important, is_urgent: tempTask.is_urgent, is_acknowledged: tempTask.is_acknowledged, status: tempTask.status }).select().single();
-                    if(data) { const idx = sharedTasks.findIndex(t => String(t.id) === String(tempId)); if (idx > -1) sharedTasks[idx] = data; 
+                
+                    const { data } = await supabaseClient.from('shared_tasks').insert({
+                        scope_id: sharedScope.id,
+                        title: tempTask.title,
+                        creator_username: tempTask.creator_username,
+                        assignee_username: tempTask.assignee_username,
+                        is_important: tempTask.is_important,
+                        is_urgent: tempTask.is_urgent,
+                        is_acknowledged: tempTask.is_acknowledged,
+                        status: tempTask.status
+                    }).select().single();
+                    if(data) {
+                        const idx = sharedTasks.findIndex(t => String(t.id) === String(tempId));
+                        if (idx > -1) sharedTasks[idx] = data;
                         if (finalAssignee !== username) {
                             fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -960,14 +975,15 @@
                         }
                     }
                 } else {
-                    const d = new Date(); const dateStr = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`;
+                    const d = new Date();
+                    const dateStr = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth()+1).padStart(2, '0')}.${d.getFullYear()}`;
                     tasks.unshift({ id: Date.now(), title: input.value, sphere: sphereVal, isImportant: impVal, isUrgent: urgVal, completed: false, createdAt: dateStr, comments: [] });
                     input.value = ''; saveData('priority_tasks', tasks); renderTasks(); renderFilters();
                 }
-                
+
                 setCustomDropdown('imp', 'yes');
                 setCustomDropdown('urg', 'no');
-                
+
                 if (escalatedLiteTaskId) {
                     liteTasks = liteTasks.filter(x => String(x.id) !== String(escalatedLiteTaskId));
                     saveData('priority_lite_tasks', liteTasks);
@@ -986,8 +1002,13 @@
 
             editTaskId = id;
             document.getElementById('mobileTaskInput').value = tObj.title;
-            document.getElementById('mobileScopeSelect').value = tObj.sphere;
-            syncMobileScope();
+            
+            // Используем кастомную установку дропдауна
+            const sharedScope = sharedScopes.find(ss => ss.name === tObj.sphere);
+            const isActuallyShared = sharedScope && sharedScope.memberCount > 1;
+            const icon = isActuallyShared ? '👥 ' : '';
+            const display = tObj.sphere === 'SYS_OTHER' ? 'ДРУГОЕ' : tObj.sphere;
+            setCustomDropdown('scope', tObj.sphere, `${icon}${display}`);
             
             setCustomDropdown('imp', tObj.isImportant ? 'yes' : 'no');
             setCustomDropdown('urg', tObj.isUrgent ? 'yes' : 'no');
@@ -1088,13 +1109,21 @@
             const qLists = [document.getElementById('listQ1'), document.getElementById('listQ2'), document.getElementById('listQ3'), document.getElementById('listQ4')];
             qLists.forEach(l => l.innerHTML = '');
             
-            const acceptedShared = sharedTasks.filter(t => !(t.assignee_username === username && t.status === 'inbox')).map(t => ({
-                id: t.id, title: t.title, sphere: sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER',
-                isImportant: t.is_important, isUrgent: t.is_urgent, completed: t.status === 'completed',
-                comments: t.shared_comments || [], isShared: true, creator: t.creator_username, assignee: t.assignee_username
-            }));
+            const acceptedShared = sharedTasks.filter(t => !(t.assignee_username === username && t.status === 'inbox')).map(t => {
+                const scopeObj = sharedScopes.find(s => s.id === t.scope_id);
+                const isActuallyShared = scopeObj && scopeObj.memberCount > 1; 
+                return {
+                    id: t.id, title: t.title, sphere: scopeObj?.name || 'SYS_OTHER',
+                    isImportant: t.is_important, isUrgent: t.is_urgent, completed: t.status === 'completed',
+                    comments: t.shared_comments || [], isShared: isActuallyShared, creator: t.creator_username, assignee: t.assignee_username
+                }
+            });
             
-            const allTasks = [...tasks, ...acceptedShared].filter(t => !t.completed).sort((a, b) => b.id - a.id);
+            const allTasks = [...tasks, ...acceptedShared].filter(t => !t.completed).sort((a, b) => {
+                const timeA = typeof a.id === 'string' ? 0 : a.id; 
+                const timeB = typeof b.id === 'string' ? 0 : b.id;
+                return timeB - timeA; 
+            });
 
             allTasks.forEach(task => {
                 const effectiveSphere = task.sphere;
@@ -1247,24 +1276,30 @@
         // ==========================================
         function renderInbox() {
             const username = localStorage.getItem('priority_user');
-            const inboxTasks = sharedTasks.filter(t => t.assignee_username === username && t.is_acknowledged === false && t.status !== 'completed');
+            const inboxTasks = sharedTasks.filter(t => t.assignee_username === username && t.status === 'inbox');
             const wrapper = document.getElementById('inboxWrapper');
-            if(inboxTasks.length === 0) return wrapper.classList.add('hidden');
-            
+            const container = document.getElementById('inboxTasksContainer');
+
+            if(inboxTasks.length === 0) {
+                wrapper.classList.add('hidden');
+                return;
+            }
+
             wrapper.classList.remove('hidden');
-            document.getElementById('inboxTasksContainer').innerHTML = inboxTasks.map(t => {
+            container.innerHTML = inboxTasks.map(t => {
                 const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS';
                 let quadLabel = (t.is_important && t.is_urgent) ? 'Q1 (Критично)' : (t.is_important && !t.is_urgent) ? 'Q2 (Стратегия)' : (!t.is_important && t.is_urgent) ? 'Q3 (Рутина)' : 'Q4 (Бэклог)';
-                
                 return `
-                <div class="bg-panel-light dark:bg-panel-dark border border-brand-light/30 p-4 rounded shadow-sm hover-magnet">
-                    <div class="font-bold text-base text-zinc-900 dark:text-zinc-100 mb-2" style="font-family: var(--font-primary);">${t.title}</div>
-                    <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-mono-tech flex items-center flex-wrap gap-2 mb-4">
-                        <span class="bg-base-light dark:bg-base-dark px-2 py-0.5 rounded border border-borderline-light dark:border-borderline-dark">${scopeName}</span>
-                        <span class="bg-red-500/10 text-red-500 px-2 py-0.5 rounded border border-red-500/20">${quadLabel}</span>
-                        <span>От: <span class="text-brand-light dark:text-brand-dark font-bold">${t.creator_username}</span></span>
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-panel-light dark:bg-panel-dark border border-brand-light/30 dark:border-brand-dark/30 p-4 rounded shadow-sm hover-magnet">
+                    <div>
+                        <div class="font-bold text-base text-zinc-900 dark:text-zinc-100" style="font-family: var(--font-primary);">${t.title}</div>
+                        <div class="text-[10px] text-zinc-500 uppercase mt-1 tracking-widest font-mono-tech flex items-center gap-2">
+                            <span class="bg-base-light dark:bg-base-dark px-2 py-0.5 rounded border border-borderline-light dark:border-borderline-dark">${scopeName}</span>
+                            <span class="bg-red-500/10 text-red-500 px-2 py-0.5 rounded border border-red-500/20">${quadLabel}</span>
+                            <span>От: <span class="text-brand-light dark:text-brand-dark font-bold">${t.creator_username}</span></span>
+                        </div>
                     </div>
-                    <button onclick="acceptInboxTask('${t.id}')" class="w-full py-3 bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press shadow-md">
+                    <button onclick="acceptInboxTask('${t.id}')" class="shrink-0 px-8 py-3 bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black rounded text-[10px] font-bold uppercase tracking-widest transition-colors btn-press shadow-md">
                         Принять задачу
                     </button>
                 </div>
@@ -1273,13 +1308,29 @@
 
         async function acceptInboxTask(taskId) {
             const t = sharedTasks.find(x => x.id === taskId);
-            if(t) t.is_acknowledged = true;
+            let targetStatus = 'q4'; 
+                
+            if (t) {
+                if (t.is_important && t.is_urgent) targetStatus = 'q1';
+                else if (t.is_important && !t.is_urgent) targetStatus = 'q2';
+                else if (!t.is_important && t.is_urgent) targetStatus = 'q3';
+            
+                t.is_acknowledged = true;
+                t.status = targetStatus; 
+            }
+        
             renderInbox(); 
             renderTasks();
-            try { 
-                await supabaseClient.from('shared_tasks').update({ is_acknowledged: true }).eq('id', taskId); 
+        
+            try {
+                await supabaseClient.from('shared_tasks').update({ 
+                    is_acknowledged: true, 
+                    status: targetStatus 
+                }).eq('id', taskId);
                 showToast('SYSTEM', 'Задача принята в работу', 'success');
-            } catch(e) { showToast('ERROR', 'Ошибка подтверждения', 'error'); }
+            } catch (err) {
+                showToast('ERROR', 'Ошибка подтверждения', 'error');
+            }
         }
 
         function logout() {
