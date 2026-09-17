@@ -871,31 +871,34 @@
             setTimeout(() => modal.classList.add('opacity-100'), 10);
         }
 
-        function executeScopeDelete(scopeName, action) {
+        async function executeScopeDelete(scopeName, action) {
             let allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
             let tasksChanged = false;
+            const username = localStorage.getItem('priority_user');
 
-            // СПАСАЕМ ОБЩИЕ ЗАДАЧИ: Если переносим в "ДРУГОЕ", конвертируем облачные задачи в локальные
             const scopeObj = sharedScopes.find(s => s.name === scopeName);
+            
+            // 1. СПАСАЕМ ЗАДАЧИ В ЛОКАЛЬНЫЙ ХРАН (Если переносим В "ДРУГОЕ")
             if (scopeObj && action === 'move') {
                 const sTasks = (typeof sharedTasks !== 'undefined' ? sharedTasks : []).filter(t => t.scope_id === scopeObj.id);
-                sTasks.forEach(st => {
+                sTasks.forEach((st, idx) => {
                     allTasks.unshift({
-                        id: Date.now() + Math.floor(Math.random() * 10000), // Генерируем новый локальный ID
+                        id: Date.now() + idx, // Безопасная генерация локального ID
                         title: st.title,
                         sphere: 'SYS_OTHER',
                         isImportant: st.is_important,
                         isUrgent: st.is_urgent,
                         completed: st.status === 'completed',
-                        createdAt: new Date(st.created_at).toLocaleDateString('ru-RU'),
+                        createdAt: st.created_at ? new Date(st.created_at).toLocaleDateString('ru-RU') : new Date().toLocaleDateString('ru-RU'),
                         completedAt: st.completed_at ? new Date(st.completed_at).toLocaleDateString('ru-RU') : null,
-                        comments: [], // Чат не переносим, так как он теряет смысл без команды
+                        comments: [], // Комментарии не переносятся (теряют смысл без команды)
                         price: st.price
                     });
                     tasksChanged = true;
                 });
             }
 
+            // 2. ДЕЙСТВИЕ ДЛЯ ЛОКАЛЬНЫХ ЗАДАЧ
             if (action === 'move') {
                 allTasks.forEach(task => { if (task.sphere === scopeName) { task.sphere = 'SYS_OTHER'; tasksChanged = true; } });
             } else if (action === 'delete') {
@@ -904,28 +907,43 @@
                 if (allTasks.length !== initialLength) tasksChanged = true;
             }
 
-            if (tasksChanged) localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
+            if (tasksChanged) {
+                localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
+                if (typeof tasks !== 'undefined') tasks = allTasks; // ЖЕСТКО ОБНОВЛЯЕМ ГЛОБАЛЬНУЮ ПЕРЕМЕННУЮ
+            }
 
-            // 1. Удаляем локально
+            // 3. УДАЛЯЕМ ЛОКАЛЬНУЮ СФЕРУ
             const idx = scopes.indexOf(scopeName);
             if (idx > -1) {
                 scopes.splice(idx, 1);
                 localStorage.setItem('priority_scopes', JSON.stringify(scopes));
             }
 
-            // 2. Уничтожаем в SQL (с жесткой зачисткой задач)
+            // 4. УНИЧТОЖАЕМ СВЯЗИ В SQL (Синхронно через await)
             if (scopeObj) {
-                supabaseClient.from('shared_tasks').delete().eq('scope_id', scopeObj.id).then(() => {
-                    supabaseClient.from('scope_members').delete().eq('scope_id', scopeObj.id).eq('username', localStorage.getItem('priority_user')).then(() => {
-                        supabaseClient.from('shared_scopes').delete().eq('id', scopeObj.id).then(() => {
-                            if (typeof loadSharedScopes === 'function') loadSharedScopes();
-                        });
-                    });
-                });
+                try {
+                    // Проверяем права: мы создатель или просто участник?
+                    const { data: checkScope } = await supabaseClient.from('shared_scopes').select('owner_username').eq('id', scopeObj.id).single();
+                    
+                    if (checkScope && checkScope.owner_username === username) {
+                        // Мы создатель - сносим ВСЮ сферу (каскадом)
+                        await supabaseClient.from('shared_tasks').delete().eq('scope_id', scopeObj.id);
+                        await supabaseClient.from('scope_members').delete().eq('scope_id', scopeObj.id);
+                        await supabaseClient.from('shared_scopes').delete().eq('id', scopeObj.id);
+                    } else {
+                        // Мы просто участник - выходим из сферы
+                        await supabaseClient.from('scope_members').delete().eq('scope_id', scopeObj.id).eq('username', username);
+                    }
+                } catch (e) {
+                    console.error("Ошибка при удалении из SQL:", e);
+                }
             }
             
-            renderScopes();
-            showToast('SYS', 'Сфера удалена', 'info');
+            // 5. Перерисовываем UI и синхронизируемся
+            if (typeof loadSharedScopes === 'function') await loadSharedScopes(); // Дожидаемся загрузки новых данных из облака
+            else renderScopes();
+            
+            showToast('SYS', 'Сфера успешно удалена', 'info');
             syncStateToCloud(true);
             closeScopeModal();
         }

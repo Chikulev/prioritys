@@ -1289,9 +1289,9 @@
                 return;
             }
             if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
-        
+
             showToast('SYSTEM', 'Requesting OTP from Telegram bot...', 'info');
-        
+
             try {
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
                     method: 'POST',
@@ -1309,134 +1309,134 @@
                     setTimeout(() => s2.classList.remove('opacity-0', 'translate-y-4'), 50);
                     setTimeout(() => codeInputs[0].focus(), 300);
                 } else {
-            const botUrl = 'https://t.me/PrioritysBot';
-            const errorMsg = `
-                <div class="flex flex-col gap-4 mt-2">
-                    <span class="text-xs font-black text-zinc-700 dark:text-zinc-300 leading-relaxed tracking-widest">${t('toast_unreg_desc')}</span>
-                    <div class="flex gap-2 mt-1">
-                        <a href="${botUrl}" target="_blank" onclick="this.closest('.toast-enter').remove()" class="flex-1 flex items-center justify-center bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-black py-3 px-2 rounded text-[10px] uppercase tracking-widest shadow-md transition-all btn-press">
-                            ${t('btn_open_bot')}
-                        </a>
-                        <button type="button" onclick="navigator.clipboard.writeText('${botUrl}'); showToast('${t('toast_clip')}', '${t('toast_copied')}', 'success', 3000);" class="shrink-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark hover:border-brand-light dark:hover:border-brand-dark text-zinc-600 dark:text-zinc-400 font-bold py-3 px-4 rounded text-base transition-all btn-press shadow-sm" title="${t('btn_copy_link')}">
-                            📋
-                        </button>
-                    </div>
-                </div>
-            `;
-            // Вызываем с параметром 0 (вечный тост)
-            showToast(t('toast_unreg_title'), errorMsg, 'error', 0);
-        }
+                    // ЕСЛИ ВЫДАЛО ОШИБКУ — ЭТО 100% ЗНАЧИТ, ЧТО ЮЗЕРА НЕТ В БАЗЕ. ВЫВОДИМ КНОПКУ.
+                    const botUrl = 'https://t.me/PrioritysBot';
+                    const errorMsg = `
+                        <div class="flex flex-col gap-4 mt-2">
+                            <span class="text-xs font-black text-zinc-700 dark:text-zinc-300 leading-relaxed tracking-widest">${t('toast_unreg_desc')}</span>
+                            <div class="flex gap-2 mt-1">
+                                <a href="${botUrl}" target="_blank" onclick="this.closest('.toast-enter').remove()" class="flex-1 flex items-center justify-center bg-brand-light dark:bg-brand-dark hover:opacity-90 text-white dark:text-black font-black py-3 px-2 rounded text-[10px] uppercase tracking-widest shadow-md transition-all btn-press">
+                                    ${t('btn_open_bot')}
+                                </a>
+                                <button type="button" onclick="navigator.clipboard.writeText('${botUrl}'); showToast('${t('toast_clip')}', '${t('toast_copied')}', 'success', 3000);" class="shrink-0 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark hover:border-brand-light dark:hover:border-brand-dark text-zinc-600 dark:text-zinc-400 font-bold py-3 px-4 rounded text-base transition-all btn-press shadow-sm" title="${t('btn_copy_link')}">
+                                    📋
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    showToast(t('toast_unreg_title'), errorMsg, 'error', 0);
+                }
             } catch (err) {
                 console.error(err);
                 showToast('ERROR', 'Connection failed', 'error');
             }
         }
 
-        async function confirmLogin() {
-    const codeInputs = document.querySelectorAll('.code-cell');
-    const code = Array.from(codeInputs).map(i => i.value).join('');
-    
-    let loginInput = document.getElementById('tgLogin').value.trim().toLowerCase();
-    if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
-
-    if (code.length < 4) {
-        showToast('ERROR', 'Enter 4-digit code', 'error');
-        return;
-    }
-
-    showToast('SYSTEM', 'Verifying cryptographic signature...', 'info');
-
-    try {
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'verify_otp', username: loginInput, code: code })
-        });
+    async function confirmLogin() {
+        const codeInputs = document.querySelectorAll('.code-cell');
+        const code = Array.from(codeInputs).map(i => i.value).join('');
         
-        const result = await response.json();
+        let loginInput = document.getElementById('tgLogin').value.trim().toLowerCase();
+        if (!loginInput.startsWith('@')) loginInput = '@' + loginInput;
 
-        if (!result.success) {
-            showToast('ACCESS DENIED', result.error || 'Invalid or expired code', 'error');
-            codeInputs.forEach(i => i.value = '');
-            if(codeInputs[0]) codeInputs[0].focus();
+        if (code.length < 4) {
+            showToast('ERROR', 'Enter 4-digit code', 'error');
             return;
         }
 
-        // 1. Сохраняем сессию и JWT токен
-        localStorage.setItem('priority_auth', 'true');
-        localStorage.setItem('priority_user', loginInput);
-        localStorage.setItem('priority_jwt', result.token);
+        showToast('SYSTEM', 'Verifying cryptographic signature...', 'info');
 
-        // 2. АВТОРИЗУЕМ WEBSOCKETS (fetch обновит заголовки сам)
-        supabaseClient.realtime.setAuth(result.token);
+        try {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/telegram-webhook`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'verify_otp', username: loginInput, code: code })
+            });
 
-        // 3. ЗАГРУЖАЕМ БЭКАП
-        const { data: userData } = await supabaseClient
-            .from('users')
-            .select('is_pro, app_data')
-            .eq('username', loginInput)
-            .single();
+            const result = await response.json();
 
-        if (userData) {
-            isPro = userData.is_pro || false;
+            if (!result.success) {
+                showToast('ACCESS DENIED', result.error || 'Invalid or expired code', 'error');
+                codeInputs.forEach(i => i.value = '');
+                if(codeInputs[0]) codeInputs[0].focus();
+                return;
+            }
 
-            // ---> АВТОАКТИВАЦИЯ PRO ПО АКЦИИ <---
-            if (localStorage.getItem('priority_pending_promo') === 'true') {
-                isPro = true;
-                // Апгрейдим юзера прямо в базе данных Supabase
-                await supabaseClient.from('users').update({ is_pro: true }).eq('username', loginInput);
-                localStorage.removeItem('priority_pending_promo');
+            // 1. Сохраняем сессию и JWT токен
+            localStorage.setItem('priority_auth', 'true');
+            localStorage.setItem('priority_user', loginInput);
+            localStorage.setItem('priority_jwt', result.token);
+
+            // 2. АВТОРИЗУЕМ WEBSOCKETS (fetch обновит заголовки сам)
+            supabaseClient.realtime.setAuth(result.token);
+
+            // 3. ЗАГРУЖАЕМ БЭКАП
+            const { data: userData } = await supabaseClient
+                .from('users')
+                .select('is_pro, app_data')
+                .eq('username', loginInput)
+                .single();
+
+            if (userData) {
+                isPro = userData.is_pro || false;
+
+                // ---> АВТОАКТИВАЦИЯ PRO ПО АКЦИИ <---
+                if (localStorage.getItem('priority_pending_promo') === 'true') {
+                    isPro = true;
+                    // Апгрейдим юзера прямо в базе данных Supabase
+                    await supabaseClient.from('users').update({ is_pro: true }).eq('username', loginInput);
+                    localStorage.removeItem('priority_pending_promo');
+
+                    // Выводим красивое уведомление с небольшой задержкой после отрисовки интерфейса
+                    setTimeout(() => {
+                        showToast('GIFT UNLOCKED', 'Акция запуска: Вечная PRO-лицензия успешно активирована!', 'success', 8000);
+                    }, 1500);
+                }
+                // ---> КОНЕЦ АВТОАКТИВАЦИИ <---
+
+                localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
+
+                if (userData.app_data && Object.keys(userData.app_data).length > 0) {
+                    const cloudData = userData.app_data;
+                    localStorage.setItem('priority_onboarded', 'true'); 
                 
-                // Выводим красивое уведомление с небольшой задержкой после отрисовки интерфейса
+                    if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
+                    if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
+                    if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
+                    if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
+                    if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
+                    if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
+                    if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
+                    if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
+                    if (cloudData.shop_module) localStorage.setItem('priority_shop_module', cloudData.shop_module);
+                    if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
+                    if (cloudData.scale) localStorage.setItem('priority_scale', cloudData.scale);
+                }
+            }
+
+            showToast('SYSTEM', 'Access Granted', 'success');
+
+            // 4. ТВОЯ ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ
+            // Если это файл m.html, просто замени этот if-else на вызов checkAuth();
+            if (localStorage.getItem('priority_onboarded') !== 'true') {
+                window.location.href = 'onboarding.html';
+            } else {
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('globalToggles').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+
+                loadDataFromStorage();
+                applyAppTheme();
                 setTimeout(() => {
-                    showToast('GIFT UNLOCKED', 'Акция запуска: Вечная PRO-лицензия успешно активирована!', 'success', 8000);
-                }, 1500);
+                    const taskInput = document.getElementById('taskInput');
+                    if (taskInput) taskInput.focus();
+                }, 100);
             }
-            // ---> КОНЕЦ АВТОАКТИВАЦИИ <---
-
-            localStorage.setItem('priority_is_pro', isPro ? 'true' : 'false');
-
-            if (userData.app_data && Object.keys(userData.app_data).length > 0) {
-                const cloudData = userData.app_data;
-                localStorage.setItem('priority_onboarded', 'true'); 
-            
-                if (cloudData.scopes) localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
-                if (cloudData.tasks) localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
-                if (cloudData.macros) localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
-                if (cloudData.templates) localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
-                if (cloudData.badges) localStorage.setItem('priority_badges', JSON.stringify(cloudData.badges));
-                if (cloudData.theme) localStorage.setItem('priority_theme', cloudData.theme);
-                if (cloudData.cursor) localStorage.setItem('priority_cursor', cloudData.cursor);
-                if (cloudData.lang) localStorage.setItem('priority_lang', cloudData.lang);
-                if (cloudData.shop_module) localStorage.setItem('priority_shop_module', cloudData.shop_module);
-                if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
-                if (cloudData.scale) localStorage.setItem('priority_scale', cloudData.scale);
-            }
+        } catch (err) {
+            console.error(err);
+            showToast('ERROR', 'Verification error', 'error');
         }
-
-        showToast('SYSTEM', 'Access Granted', 'success');
-
-        // 4. ТВОЯ ЛОГИКА ПЕРЕНАПРАВЛЕНИЯ
-        // Если это файл m.html, просто замени этот if-else на вызов checkAuth();
-        if (localStorage.getItem('priority_onboarded') !== 'true') {
-            window.location.href = 'onboarding.html';
-        } else {
-            document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('globalToggles').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            
-            loadDataFromStorage();
-            applyAppTheme();
-            setTimeout(() => {
-                const taskInput = document.getElementById('taskInput');
-                if (taskInput) taskInput.focus();
-            }, 100);
-        }
-    } catch (err) {
-        console.error(err);
-        showToast('ERROR', 'Verification error', 'error');
     }
-}
 
         function backToStep1() {
             const s1 = document.getElementById('authStep1');
