@@ -836,8 +836,18 @@
         }
 
         function deleteScope(scopeName) {
-            const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
-            const tasksInScope = allTasks.filter(t => t.sphere === scopeName).length;
+            // 1. Считаем локальные задачи
+            const localTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
+            const localCount = localTasks.filter(t => t.sphere === scopeName).length;
+            
+            // 2. Считаем общие (командные) задачи
+            const sharedCount = (typeof sharedTasks !== 'undefined' ? sharedTasks : [])
+                .filter(t => {
+                    const s = sharedScopes.find(ss => ss.id === t.scope_id);
+                    return (s ? s.name : 'SYS_OTHER') === scopeName;
+                }).length;
+
+            const tasksInScope = localCount + sharedCount;
             
             const modal = document.getElementById('systemModal');
             const btnContainer = modal.querySelector('.flex.gap-3.justify-end');
@@ -865,6 +875,27 @@
             let allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
             let tasksChanged = false;
 
+            // СПАСАЕМ ОБЩИЕ ЗАДАЧИ: Если переносим в "ДРУГОЕ", конвертируем облачные задачи в локальные
+            const scopeObj = sharedScopes.find(s => s.name === scopeName);
+            if (scopeObj && action === 'move') {
+                const sTasks = (typeof sharedTasks !== 'undefined' ? sharedTasks : []).filter(t => t.scope_id === scopeObj.id);
+                sTasks.forEach(st => {
+                    allTasks.unshift({
+                        id: Date.now() + Math.floor(Math.random() * 10000), // Генерируем новый локальный ID
+                        title: st.title,
+                        sphere: 'SYS_OTHER',
+                        isImportant: st.is_important,
+                        isUrgent: st.is_urgent,
+                        completed: st.status === 'completed',
+                        createdAt: new Date(st.created_at).toLocaleDateString('ru-RU'),
+                        completedAt: st.completed_at ? new Date(st.completed_at).toLocaleDateString('ru-RU') : null,
+                        comments: [], // Чат не переносим, так как он теряет смысл без команды
+                        price: st.price
+                    });
+                    tasksChanged = true;
+                });
+            }
+
             if (action === 'move') {
                 allTasks.forEach(task => { if (task.sphere === scopeName) { task.sphere = 'SYS_OTHER'; tasksChanged = true; } });
             } else if (action === 'delete') {
@@ -875,23 +906,23 @@
 
             if (tasksChanged) localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
 
-            // 1. Удаляем локально, если она там есть
+            // 1. Удаляем локально
             const idx = scopes.indexOf(scopeName);
             if (idx > -1) {
                 scopes.splice(idx, 1);
                 localStorage.setItem('priority_scopes', JSON.stringify(scopes));
             }
 
-            // 2. Уничтожаем в SQL (если это общая сфера)
-            supabaseClient.from('shared_scopes').select('id').eq('name', scopeName).single().then(({data}) => {
-                if(data) {
-                    supabaseClient.from('scope_members').delete().eq('scope_id', data.id).eq('username', localStorage.getItem('priority_user')).then(() => {
-                        supabaseClient.from('shared_scopes').delete().eq('id', data.id).then(() => {
+            // 2. Уничтожаем в SQL (с жесткой зачисткой задач)
+            if (scopeObj) {
+                supabaseClient.from('shared_tasks').delete().eq('scope_id', scopeObj.id).then(() => {
+                    supabaseClient.from('scope_members').delete().eq('scope_id', scopeObj.id).eq('username', localStorage.getItem('priority_user')).then(() => {
+                        supabaseClient.from('shared_scopes').delete().eq('id', scopeObj.id).then(() => {
                             if (typeof loadSharedScopes === 'function') loadSharedScopes();
                         });
                     });
-                }
-            });
+                });
+            }
             
             renderScopes();
             showToast('SYS', 'Сфера удалена', 'info');
