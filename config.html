@@ -516,7 +516,8 @@
         if (localStorage.getItem('priority_auth') !== 'true') window.location.href = 'index.html';
 
         let scopes = [];
-        let sharedScopes = []; // <--- ВОТ ЧЕГО НЕ ХВАТАЛО!
+        let sharedScopes = [];
+        let sharedTasks = [];
         let isPro = false;
 
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
@@ -749,14 +750,30 @@
         function renderScopes() {
             const list = document.getElementById('scopesList');
             if(!list) return;
-            const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
             
+            const username = localStorage.getItem('priority_user');
+            
+            // 1. Собираем активные локальные задачи
+            const localTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
+            const localActive = localTasks.filter(t => !t.completed);
+            
+            // 2. Собираем активные общие задачи (исключаем карантин)
+            const sharedActive = (typeof sharedTasks !== 'undefined' ? sharedTasks : [])
+                .filter(t => t.status !== 'completed' && !(t.assignee_username === username && t.is_acknowledged === false))
+                .map(t => {
+                    const scopeName = sharedScopes.find(s => s.id === t.scope_id)?.name || 'SYS_OTHER';
+                    return { sphere: scopeName }; 
+                });
+
+            // 3. Объединяем массивы для честного подсчета
+            const allActiveTasks = [...localActive, ...sharedActive];
+
             // Склеиваем личные и общие сферы
             const personalScopes = scopes.filter(s => !sharedScopes.find(ss => ss.name === s));
             const combinedScopes = [...personalScopes, ...sharedScopes.map(s => s.name)];
                 
             list.innerHTML = combinedScopes.map((s, index) => {
-                const count = allTasks.filter(t => t.sphere === s && !t.completed).length;
+                const count = allActiveTasks.filter(t => t.sphere === s).length; // Подсчет из объединенного массива
                 const isShared = sharedScopes.some(ss => ss.name === s);
                 const sharedIcon = isShared ? ' <span title="Общая сфера" class="ml-2">👥</span>' : '';
                 
@@ -783,6 +800,7 @@
                     </div>
                 `;
             }).join('');
+            if (typeof applyI18n === 'function') applyI18n(); 
         }
 
         function addScope() {
@@ -1095,12 +1113,26 @@
             
                 if (membersData && membersData.length > 0) {
                     sharedScopes = membersData.map(m => m.shared_scopes).filter(Boolean);
+                    
+                    // ---> СКАЧИВАЕМ ЗАДАЧИ ДЛЯ ТОЧНОГО ПОДСЧЕТА <---
+                    const scopeIds = sharedScopes.map(s => s.id);
+                    if (scopeIds.length > 0) {
+                        const { data: tasksData } = await supabaseClient
+                            .from('shared_tasks')
+                            .select('*')
+                            .in('scope_id', scopeIds);
+                            
+                        if (tasksData) {
+                            sharedTasks = tasksData;
+                        }
+                    }
                 } else {
                     sharedScopes = [];
+                    sharedTasks = [];
                 }
                 renderScopes();
             } catch (err) { console.error('Ошибка загрузки:', err); }
-        }        
+        }       
 
         function initRealtimeSync() {
             const username = localStorage.getItem('priority_user');
