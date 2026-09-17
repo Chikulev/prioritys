@@ -33,6 +33,9 @@
     <title>PRIORITYS // SYS.DASHBOARD</title>
     <link id="dynamic-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23121214'/><text x='50' y='66' font-size='48' font-family='monospace' font-weight='bold' fill='%2306B6D4' text-anchor='middle'>/&gt;_</text></svg>">
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090B">
+
     <!-- SEO Base -->
     <meta name="description" content="Премиальная система управления фокусом и задачами. Матрица Эйзенхауэра, интеграция с Telegram и AI-аудит вашей продуктивности.">
     <meta name="keywords" content="планировщик, матрица эйзенхауэра, трекер задач, тайм-менеджмент, prioritys, управление фокусом, productivity">
@@ -970,6 +973,7 @@
         let cloudSyncTimeout = null;
 
         function saveData(key, data) { 
+
             localStorage.setItem(key, JSON.stringify(data)); 
 
             const username = localStorage.getItem('priority_user');
@@ -983,6 +987,7 @@
 
                 const appState = {
                     _mutation_id: mutationId, // <--- ТОТ САМЫЙ ЯРЛЫК
+                    sys_logs: JSON.parse(localStorage.getItem('priority_sys_logs') || '[]'),
                     scopes: JSON.parse(localStorage.getItem('priority_scopes') || '[]'),
                     tasks: JSON.parse(localStorage.getItem('priority_tasks') || '[]'),
                     macros: JSON.parse(localStorage.getItem('priority_macros') || '[]'),
@@ -1108,7 +1113,7 @@
             const username = localStorage.getItem('priority_user');
             if (!username) return;
 
-            // Единый канал для всех файлов
+            // Единый канал для личных настроек
             supabaseClient
                 .channel('public:users_realtime')
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users', filter: `username=eq.${username}` }, (payload) => {
@@ -1121,59 +1126,32 @@
                     // 1. ВИЗУАЛ И НАСТРОЙКИ (Мгновенное применение)
                     let visualChanged = false;
                     
-                    if (cloudData.theme && localStorage.getItem('priority_theme') !== cloudData.theme) {
-                        localStorage.setItem('priority_theme', cloudData.theme);
-                        visualChanged = true;
-                    }
-                    if (cloudData.cursor && localStorage.getItem('priority_cursor') !== cloudData.cursor) {
-                        localStorage.setItem('priority_cursor', cloudData.cursor);
-                        if (typeof applyCursor === 'function') applyCursor();
-                    }
-                    if (cloudData.lang && localStorage.getItem('priority_lang') !== cloudData.lang) {
-                        localStorage.setItem('priority_lang', cloudData.lang);
-                        if (typeof applyI18n === 'function') applyI18n();
-                        if (typeof renderThemesMarketplace === 'function') renderThemesMarketplace();
-                    }
-                    if (cloudData.scale && localStorage.getItem('priority_scale') !== cloudData.scale) {
-                        localStorage.setItem('priority_scale', cloudData.scale);
-                        document.documentElement.style.setProperty('--system-scale', cloudData.scale);
-                    }
-                    if (cloudData.shop_module) {
-                        localStorage.setItem('priority_shop_module', cloudData.shop_module);
-                        if (typeof renderShopUI === 'function') renderShopUI();
-                    }
+                    if (cloudData.theme && localStorage.getItem('priority_theme') !== cloudData.theme) { localStorage.setItem('priority_theme', cloudData.theme); visualChanged = true; }
+                    if (cloudData.cursor && localStorage.getItem('priority_cursor') !== cloudData.cursor) { localStorage.setItem('priority_cursor', cloudData.cursor); if (typeof applyCursor === 'function') applyCursor(); }
+                    if (cloudData.lang && localStorage.getItem('priority_lang') !== cloudData.lang) { localStorage.setItem('priority_lang', cloudData.lang); if (typeof applyI18n === 'function') applyI18n(); if (typeof renderThemesMarketplace === 'function') renderThemesMarketplace(); }
+                    if (cloudData.scale && localStorage.getItem('priority_scale') !== cloudData.scale) { localStorage.setItem('priority_scale', cloudData.scale); document.documentElement.style.setProperty('--system-scale', cloudData.scale); }
+                    if (cloudData.shop_module) { localStorage.setItem('priority_shop_module', cloudData.shop_module); if (typeof renderShopUI === 'function') renderShopUI(); }
                     if (cloudData.currency) localStorage.setItem('priority_currency', cloudData.currency);
                     
-                    // Если тема поменялась - применяем магию на лету
                     if (visualChanged && typeof applyAppTheme === 'function') applyAppTheme();
 
                     // 2. БАЗА ДАННЫХ (Задачи, макросы, сферы)
-                    if (cloudData.scopes) {
-                        localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes));
-                        if (typeof scopes !== 'undefined') scopes = cloudData.scopes;
-                        if (typeof dynamicScopes !== 'undefined') dynamicScopes = cloudData.scopes;
-                    }
-                    if (cloudData.tasks) {
-                        localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks));
-                        if (typeof tasks !== 'undefined') tasks = cloudData.tasks;
-                    }
-                    if (cloudData.macros) {
-                        localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros));
-                        if (typeof macros !== 'undefined') macros = cloudData.macros;
-                    }
-                    if (cloudData.lite_tasks) {
-                        localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks));
-                        if (typeof liteTasks !== 'undefined') liteTasks = cloudData.lite_tasks;
-                    }
-                    if (cloudData.templates) {
-                        localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates));
-                        if (typeof templates !== 'undefined') templates = cloudData.templates;
-                    }
+                    if (cloudData.scopes) { localStorage.setItem('priority_scopes', JSON.stringify(cloudData.scopes)); if (typeof scopes !== 'undefined') scopes = cloudData.scopes; if (typeof dynamicScopes !== 'undefined') dynamicScopes = cloudData.scopes; }
+                    if (cloudData.tasks) { localStorage.setItem('priority_tasks', JSON.stringify(cloudData.tasks)); if (typeof tasks !== 'undefined') tasks = cloudData.tasks; }
+                    if (cloudData.macros) { localStorage.setItem('priority_macros', JSON.stringify(cloudData.macros)); if (typeof macros !== 'undefined') macros = cloudData.macros; }
+                    if (cloudData.lite_tasks) { localStorage.setItem('priority_lite_tasks', JSON.stringify(cloudData.lite_tasks)); if (typeof liteTasks !== 'undefined') liteTasks = cloudData.lite_tasks; }
+                    if (cloudData.templates) { localStorage.setItem('priority_templates', JSON.stringify(cloudData.templates)); if (typeof templates !== 'undefined') templates = cloudData.templates; }
                     if (cloudData.lite_log) localStorage.setItem('priority_lite_log', JSON.stringify(cloudData.lite_log));
                     if (cloudData.lite_cron_time) localStorage.setItem('lite_cron_time', cloudData.lite_cron_time);
                     if (cloudData.lite_cron_action) localStorage.setItem('lite_cron_action', cloudData.lite_cron_action);
+                    
+                    // ---> ИСПРАВЛЕНИЕ: ДОБАВЛЕНЫ СИСТЕМНЫЕ ЛОГИ <---
+                    if (cloudData.sys_logs) {
+                        localStorage.setItem('priority_sys_logs', JSON.stringify(cloudData.sys_logs));
+                        if (typeof renderSysLogs === 'function') renderSysLogs();
+                    }
 
-                    // 3. БЕСШОВНАЯ ПЕРЕРИСОВКА ИНТЕРФЕЙСА (Для всех возможных страниц)
+                    // 3. БЕСШОВНАЯ ПЕРЕРИСОВКА ИНТЕРФЕЙСА
                     if (typeof initDynamicScopes === 'function') initDynamicScopes();
                     if (typeof renderTasks === 'function') renderTasks();
                     if (typeof renderMacros === 'function') renderMacros();
@@ -1185,17 +1163,19 @@
                     if (typeof renderFilters === 'function') renderFilters();
                 }).subscribe();
 
-            // Слушаем общие задачи (Только для тех файлов, где есть эта логика: index.html, m.html)
+            // 4. ---> ИСПРАВЛЕНИЕ: СЛУШАЕМ ВСЕ ТАБЛИЦЫ МУЛЬТИПЛЕЕРА <---
             if (typeof loadSharedScopes === 'function') {
                 supabaseClient.channel('public:shared_tasks_realtime')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_tasks' }, () => {
-                        loadSharedScopes();
-                    }).subscribe();
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_tasks' }, () => loadSharedScopes()).subscribe();
 
                 supabaseClient.channel('public:shared_comments_realtime')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_comments' }, () => {
-                        loadSharedScopes();
-                    }).subscribe();
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_comments' }, () => loadSharedScopes()).subscribe();
+
+                supabaseClient.channel('public:shared_scopes_realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'shared_scopes' }, () => loadSharedScopes()).subscribe();
+
+                supabaseClient.channel('public:scope_members_realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'scope_members' }, () => loadSharedScopes()).subscribe();
             }
         }
 
@@ -1775,31 +1755,38 @@
             const username = localStorage.getItem('priority_user');
 
             if (editTaskId) {
-                // ПРОВЕРЯЕМ ОБЩИЕ ЗАДАЧИ
-                const sharedTask = sharedTasks.find(x => String(x.id) === String(editTaskId));
-                if (sharedTask) {
-                    sharedTask.title = input.value;
-                    sharedTask.is_important = impVal;
-                    sharedTask.is_urgent = urgVal;
-                    if(priceVal !== null) sharedTask.price = priceVal; else sharedTask.price = null;
-                    
-                    cancelEdit();
-                    showToast('SYS', 'Updated (Cloud)', 'info');
-                    
-                    supabaseClient.from('shared_tasks').update({
-                        title: sharedTask.title,
-                        is_important: sharedTask.is_important,
-                        is_urgent: sharedTask.is_urgent,
-                        price: sharedTask.price
-                    }).eq('id', editTaskId).then(() => renderTasks());
-                    renderTasks();
+                // 1. Проверяем, общая ли это задача (есть ли дефис от UUID)
+                const isShared = String(editTaskId).includes('-') || String(editTaskId).startsWith('temp_');
+                
+                if (isShared) {
+                    const sharedTask = sharedTasks.find(x => String(x.id) === String(editTaskId));
+                    if (sharedTask) {
+                        sharedTask.title = input.value;
+                        sharedTask.is_important = impVal;
+                        sharedTask.is_urgent = urgVal;
+                        if(priceVal !== null) sharedTask.price = priceVal; else sharedTask.price = null;
+                        
+                        cancelEdit();
+                        showToast('SYS', 'Updated (Cloud)', 'info');
+                        
+                        supabaseClient.from('shared_tasks').update({
+                            title: sharedTask.title,
+                            is_important: sharedTask.is_important,
+                            is_urgent: sharedTask.is_urgent,
+                            price: sharedTask.price
+                        }).eq('id', editTaskId).then(() => renderTasks());
+                        
+                        renderTasks();
+                    }
                 } else {
-                    // ПРОВЕРЯЕМ ЛОКАЛЬНЫЕ ЗАДАЧИ
-                    const taskObj = tasks.find(x => String(x.id) === String(editTaskId));
+                    // 2. Локальная задача (ID - это просто timestamp)
+                    const numericId = Number(editTaskId);
+                    const taskObj = tasks.find(x => x.id === numericId);
                     if (taskObj) {
                         taskObj.title = input.value; taskObj.sphere = sphereVal; taskObj.isImportant = impVal; taskObj.isUrgent = urgVal;
                         if(priceVal !== null) taskObj.price = priceVal; else delete taskObj.price;
                         if(macroId) taskObj.macroId = parseInt(macroId); else delete taskObj.macroId;
+                        
                         cancelEdit();
                         showToast('SYS', 'Updated', 'info');
                         saveData('priority_tasks', tasks);
@@ -2343,7 +2330,7 @@
                         createdAt: new Date(t.created_at).toLocaleDateString('ru-RU'),
                         completedAt: t.completed_at ? new Date(t.completed_at).toLocaleDateString('ru-RU') : null,
                         comments: t.shared_comments ? t.shared_comments.map(c => ({ 
-                            id: c.id, text: c.text, author: c.author_username, createdAt: new Date(c.created_at).toLocaleString('ru-RU', {hour: '2-digit', minute:'2-digit'}) 
+                            id: c.id, text: c.text, author: c.author_username, createdAt: new Date(c.created_at).toLocaleString('ru-RU', {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'}) 
                         })) : [],
                         price: t.price,
                         isShared: true,
@@ -3398,6 +3385,13 @@ YOUR OBJECTIVE (Answer in these steps):
 
         // BOOT SEQUENCE (Запускается мгновенно!)
         initThemeToggle();
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Registration failed: ', err));
+            });
+        }
+
         checkAuth();
     </script>
 </body>

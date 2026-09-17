@@ -219,6 +219,8 @@ const translations = {
         "toast_port_imp": "Import successful. Rebooting system...",
         "toast_port_err": "Invalid file format",
 
+        "lbl_assignee": "Assignee",
+
         "txt_buy": "Buy",
         "btn_copy": "Copy to clipboard",
         "toast_copied_task": "Task data copied!",
@@ -420,6 +422,8 @@ const translations = {
         "cursor_def": "Системный",
         "cursor_tech": "Кибер-прицел",
         "cursor_roy": "Королевское Перо",
+
+        "lbl_assignee": "Исполнитель",
         
         "cfg_fund": "SYS.FUNDING // Поддержка",
         "fund_direct": "Прямой Донат",

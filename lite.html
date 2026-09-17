@@ -25,7 +25,10 @@
     <meta property="og:description" content="Очистите нейронные пути. Быстрый буфер для ежедневных задач с интеграцией Telegram Quick Capture. Разгрузите мозг для глубокой работы.">
     <meta property="og:image" content="https://prioritys.ru/og-image.png">
     <link rel="stylesheet" href="style.css">
-    
+        
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090B">
+
     <style>
         :root {
             --color-brand-light: #0891B2; --color-brand-dark: #06B6D4;
@@ -503,6 +506,13 @@
             saveAndRender();
             syncFromCloud();
             initRealtimeSync();
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Registration failed: ', err));
+                });
+            }
+            
             document.getElementById('mainApp').classList.remove('hidden');
         });
     </script>

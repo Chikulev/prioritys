@@ -51,6 +51,341 @@ const SYSTEM_THEMES = {
             ru: { "dash_subtitle_main": "ЖЕСТКИЙ ДАШБОРД", "btn_deploy": "ЗАДЕПЛОИТЬ", "task_ph": "Что будем уничтожать?...", "btn_logs": "ДАМП", "macro_title": "БАЗА", "quad_1": "ГОРИТ [0]", "quad_2": "КАЧ [1]", "quad_3": "ГРИНД [2]", "quad_4": "МУСОРКА [3]", "archived": "КЛАДБИЩЕ", "empty_tasks": "ПУСТО. ИДИ ПОТРОГАЙ ТРАВУ.", "lbl_macro": "ГИГА", "btn_init_macro": "НОВЫЙ ГИГА-ПРОЕКТ" }
         }
     },
+    stalker: {
+        id: 'stalker',
+        name: 'S.T.A.L.K.E.R. PDA',
+        fontPrimary: "'Courier New', Courier, monospace",
+        desc: { en: "Zone PDA network. Anomalies, radiation, and artifacts.", ru: "Сеть ПДА Зоны. Аномалии, радиация и хабар." },
+        icon: "☢️",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#89a832", "--color-brand-dark": "#89a832",
+            "--color-base-light": "#2b2e24", "--color-base-dark": "#181a13",
+            "--color-panel-light": "rgba(43, 46, 36, 0.8)", "--color-panel-dark": "rgba(24, 26, 19, 0.8)",
+            "--color-border-light": "#4a5232", "--color-border-dark": "#323820"
+        },
+        customCss: `
+            /* Эффект старого экрана ПДА (scanlines) */
+            body { background-color: #181a13 !important; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 4px) !important; color: #89a832 !important; }
+            /* Грязные и грубые рамки */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card { border-radius: 4px !important; border: 2px solid var(--color-border-dark) !important; box-shadow: inset 0 0 15px rgba(0,0,0,0.8) !important; }
+            h1, h2, h3 { color: #a4c246 !important; text-transform: uppercase !important; }
+            .btn-press { border-radius: 2px !important; background: #26291d !important; border: 1px solid #4a5232 !important; color: #89a832 !important; }
+            .btn-press:hover { background: #4a5232 !important; color: #181a13 !important; }
+            .text-zinc-900, .dark\\:text-zinc-100, .text-zinc-600, .text-zinc-500, .text-zinc-700, .text-zinc-400 { color: #768f29 !important; }
+            input[type="text"], input[type="time"], select { background: rgba(0,0,0,0.5) !important; border: 1px solid #4a5232 !important; color: #89a832 !important; border-radius: 2px !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "PDA NETWORK v2.0", "macro_title": "GLOBAL MISSIONS", "quad_1": "BLOWOUT [0]", "quad_2": "ARTIFACTS [1]", "quad_3": "MUTANTS [2]", "quad_4": "ANOMALIES [3]", "empty_tasks": "No active signals.", "lbl_macro": "Target", "btn_init_macro": "Add Marker", "archived": "Completed Quests" },
+            ru: { "dash_subtitle_main": "СЕТЬ ПДА v2.0", "macro_title": "ГЛОБАЛЬНЫЕ ЦЕЛИ", "quad_1": "ВЫБРОС [0]", "quad_2": "АРТЕФАКТЫ [1]", "quad_3": "МУТАНТЫ [2]", "quad_4": "АНОМАЛИИ [3]", "empty_tasks": "Сигналов нет.", "lbl_macro": "Цель", "btn_init_macro": "Поставить метку", "archived": "Сданный хабар" }
+        }
+    },
+    nasa: {
+        id: 'nasa',
+        name: 'AeroSpace',
+        fontPrimary: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        desc: { en: "Aeronautics dashboard. High contrast, precise data.", ru: "Телеметрия шаттла. Прицелы, белый пластик и космос." },
+        icon: "🚀",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#FC3D21", "--color-brand-dark": "#FC3D21", 
+            "--color-base-light": "#F1F5F9", "--color-base-dark": "#05050A", 
+            "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#0F111A",
+            "--color-border-light": "#CBD5E1", "--color-border-dark": "#1E293B"
+        },
+        customCss: `
+            /* Светлая тема: Обшивка шаттла, стерильная чистота */
+            body { background-color: var(--color-base-light) !important; background-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.03) 2px, transparent 2px) !important; background-size: 40px 40px !important; }
+            .bg-panel-light, .theme-card, .tech-card-task, #templatesDropdown { 
+                border-radius: 0px !important; 
+                border: 1px solid var(--color-border-light) !important; 
+                box-shadow: none !important; 
+                position: relative; 
+            }
+            /* Прицелы по углам (Светлая) */
+            .bg-panel-light::before, .bg-panel-light::after, .tech-card-task::before, .tech-card-task::after { content: ''; position: absolute; width: 15px; height: 15px; border: 2px solid var(--color-brand-light); opacity: 0.8; pointer-events: none; }
+            .bg-panel-light::before, .tech-card-task::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+            .bg-panel-light::after, .tech-card-task::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+            /* Темная тема: Открытый космос, красная телеметрия */
+            .dark body { background-color: var(--color-base-dark) !important; background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 2px, transparent 2px) !important; }
+            .dark .bg-panel-light, .dark .theme-card, .dark .tech-card-task, .dark #templatesDropdown, .dark .dark\\:bg-panel-dark { 
+                background-color: var(--color-panel-dark) !important;
+                border: 1px solid var(--color-border-dark) !important;
+            }
+            /* Прицелы (Темная) */
+            .dark .bg-panel-light::before, .dark .bg-panel-light::after, .dark .tech-card-task::before, .dark .tech-card-task::after { border-color: var(--color-brand-dark); }
+            
+            h1, h2, h3 { font-weight: 900 !important; text-transform: uppercase !important; letter-spacing: 0.15em !important; }
+            .btn-press { border-radius: 0px !important; border: 2px solid var(--color-brand-light) !important; text-transform: uppercase !important; font-weight: 800 !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "HOUSTON COMMAND", "macro_title": "ORBITAL LAUNCHES", "quad_1": "ABORT SEQUENCE [Q1]", "quad_2": "FLIGHT PLAN [Q2]", "quad_3": "SYSTEM CHECK [Q3]", "quad_4": "JETTISON [Q4]", "empty_tasks": "Telemetry normal. Awaiting commands.", "lbl_macro": "Mission", "btn_init_macro": "Init Mission", "archived": "Splashdown" },
+            ru: { "dash_subtitle_main": "ЦУП ХЬЮСТОН", "macro_title": "ОРБИТАЛЬНЫЕ ЗАПУСКИ", "quad_1": "АВАРИЙНЫЙ СБРОС [Q1]", "quad_2": "ПЛАН ПОЛЕТА [Q2]", "quad_3": "ПРОВЕРКА СИСТЕМ [Q3]", "quad_4": "ОТСТРЕЛ СТУПЕНИ [Q4]", "empty_tasks": "Телеметрия в норме. Жду команд.", "lbl_macro": "Миссия", "btn_init_macro": "Запуск Миссии", "archived": "Приводнение" }
+        }
+    },
+
+    vicecity: {
+        id: 'vicecity',
+        name: 'Ocean Drive 86',
+        fontPrimary: "'Arial', sans-serif",
+        desc: { en: "Neon lights, sunset boulevards and 80s synthwave.", ru: "Вайб 80-х. Пальмы на закате днем, неоновые вывески ночью." },
+        icon: "🌴",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#FF007F", "--color-brand-dark": "#00FFFF",
+            "--color-base-light": "#FFE4E1", "--color-base-dark": "#0F001A",
+            "--color-panel-light": "rgba(255, 255, 255, 0.8)", "--color-panel-dark": "rgba(15, 0, 26, 0.7)",
+            "--color-border-light": "#FF69B4", "--color-border-dark": "#FF007F"
+        },
+        customCss: `
+            /* Светлая тема: Жаркий Майами, розово-оранжевый закат */
+            body { 
+                background: linear-gradient(180deg, #FFE4E1 0%, #FFB6C1 50%, #FF8C00 100%) !important; 
+                background-attachment: fixed !important; 
+            }
+            .bg-panel-light, .theme-card, .tech-card-task, #templatesDropdown { 
+                border-radius: 12px !important; 
+                border: 2px solid var(--color-border-light) !important; 
+                box-shadow: 0 10px 20px rgba(255, 105, 180, 0.2) !important; 
+                backdrop-filter: blur(10px) !important; 
+            }
+            h1, h2, h3 { color: #FF007F !important; font-style: italic !important; font-weight: 900 !important; letter-spacing: 2px !important; text-transform: uppercase !important; text-shadow: 2px 2px 0px #FFFFFF !important; }
+            
+            /* Темная тема: Неоновая ночь, синтвейв */
+            .dark body { 
+                background: linear-gradient(180deg, #0F001A 0%, #4B0082 50%, #000000 100%) !important; 
+                background-attachment: fixed !important; 
+            }
+            .dark .bg-panel-light, .dark .theme-card, .dark .tech-card-task, .dark #templatesDropdown, .dark .dark\\:bg-panel-dark { 
+                background: var(--color-panel-dark) !important;
+                border: 2px solid var(--color-border-dark) !important; 
+                box-shadow: 0 0 15px rgba(255, 0, 127, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.1) !important; 
+            }
+            .dark h1, .dark h2, .dark h3 { color: #00FFFF !important; text-shadow: 2px 2px 0px #FF007F, 0 0 10px #00FFFF !important; }
+            
+            .btn-press { border-radius: 8px !important; font-weight: 900 !important; text-transform: uppercase !important; font-style: italic !important; border-width: 2px !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "OCEAN BEACH VCPD", "macro_title": "EMPIRE BUSINESS", "quad_1": "WANTED LEVEL 5 🚨", "quad_2": "REAL ESTATE 🏢", "quad_3": "PAYPHONE MISSIONS 📞", "quad_4": "WASTED 💀", "empty_tasks": "Take a cruise down Ocean Drive.", "lbl_macro": "Asset", "btn_init_macro": "Buy Asset", "archived": "Busted" },
+            ru: { "dash_subtitle_main": "ПОЛИЦИЯ ВАЙС СИТИ", "macro_title": "БИЗНЕС ИМПЕРИЯ", "quad_1": "5 ЗВЕЗД РОЗЫСКА 🚨", "quad_2": "НЕДВИЖИМОСТЬ 🏢", "quad_3": "ТЕЛЕФОННЫЕ БУДКИ 📞", "quad_4": "ПОТРАЧЕНО 💀", "empty_tasks": "Прокатись по Оушен-Драйв.", "lbl_macro": "Бизнес", "btn_init_macro": "Купить Актив", "archived": "Арестовано" }
+        }
+    },
+
+    stalker: {
+        id: 'stalker',
+        name: 'Zone PDA',
+        fontPrimary: "'Courier New', Courier, monospace",
+        desc: { en: "Zone PDA network. Anomalies, radiation, and artifacts.", ru: "ПДА Сталкера. Брезент днем, радиоактивный фосфор ночью." },
+        icon: "☢️",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#4A5232", "--color-brand-dark": "#89A832",
+            "--color-base-light": "#D4D0C8", "--color-base-dark": "#141510",
+            "--color-panel-light": "#EBE9E4", "--color-panel-dark": "#1D1E17",
+            "--color-border-light": "#A3A095", "--color-border-dark": "#2A2D22"
+        },
+        customCss: `
+            /* Светлая тема: Грязный брезент, армейский стиль, ржавчина */
+            body { 
+                background-color: var(--color-base-light) !important; 
+                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="%23D4D0C8"/><path d="M0 0L4 4M4 0L0 4" stroke="%23C2BEB4" stroke-width="1"/></svg>') !important; 
+            }
+            .bg-panel-light, .theme-card, .tech-card-task, #templatesDropdown { 
+                border-radius: 2px !important; 
+                border: 2px solid var(--color-border-light) !important; 
+                box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 4px 4px 0px rgba(0,0,0,0.1) !important; 
+            }
+            h1, h2, h3 { color: #323624 !important; font-weight: bold !important; text-transform: uppercase !important; }
+            
+            /* Темная тема: Экран старого ПДА, зеленый фосфор, сканлайны */
+            .dark body { 
+                background-color: var(--color-base-dark) !important; 
+                background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.4) 2px, rgba(0,0,0,0.4) 4px) !important; 
+                color: var(--color-brand-dark) !important; 
+            }
+            .dark .bg-panel-light, .dark .theme-card, .dark .tech-card-task, .dark #templatesDropdown, .dark .dark\\:bg-panel-dark { 
+                background-color: var(--color-panel-dark) !important;
+                border: 2px solid var(--color-border-dark) !important; 
+                box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(137, 168, 50, 0.05) !important; 
+            }
+            .dark h1, .dark h2, .dark h3, .dark .text-zinc-900, .dark .text-zinc-100, .dark .text-zinc-500 { 
+                color: var(--color-brand-dark) !important; text-shadow: 0 0 4px rgba(137, 168, 50, 0.4) !important; 
+            }
+            
+            .btn-press { border-radius: 0px !important; font-weight: bold !important; text-transform: uppercase !important; border-width: 2px !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "PDA NETWORK v2.0", "macro_title": "GLOBAL MISSIONS", "quad_1": "BLOWOUT [0]", "quad_2": "ARTIFACTS [1]", "quad_3": "MUTANTS [2]", "quad_4": "ANOMALIES [3]", "empty_tasks": "No active signals.", "lbl_macro": "Target", "btn_init_macro": "Add Marker", "archived": "Completed Quests" },
+            ru: { "dash_subtitle_main": "СЕТЬ ПДА v2.0", "macro_title": "ГЛОБАЛЬНЫЕ ЦЕЛИ", "quad_1": "ВЫБРОС [Q1]", "quad_2": "АРТЕФАКТЫ [Q2]", "quad_3": "МУТАНТЫ [Q3]", "quad_4": "АНОМАЛИИ [Q4]", "empty_tasks": "Сигналов нет.", "lbl_macro": "Цель", "btn_init_macro": "Поставить метку", "archived": "Сданный хабар" }
+        }
+    },
+
+    dota: {
+        id: 'dota',
+        name: 'Aegis',
+        fontPrimary: "'Georgia', serif",
+        desc: { en: "Radiant vs Dire. MOBA aesthetics and ancient battles.", ru: "Битва Древних. Свет (Radiant) днем и Тьма (Dire) ночью." },
+        icon: "🛡️",
+        isPro: true,
+        cssVars: {
+            /* Переменные для Светлой темы (Свет/Radiant) - Зелень, золото, камень */
+            "--color-brand-light": "#2E7D32", "--color-brand-dark": "#E74C3C", 
+            "--color-base-light": "#E8F5E9", "--color-base-dark": "#140C0C", 
+            "--color-panel-light": "#FFFFFF", "--color-panel-dark": "#231515",
+            "--color-border-light": "#A5D6A7", "--color-border-dark": "#4A1C1C" 
+        },
+        customCss: `
+            /* Светлая тема (Radiant): Солнечный свет, зелень, белые руины */
+            body { 
+                background: radial-gradient(circle at 50% 0%, #E8F5E9 0%, #C8E6C9 100%) !important; 
+                background-attachment: fixed !important; 
+            }
+            .bg-panel-light, .theme-card, .tech-card-task, #templatesDropdown { 
+                border-radius: 4px !important; 
+                border: 2px solid var(--color-border-light) !important; 
+                box-shadow: 0 4px 12px rgba(46, 125, 50, 0.1), inset 0 0 10px rgba(255,255,255,0.8) !important; 
+            }
+            h1, h2, h3 { font-weight: 700 !important; color: #1B5E20 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
+            
+            /* Темная тема (Dire): Пепел, лава, обсидиан, красное свечение */
+            .dark body { 
+                background: radial-gradient(circle at 50% 100%, #2A0808 0%, #140C0C 80%) !important; 
+                background-attachment: fixed !important; 
+            }
+            .dark .bg-panel-light, .dark .theme-card, .dark .tech-card-task, .dark #templatesDropdown, .dark .dark\\:bg-panel-dark { 
+                background-color: var(--color-panel-dark) !important;
+                border: 1px solid var(--color-border-dark) !important; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 15px rgba(231, 76, 60, 0.05) !important; 
+            }
+            .dark h1, .dark h2, .dark h3 { color: #E74C3C !important; text-shadow: 0 0 8px rgba(231, 76, 60, 0.4) !important; }
+            
+            .btn-press { border-radius: 2px !important; text-transform: uppercase !important; font-weight: bold !important; border-width: 2px !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "BATTLE LOG", "macro_title": "ANCIENTS", "quad_1": "TEAMFIGHT ⚔️ [Q1]", "quad_2": "FARMING 💰 [Q2]", "quad_3": "WARDING 👁️ [Q3]", "quad_4": "FEEDING 💀 [Q4]", "empty_tasks": "Waiting for creeps to spawn.", "lbl_macro": "Objective", "btn_init_macro": "Claim Aegis", "archived": "Respawned" },
+            ru: { "dash_subtitle_main": "ЖУРНАЛ БИТВЫ", "macro_title": "ТРОНЫ", "quad_1": "ЗАМЕС ⚔️ [Q1]", "quad_2": "ФАРМ 💰 [Q2]", "quad_3": "ВАРДИНГ 👁️ [Q3]", "quad_4": "ФИД 💀 [Q4]", "empty_tasks": "Ждем спавна крипов.", "lbl_macro": "Цель", "btn_init_macro": "Забрать Аегис", "archived": "На фонтане" }
+        }
+    },
+    night_drive: {
+        id: 'night_drive',
+        name: 'Night Highway',
+        fontPrimary: "'Inter', sans-serif",
+        desc: { en: "Textured dashboard plastic and amber instrument glows.", ru: "Текстура приборной панели, ночная трасса и янтарная подсветка." },
+        icon: "🛣️",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#FF8C00", "--color-brand-dark": "#FFA500",
+            "--color-base-light": "#1C1C1C", "--color-base-dark": "#0A0A0A",
+            "--color-panel-light": "linear-gradient(145deg, #232323, #1a1a1a)", "--color-panel-dark": "linear-gradient(145deg, #121212, #080808)",
+            "--color-border-light": "#333333", "--color-border-dark": "#1A1A1A"
+        },
+        customCss: `
+            /* Эффект текстуры автомобильного пластика/кожи */
+            body { 
+                background-color: var(--color-base-light) !important;
+                background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="%231C1C1C"/><path d="M0 0L4 4M4 0L0 4" stroke="%23222" stroke-width="1"/></svg>') !important;
+                color: #E0E0E0 !important;
+            }
+            .dark body { background-color: var(--color-base-dark) !important; }
+            
+            /* Изогнутые панели с эффектом циферблатов (Inner Shadows) */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
+                border-radius: 12px !important;
+                border: 1px solid var(--color-border-light) !important;
+                background: var(--color-panel-light) !important;
+                box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 4px 15px rgba(0,0,0,0.8) !important;
+            }
+            
+            /* Янтарное свечение текста (Amber Glow) */
+            h1, h2, h3, .text-brand-light, .dark\\:text-brand-dark { 
+                color: var(--color-brand-light) !important; 
+                text-shadow: 0 0 8px rgba(255, 140, 0, 0.4) !important; 
+                font-weight: 800 !important; 
+            }
+            
+            /* Кнопки как тумблеры на торпеде */
+            .btn-press { border-radius: 8px !important; border: 1px solid var(--color-brand-light) !important; background: rgba(255,140,0,0.05) !important; color: var(--color-brand-light) !important; }
+            .btn-press:hover { background: var(--color-brand-light) !important; color: #000 !important; box-shadow: 0 0 15px var(--color-brand-light) !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "DASHBOARD LOG", "macro_title": "LONG HAULS", "quad_1": "ENGINE CHECK ⚠️", "quad_2": "CRUISE CONTROL 🛣️", "quad_3": "REFUEL ⛽", "quad_4": "REST STOP ☕", "empty_tasks": "ROAD IS CLEAR.", "lbl_macro": "Route", "btn_init_macro": "Set GPS" },
+            ru: { "dash_subtitle_main": "ПРИБОРНАЯ ПАНЕЛЬ", "macro_title": "ДАЛЬНИЕ РЕЙСЫ", "quad_1": "ЧЕК ДВИГАТЕЛЯ ⚠️", "quad_2": "КРУИЗ-КОНТРОЛЬ 🛣️", "quad_3": "ДОЗАПРАВКА ⛽", "quad_4": "СТОЯНКА ☕", "empty_tasks": "ТРАССА ПУСТА.", "lbl_macro": "Маршрут", "btn_init_macro": "Настроить GPS" }
+        }
+    },
+    darkroom: {
+        id: 'darkroom',
+        name: 'Darkroom Exposure',
+        fontPrimary: "'Courier New', Courier, monospace",
+        desc: { en: "Film grain, safelight reds, and focus brackets.", ru: "Пленочное зерно, красный свет проявочной и рамки фокуса." },
+        icon: "🎞️",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#E50914", "--color-brand-dark": "#FF1E1E",
+            "--color-base-light": "#180A0A", "--color-base-dark": "#0A0000",
+            "--color-panel-light": "rgba(30, 10, 10, 0.8)", "--color-panel-dark": "rgba(15, 0, 0, 0.9)",
+            "--color-border-light": "#4A1515", "--color-border-dark": "#2A0A0A"
+        },
+        customCss: `
+            /* Тяжелое пленочное зерно и виньетка */
+            body { 
+                background-color: var(--color-base-light) !important;
+                background-image: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.8) 150%), url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.06"/></svg>') !important;
+                color: #D3D3D3 !important;
+            }
+            .dark body { background-color: var(--color-base-dark) !important; }
+            
+            /* Панели размыты, как вне фокуса (Depth of Field) */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card {
+                border-radius: 2px !important;
+                border: 1px solid var(--color-border-light) !important;
+                backdrop-filter: blur(4px) !important;
+            }
+            
+            /* Эффект брекетинга фокуса при наведении [  ] */
+            .tech-card-task { position: relative; transition: all 0.3s ease; }
+            .tech-card-task:hover::before { content: '['; position: absolute; left: -15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: var(--color-brand-light); font-weight: bold; }
+            .tech-card-task:hover::after { content: ']'; position: absolute; right: -15px; top: 50%; transform: translateY(-50%); font-size: 24px; color: var(--color-brand-light); font-weight: bold; }
+            
+            h1, h2, h3 { font-weight: bold !important; color: var(--color-brand-light) !important; letter-spacing: 0.1em !important; }
+            
+            input[type="text"], select { background: rgba(0,0,0,0.8) !important; border: 1px solid var(--color-brand-light) !important; color: #FFF !important; border-radius: 2px !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "EXPOSURE LOG", "macro_title": "PHOTO SERIES", "quad_1": "OVEREXPOSED ☀️", "quad_2": "IN FOCUS 🎯", "quad_3": "LENS BLUR 🌫️", "quad_4": "SCRAP FILM 🎞️", "empty_tasks": "AWAITING DEVELOPER.", "lbl_macro": "Roll", "btn_init_macro": "Load Film" },
+            ru: { "dash_subtitle_main": "ЖУРНАЛ ПРОЯВКИ", "macro_title": "ФОТОСЕРИИ", "quad_1": "ПЕРЕСВЕТ ☀️ [Q1]", "quad_2": "В ФОКУСЕ 🎯 [Q2]", "quad_3": "БЛЮР ЛИНЗЫ 🌫️ [Q3]", "quad_4": "БРАК ПЛЕНКИ 🎞️ [Q4]", "empty_tasks": "ОЖИДАНИЕ ПРОЯВИТЕЛЯ.", "lbl_macro": "Катушка", "btn_init_macro": "Зарядить пленку" }
+        }
+    },
+    dota: {
+        id: 'dota',
+        name: 'Aegis of Immortal',
+        fontPrimary: "'Georgia', serif",
+        desc: { en: "Radiant vs Dire. MOBA aesthetics and ancient battles.", ru: "Свет против Тьмы. Эстетика MOBA и битв древних." },
+        icon: "🛡️",
+        isPro: true,
+        cssVars: {
+            "--color-brand-light": "#B42529", "--color-brand-dark": "#E74C3C", 
+            "--color-base-light": "#1B1F23", "--color-base-dark": "#111418", 
+            "--color-panel-light": "#242A31", "--color-panel-dark": "#1A1E24",
+            "--color-border-light": "#CBA365", "--color-border-dark": "#A5834F" 
+        },
+        customCss: `
+            /* Фон как Туман Войны (Fog of War) */
+            body { background: radial-gradient(circle at 50% 0%, #1a1e24 0%, #111418 100%) !important; background-attachment: fixed !important; }
+            /* Рамки в стиле потускневшего золота */
+            .bg-panel-light, .dark\\:bg-panel-dark, .tech-card-task, #templatesDropdown, .theme-card { border-radius: 4px !important; border: 1px solid var(--color-border-dark) !important; box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 0 10px rgba(203, 163, 101, 0.05) !important; }
+            h1, h2, h3 { font-weight: 700 !important; color: #CBA365 !important; text-transform: uppercase !important; letter-spacing: 1px !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important; }
+            /* Кнопки с градиентом и кроваво-красным ховером */
+            .btn-press { background: linear-gradient(180deg, #242A31 0%, #1A1E24 100%) !important; border: 1px solid var(--color-border-dark) !important; color: #CBA365 !important; border-radius: 2px !important; text-transform: uppercase !important; box-shadow: 0 2px 4px rgba(0,0,0,0.5) !important; }
+            .btn-press:hover { background: linear-gradient(180deg, #E74C3C 0%, #B42529 100%) !important; color: #FFF !important; border-color: #FFF !important; box-shadow: 0 0 15px rgba(231, 76, 60, 0.6) !important; }
+            .text-zinc-900, .dark\\:text-zinc-100, .text-zinc-600, .text-zinc-500, .text-zinc-700, .text-zinc-400 { color: #A3B1C6 !important; }
+            input[type="text"], input[type="time"], select { background: rgba(0,0,0,0.6) !important; border: 1px solid var(--color-border-dark) !important; color: #CBA365 !important; border-radius: 2px !important; }
+        `,
+        locales: {
+            en: { "dash_subtitle_main": "BATTLE LOG", "macro_title": "ANCIENTS", "quad_1": "TEAMFIGHT ⚔️ [Q1]", "quad_2": "FARMING 💰 [Q2]", "quad_3": "WARDING 👁️ [Q3]", "quad_4": "FEEDING 💀 [Q4]", "empty_tasks": "Waiting for creeps to spawn.", "lbl_macro": "Objective", "btn_init_macro": "Claim Aegis", "archived": "Respawned" },
+            ru: { "dash_subtitle_main": "ЖУРНАЛ БИТВЫ", "macro_title": "ТРОНЫ", "quad_1": "ЗАМЕС ⚔️ [Q1]", "quad_2": "ФАРМ 💰 [Q2]", "quad_3": "ВАРДИНГ 👁️ [Q3]", "quad_4": "ФИД 💀 [Q4]", "empty_tasks": "Ждем спавна крипов.", "lbl_macro": "Цель", "btn_init_macro": "Забрать Аегис", "archived": "На фонтане" }
+        }
+    },
     executive: {
         id: 'executive',
         name: 'Glass',

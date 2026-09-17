@@ -14,11 +14,16 @@
             document.head.appendChild(style);
         }
     </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PRIORITYS // SYS.CONFIG</title>
     <meta name="description" content="Настройки рабочего пространства PRIORITYS. Кастомизация интерфейса, маркетплейс тем, кастомные курсоры и управление системными модулями.">
     <meta name="author" content="PRIORITYS">
+        
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090B">
+
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://prioritys.ru/config.html">
@@ -511,6 +516,7 @@
         if (localStorage.getItem('priority_auth') !== 'true') window.location.href = 'index.html';
 
         let scopes = [];
+        let sharedScopes = []; // <--- ВОТ ЧЕГО НЕ ХВАТАЛО!
         let isPro = false;
 
         const SUPABASE_URL = 'https://ylhjwrckfisxjjjugzpo.supabase.co';
@@ -744,33 +750,39 @@
             const list = document.getElementById('scopesList');
             if(!list) return;
             const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
+            
+            // Склеиваем личные и общие сферы
+            const personalScopes = scopes.filter(s => !sharedScopes.find(ss => ss.name === s));
+            const combinedScopes = [...personalScopes, ...sharedScopes.map(s => s.name)];
                 
-            list.innerHTML = scopes.map((s, index) => {
+            list.innerHTML = combinedScopes.map((s, index) => {
                 const count = allTasks.filter(t => t.sphere === s && !t.completed).length;
+                const isShared = sharedScopes.some(ss => ss.name === s);
+                const sharedIcon = isShared ? ' <span title="Общая сфера" class="ml-2">👥</span>' : '';
+                
                 return `
                     <div class="flex justify-between items-center bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark p-3 rounded transition-colors group gap-2">
                         <div class="flex items-center gap-2 flex-1 min-w-0">
                             <span class="text-brand-light dark:text-brand-dark font-bold shrink-0">></span>
                             <input type="text" id="scope-edit-${index}" value="${s}" readonly 
                                 class="w-full bg-transparent border-none outline-none text-sm uppercase overflow-hidden text-ellipsis whitespace-nowrap" 
-                                ondblclick="enableScopeEdit(${index})" onblur="saveScopeEdit(${index})">
+                                ondblclick="enableScopeEdit('${s}', ${index})" onblur="saveScopeEdit('${s}', ${index})">
                             <span class="px-1.5 py-0.5 bg-panel-light dark:bg-panel-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 rounded text-[9px] font-bold shrink-0">${count}</span>
+                            ${sharedIcon}
                         </div>
                         <div class="flex gap-1 opacity-50 group-hover:opacity-100 transition-opacity shrink-0 items-center">
-                            <!-- Кнопка Шеринга -->
                             <button onclick="openShareModal('${s}')" class="text-brand-light dark:text-brand-dark hover:text-brand-light px-2 py-1.5 rounded transition-colors btn-press text-sm" title="Share Scope">👥</button>
                             
                             <div class="flex items-center gap-1 mr-2 pr-2 border-r border-borderline-light dark:border-borderline-dark">
-                                <button onclick="moveScopeUp(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === 0 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg></button>
-                                <button onclick="moveScopeDown(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === scopes.length - 1 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button>
+                                <button onclick="moveScopeUp('${s}')" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === 0 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg></button>
+                                <button onclick="moveScopeDown('${s}')" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark disabled:opacity-20 disabled:cursor-not-allowed p-1.5 rounded transition-colors btn-press" ${index === combinedScopes.length - 1 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button>
                             </div>
-                            <button onclick="enableScopeEdit(${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark p-1.5 rounded transition-colors btn-press"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-                            <button onclick="deleteScope(${index})" class="text-zinc-400 hover:text-red-500 p-1.5 rounded transition-colors btn-press"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                            <button onclick="enableScopeEdit('${s}', ${index})" class="text-zinc-400 hover:text-brand-light dark:hover:text-brand-dark p-1.5 rounded transition-colors btn-press"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                            <button onclick="deleteScope('${s}')" class="text-zinc-400 hover:text-red-500 p-1.5 rounded transition-colors btn-press"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                         </div>
                     </div>
                 `;
             }).join('');
-            if (typeof applyI18n === 'function') applyI18n(); 
         }
 
         function addScope() {
@@ -785,7 +797,8 @@
             }
         }
 
-        function moveScopeUp(index) {
+        function moveScopeUp(scopeName) {
+            const index = scopes.indexOf(scopeName);
             if (index > 0) {
                 const temp = scopes[index];
                 scopes[index] = scopes[index - 1];
@@ -794,8 +807,9 @@
             }
         }
 
-        function moveScopeDown(index) {
-            if (index < scopes.length - 1) {
+        function moveScopeDown(scopeName) {
+            const index = scopes.indexOf(scopeName);
+            if (index > -1 && index < scopes.length - 1) {
                 const temp = scopes[index];
                 scopes[index] = scopes[index + 1];
                 scopes[index + 1] = temp;
@@ -803,51 +817,66 @@
             }
         }
 
-        function deleteScope(index) {
-            const scopeToDelete = scopes[index];
+        function deleteScope(scopeName) {
             const allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
-            const tasksInScope = allTasks.filter(t => t.sphere === scopeToDelete).length;
+            const tasksInScope = allTasks.filter(t => t.sphere === scopeName).length;
             
             const modal = document.getElementById('systemModal');
             const btnContainer = modal.querySelector('.flex.gap-3.justify-end');
             document.getElementById('modalTitle').innerText = 'УДАЛЕНИЕ СФЕРЫ';
             
             if (tasksInScope > 0) {
-                document.getElementById('modalText').innerText = `Сфера "${scopeToDelete}" содержит ${tasksInScope} активных/завершенных задач(и). Что вы хотите с ними сделать?`;
+                document.getElementById('modalText').innerText = `Сфера "${scopeName}" содержит ${tasksInScope} активных/завершенных задач(и). Что вы хотите с ними сделать?`;
                 btnContainer.innerHTML = `
                     <button onclick="closeScopeModal()" class="px-3 py-2.5 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Отмена</button>
-                    <button onclick="executeScopeDelete(${index}, 'move')" class="px-3 py-2.5 bg-brand-light dark:bg-brand-dark text-white dark:text-black hover:opacity-90 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">В "ДРУГОЕ"</button>
-                    <button onclick="executeScopeDelete(${index}, 'delete')" class="px-3 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Удалить всё</button>
+                    <button onclick="executeScopeDelete('${scopeName}', 'move')" class="px-3 py-2.5 bg-brand-light dark:bg-brand-dark text-white dark:text-black hover:opacity-90 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">В "ДРУГОЕ"</button>
+                    <button onclick="executeScopeDelete('${scopeName}', 'delete')" class="px-3 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Удалить всё</button>
                 `;
             } else {
-                document.getElementById('modalText').innerText = `Сфера "${scopeToDelete}" пуста. Удалить её?`;
+                document.getElementById('modalText').innerText = `Сфера "${scopeName}" пуста. Удалить её?`;
                 btnContainer.innerHTML = `
                     <button onclick="closeScopeModal()" class="px-6 py-2.5 bg-base-light dark:bg-base-dark border border-borderline-light dark:border-borderline-dark text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Отмена</button>
-                    <button onclick="executeScopeDelete(${index}, 'delete')" class="px-6 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Удалить</button>
+                    <button onclick="executeScopeDelete('${scopeName}', 'delete')" class="px-6 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-[10px] font-bold uppercase tracking-widest rounded btn-press">Удалить</button>
                 `;
             }
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.add('opacity-100'), 10);
         }
 
-        function executeScopeDelete(index, action) {
-            const scopeToDelete = scopes[index];
+        function executeScopeDelete(scopeName, action) {
             let allTasks = JSON.parse(localStorage.getItem('priority_tasks')) || [];
             let tasksChanged = false;
 
             if (action === 'move') {
-                allTasks.forEach(task => { if (task.sphere === scopeToDelete) { task.sphere = 'SYS_OTHER'; tasksChanged = true; } });
+                allTasks.forEach(task => { if (task.sphere === scopeName) { task.sphere = 'SYS_OTHER'; tasksChanged = true; } });
             } else if (action === 'delete') {
                 const initialLength = allTasks.length;
-                allTasks = allTasks.filter(task => task.sphere !== scopeToDelete);
+                allTasks = allTasks.filter(task => task.sphere !== scopeName);
                 if (allTasks.length !== initialLength) tasksChanged = true;
             }
 
             if (tasksChanged) localStorage.setItem('priority_tasks', JSON.stringify(allTasks));
-            scopes.splice(index, 1); 
-            localStorage.setItem('priority_scopes', JSON.stringify(scopes)); 
+
+            // 1. Удаляем локально, если она там есть
+            const idx = scopes.indexOf(scopeName);
+            if (idx > -1) {
+                scopes.splice(idx, 1);
+                localStorage.setItem('priority_scopes', JSON.stringify(scopes));
+            }
+
+            // 2. Уничтожаем в SQL (если это общая сфера)
+            supabaseClient.from('shared_scopes').select('id').eq('name', scopeName).single().then(({data}) => {
+                if(data) {
+                    supabaseClient.from('scope_members').delete().eq('scope_id', data.id).eq('username', localStorage.getItem('priority_user')).then(() => {
+                        supabaseClient.from('shared_scopes').delete().eq('id', data.id).then(() => {
+                            if (typeof loadSharedScopes === 'function') loadSharedScopes();
+                        });
+                    });
+                }
+            });
+            
             renderScopes();
-            showToast(t('toast_sys'), t('toast_scope_del'), 'info');
+            showToast('SYS', 'Сфера удалена', 'info');
             syncStateToCloud(true);
             closeScopeModal();
         }
@@ -866,21 +895,29 @@
             }, 300);
         }
 
-        function enableScopeEdit(index) {
+        function enableScopeEdit(scopeName, index) {
             const input = document.getElementById(`scope-edit-${index}`);
             input.readOnly = false;
             input.classList.remove('overflow-hidden', 'text-ellipsis');
             input.classList.add('bg-panel-light', 'dark:bg-panel-dark', 'border-b', 'border-brand-light', 'dark:border-brand-dark');
             input.focus();
         }
-        function saveScopeEdit(index) {
+
+        function saveScopeEdit(oldName, index) {
             const input = document.getElementById(`scope-edit-${index}`);
             const val = input.value.trim().toUpperCase();
             input.readOnly = true;
             input.classList.add('overflow-hidden', 'text-ellipsis');
             input.classList.remove('bg-panel-light', 'dark:bg-panel-dark', 'border-b', 'border-brand-light', 'dark:border-brand-dark');
-            if(val && val !== scopes[index] && !scopes.includes(val)) { scopes[index] = val; saveScopesData(); showToast(t('toast_sys'), t('toast_scope_upd'), 'info'); } 
-            else { renderScopes(); }
+            
+            const idx = scopes.indexOf(oldName);
+            if(val && val !== oldName && !scopes.includes(val) && idx > -1) { 
+                scopes[idx] = val; 
+                saveScopesData(); 
+                showToast('SYS', 'Scope updated', 'info'); 
+            } else { 
+                renderScopes(); 
+            }
         }
         
         let cloudSyncTimeout = null;
@@ -1041,9 +1078,29 @@
                     renderShopUI();
                     renderPremiumState();
                     renderThemesMarketplace();
+                    loadSharedScopes();
                 }
             } catch (e) {}
         }
+
+        async function loadSharedScopes() {
+            const username = localStorage.getItem('priority_user');
+            if (!username) return;
+                
+            try {
+                const { data: membersData } = await supabaseClient
+                    .from('scope_members')
+                    .select('scope_id, role, shared_scopes(id, name)')
+                    .eq('username', username);
+            
+                if (membersData && membersData.length > 0) {
+                    sharedScopes = membersData.map(m => m.shared_scopes).filter(Boolean);
+                } else {
+                    sharedScopes = [];
+                }
+                renderScopes();
+            } catch (err) { console.error('Ошибка загрузки:', err); }
+        }        
 
         function initRealtimeSync() {
             const username = localStorage.getItem('priority_user');
@@ -1568,6 +1625,13 @@
             renderSysLogs();
             renderThemesMarketplace();
             syncFromCloud();
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Registration failed: ', err));
+                });
+            }
+
             initRealtimeSync();
 
             document.getElementById('mainApp').classList.remove('hidden');
